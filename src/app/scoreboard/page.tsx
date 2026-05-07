@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useSocket } from "@/hooks/useSocket";
 import { cn } from "@/lib/cn";
 
@@ -73,10 +72,6 @@ export default function ScoreboardPage() {
 
   return (
     <div className="flex flex-1 flex-col px-4 py-6">
-      <div className="fixed right-4 top-4 z-50">
-        <ThemeToggle />
-      </div>
-
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-2 text-center">
           <h1 className="neon-text text-4xl font-black">SCOREBOARD</h1>

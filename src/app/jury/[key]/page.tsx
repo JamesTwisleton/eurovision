@@ -7,7 +7,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { ScoreInput } from "@/components/ScoreInput";
 import { Toast } from "@/components/Toast";
 import { useSocket } from "@/hooks/useSocket";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/cn";
 import { VALID_FINAL_POINTS } from "@/lib/validation";
 
@@ -38,6 +38,7 @@ interface Jury {
 }
 
 export default function JuryPage() {
+  const { theme, toggleTheme } = useTheme();
   const { key } = useParams<{ key: string }>();
   const router = useRouter();
   const socketRef = useSocket(key);
@@ -182,7 +183,13 @@ export default function JuryPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
+            <button
+              onClick={toggleTheme}
+              className="rounded-full bg-muted-5 p-2 text-sm transition-colors hover:bg-muted-10"
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
             {jury.hasFinalized && (
               <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-400">
                 Finalized
@@ -388,7 +395,7 @@ export default function JuryPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60"
             onClick={() => setShowHenry(false)}
           >
             <motion.div
@@ -409,7 +416,7 @@ export default function JuryPage() {
               <p className="mt-2 text-muted-50 text-sm">
                 The high-anxiety voting process is over. Good boy, Henry.
               </p>
-              <p className="mt-3 text-xs text-muted-30">Tap anywhere to close</p>
+<p className="mt-3 text-xs text-white/30">Tap anywhere to close</p>
             </motion.div>
           </motion.div>
         )}

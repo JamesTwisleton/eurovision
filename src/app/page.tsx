@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "@/components/GlassCard";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   const router = useRouter();
@@ -58,10 +57,6 @@ export default function Home() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-      <div className="fixed right-4 top-4 z-50">
-        <ThemeToggle />
-      </div>
-
       {/* Hero */}
       <div className="mb-10 text-center">
         <h1 className="neon-text text-5xl font-black tracking-tight sm:text-6xl">
