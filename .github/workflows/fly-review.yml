@@ -1,4 +1,5 @@
-name: Deploy Review App
+name: PR Preview Deploy
+
 on:
   pull_request:
     types: [opened, reopened, synchronize, closed]
@@ -6,48 +7,39 @@ on:
 env:
   FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
   FLY_REGION: lhr
-  # Use a lowercase, unique app name
   APP_NAME: eurovision-jury-pr-${{ github.event.number }}
 
 jobs:
-  review_app:
+  preview:
+    name: Deploy PR Preview
     runs-on: ubuntu-latest
-    # Only run one deployment at a time per PR.
     concurrency:
       group: pr-${{ github.event.number }}
 
     steps:
-      - name: Get code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Flyctl
+      - name: Setup Fly CLI
         uses: superfly/flyctl-actions/setup-flyctl@master
 
-      - name: Destroy Review App
+      - name: Destroy preview app
         if: github.event.action == 'closed'
         run: flyctl apps destroy ${{ env.APP_NAME }} --yes || true
 
-      - name: Deploy Review App
+      - name: Create and deploy preview app
         if: github.event.action != 'closed'
         run: |
-          # Check if app exists, create if not
+          # Create app if it doesn't exist
           if ! flyctl status --app ${{ env.APP_NAME }} > /dev/null 2>&1; then
             echo "Creating app ${{ env.APP_NAME }}..."
-            # Try creating without specifying org first to use default
             flyctl apps create ${{ env.APP_NAME }} --machines || flyctl apps create ${{ env.APP_NAME }} --org personal --machines
           fi
 
-          # Attach postgres if secret is provided
-          if [ -n "${{ secrets.FLY_POSTGRES_CLUSTER }}" ]; then
-            echo "Attaching Postgres cluster ${{ secrets.FLY_POSTGRES_CLUSTER }}..."
-            flyctl postgres attach ${{ secrets.FLY_POSTGRES_CLUSTER }} --app ${{ env.APP_NAME }} --yes || echo "Postgres attachment skipped (might already be attached)."
-          fi
+          # Attach postgres if not already attached
+          flyctl postgres attach eurovision-jury-db --app ${{ env.APP_NAME }} --yes 2>/dev/null || echo "Postgres already attached."
 
-          # Set secrets needed for the app
-          # DATABASE_URL is set by postgres attach, but other secrets might be needed
-          # flyctl secrets set ...
-
-          # Deploy using the existing fly.toml as a template
+          # Deploy
           echo "Deploying ${{ env.APP_NAME }}..."
           flyctl deploy --app ${{ env.APP_NAME }} --primary-region ${{ env.FLY_REGION }} --remote-only --ha=false
 
