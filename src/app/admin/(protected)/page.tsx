@@ -102,7 +102,15 @@ export default function AdminPage() {
     <div className="flex flex-1 flex-col px-4 py-6">
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-2 flex items-center justify-between">
-          <h1 className="neon-text text-3xl font-black">ADMIN</h1>
+          <div className="flex flex-col">
+            <h1 className="neon-text text-3xl font-black">ADMIN</h1>
+            <nav className="mt-1 flex gap-4 text-xs font-bold uppercase tracking-wider">
+              <span className="text-neon-pink">Acts</span>
+              <Link href="/admin/juries" className="text-muted-30 hover:text-neon-cyan transition-colors">
+                Juries
+              </Link>
+            </nav>
+          </div>
           <Link
             href="/"
             className="text-sm text-muted-30 hover:text-muted-50 transition-colors"

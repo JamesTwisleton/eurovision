@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const VALID_FINAL_POINTS = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12] as const;
 
