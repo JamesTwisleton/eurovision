@@ -7,6 +7,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { ScoreInput } from "@/components/ScoreInput";
 import { Toast } from "@/components/Toast";
 import { useSocket } from "@/hooks/useSocket";
+import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/cn";
 import { VALID_FINAL_POINTS } from "@/lib/validation";
 
@@ -37,6 +38,7 @@ interface Jury {
 }
 
 export default function JuryPage() {
+  const { theme, toggleTheme } = useTheme();
   const { key } = useParams<{ key: string }>();
   const router = useRouter();
   const socketRef = useSocket(key);
@@ -143,7 +145,7 @@ export default function JuryPage() {
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="text-xl text-white/50">Loading your jury...</div>
+        <div className="text-xl text-muted-50">Loading your jury...</div>
       </div>
     );
   }
@@ -175,12 +177,19 @@ export default function JuryPage() {
         <div className="mx-auto flex max-w-2xl items-center justify-between">
           <div>
             <h1 className="text-lg font-bold">{jury.name}</h1>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-muted-40">
               {jury.location} &middot;{" "}
               <span className="font-mono">{jury.key}</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="rounded-full bg-muted-5 p-2 text-sm transition-colors hover:bg-muted-10"
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
             {jury.hasFinalized && (
               <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-400">
                 Finalized
@@ -188,7 +197,7 @@ export default function JuryPage() {
             )}
             <a
               href="/scoreboard"
-              className="text-sm text-white/40 hover:text-white/60"
+              className="text-sm text-muted-40 hover:text-muted-60"
             >
               Scoreboard
             </a>
@@ -218,8 +227,8 @@ export default function JuryPage() {
 
       {/* Instructions */}
       <div className="mx-auto w-full max-w-2xl px-4 pt-3">
-        <div className="rounded-lg bg-white/5 px-3 py-2 text-xs text-white/40 leading-relaxed">
-          <strong className="text-white/60">Tap a country</strong> to give it a
+        <div className="rounded-lg bg-muted-5 px-3 py-2 text-xs text-muted-40 leading-relaxed">
+          <strong className="text-muted-60">Tap a country</strong> to give it a
           score. During the show, feel free to change scores as much as you
           like &mdash; nothing is locked in until you hit &quot;Finalize&quot; at
           the bottom. Everyone with this jury code sees changes in real time.
@@ -228,12 +237,12 @@ export default function JuryPage() {
 
       {/* Progress summary */}
       <div className="mx-auto w-full max-w-2xl px-4 pt-3">
-        <div className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-xs">
-          <span className="text-white/40">
+        <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2 text-xs">
+          <span className="text-muted-40">
             {scoredCount} of {jury.scores.length} countries scored
           </span>
           {missingPoints.length > 0 && missingPoints.length <= 5 && (
-            <span className="text-white/30">
+            <span className="text-muted-30">
               Still need to give out:{" "}
               <span className="font-mono text-neon-pink/70">
                 {missingPoints.join(", ")}
@@ -267,7 +276,7 @@ export default function JuryPage() {
                   "ring-2 ring-neon-pink/50"
               )}
             >
-              <span className="text-xs text-white/30 w-5 text-center">
+              <span className="text-xs text-muted-30 w-5 text-center">
                 {score.contestant.performanceOrder}
               </span>
               <span className="text-2xl">{score.contestant.flagEmoji}</span>
@@ -275,7 +284,7 @@ export default function JuryPage() {
                 <div className="font-semibold truncate">
                   {score.contestant.country}
                 </div>
-                <div className="text-sm text-white/50 truncate">
+                <div className="text-sm text-muted-50 truncate">
                   {score.contestant.artist} &mdash; {score.contestant.song}
                 </div>
               </div>
@@ -288,7 +297,7 @@ export default function JuryPage() {
                       ? "score-badge-10"
                       : score.points > 0
                         ? "score-badge text-white"
-                        : "bg-white/5 text-white/20"
+                        : "bg-muted-5 text-muted-20"
                 )}
               >
                 {score.points}
@@ -319,12 +328,12 @@ export default function JuryPage() {
                   </div>
                   <button
                     onClick={() => setSelectedContestant(null)}
-                    className="text-sm text-white/40 hover:text-white/60"
+                    className="text-sm text-muted-40 hover:text-muted-60"
                   >
                     Done
                   </button>
                 </div>
-                <p className="mb-3 text-xs text-white/30">
+                <p className="mb-3 text-xs text-muted-30">
                   Tap a number to assign that score. Tap the same number
                   again to clear it.
                 </p>
@@ -355,13 +364,13 @@ export default function JuryPage() {
         {/* Finalize section */}
         <div className="mt-6 pb-24">
           <GlassCard className="mb-4">
-            <h3 className="mb-1 text-sm font-bold text-white/70">
+            <h3 className="mb-1 text-sm font-bold text-muted-70">
               Ready to submit?
             </h3>
-            <p className="text-xs text-white/40 leading-relaxed">
+            <p className="text-xs text-muted-40 leading-relaxed">
               Just like real Eurovision, your final votes must follow the
-              official format: give exactly <strong className="text-white/60">one country 12 points</strong> (your
-              favourite), <strong className="text-white/60">one country 10</strong>, then <strong className="text-white/60">one each of 8, 7, 6, 5, 4, 3,
+              official format: give exactly <strong className="text-muted-60">one country 12 points</strong> (your
+              favourite), <strong className="text-muted-60">one country 10</strong>, then <strong className="text-muted-60">one each of 8, 7, 6, 5, 4, 3,
               2, and 1</strong>. All other countries get zero. You can still
               edit after finalizing.
             </p>
@@ -394,10 +403,10 @@ export default function JuryPage() {
               <p className="text-xl font-bold neon-text">
                 Henry is visibly relieved!
               </p>
-              <p className="mt-2 text-white/50 text-sm">
+              <p className="mt-2 text-muted-50 text-sm">
                 The high-anxiety voting process is over. Good boy, Henry.
               </p>
-              <p className="mt-3 text-xs text-white/30">Tap anywhere to close</p>
+              <p className="mt-3 text-xs text-muted-30">Tap anywhere to close</p>
             </div>
           </motion.div>
         )}

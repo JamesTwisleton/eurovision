@@ -92,7 +92,7 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="text-xl text-white/50">Loading...</div>
+        <div className="text-xl text-muted-50">Loading...</div>
       </div>
     );
   }
@@ -104,16 +104,16 @@ export default function AdminPage() {
           <h1 className="neon-text text-3xl font-black">ADMIN</h1>
           <a
             href="/"
-            className="text-sm text-white/30 hover:text-white/50 transition-colors"
+            className="text-sm text-muted-30 hover:text-muted-50 transition-colors"
           >
             &larr; Home
           </a>
         </div>
-        <p className="mb-6 text-sm text-white/40 leading-relaxed">
+        <p className="mb-6 text-sm text-muted-40 leading-relaxed">
           This is where you set up the contestants for the show. Add each
-          country, their artist, and song title. The <strong className="text-white/60">performance order</strong> is
+          country, their artist, and song title. The <strong className="text-muted-60">performance order</strong> is
           the running order on the night &mdash; contestants will appear in this
-          order on everyone&apos;s scoresheet. The <strong className="text-white/60">flag emoji</strong> is shown next to
+          order on everyone&apos;s scoresheet. The <strong className="text-muted-60">flag emoji</strong> is shown next to
           each country (e.g. copy-paste from{" "}
           <a
             href="https://emojipedia.org/flags"
@@ -131,7 +131,7 @@ export default function AdminPage() {
           <h2 className="mb-1 text-lg font-bold">
             {editingId ? "Edit Contestant" : "Add a Contestant"}
           </h2>
-          <p className="mb-4 text-xs text-white/40">
+          <p className="mb-4 text-xs text-muted-40">
             {editingId
               ? "Update the details below and click Update."
               : "Fill in the details for each Eurovision act. You can always edit them later."}
@@ -139,7 +139,7 @@ export default function AdminPage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-white/50">
+                <label className="mb-1 block text-xs font-medium text-muted-50">
                   Country
                 </label>
                 <input
@@ -150,11 +150,11 @@ export default function AdminPage() {
                     setForm({ ...form, country: e.target.value })
                   }
                   required
-                  className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+                  className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-white/50">
+                <label className="mb-1 block text-xs font-medium text-muted-50">
                   Flag Emoji
                 </label>
                 <input
@@ -165,12 +165,12 @@ export default function AdminPage() {
                     setForm({ ...form, flagEmoji: e.target.value })
                   }
                   required
-                  className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+                  className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
                 />
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-white/50">
+              <label className="mb-1 block text-xs font-medium text-muted-50">
                 Artist
               </label>
               <input
@@ -179,11 +179,11 @@ export default function AdminPage() {
                 value={form.artist}
                 onChange={(e) => setForm({ ...form, artist: e.target.value })}
                 required
-                className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+                className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-white/50">
+              <label className="mb-1 block text-xs font-medium text-muted-50">
                 Song Title
               </label>
               <input
@@ -192,12 +192,12 @@ export default function AdminPage() {
                 value={form.song}
                 onChange={(e) => setForm({ ...form, song: e.target.value })}
                 required
-                className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+                className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-white/50">
+                <label className="mb-1 block text-xs font-medium text-muted-50">
                   Performance Order
                 </label>
                 <input
@@ -212,11 +212,11 @@ export default function AdminPage() {
                   }
                   min={1}
                   required
-                  className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+                  className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-white/50">
+                <label className="mb-1 block text-xs font-medium text-muted-50">
                   Image URL (optional)
                 </label>
                 <input
@@ -226,7 +226,7 @@ export default function AdminPage() {
                   onChange={(e) =>
                     setForm({ ...form, imageUrl: e.target.value })
                   }
-                  className="w-full rounded-xl bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+                  className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
                 />
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function AdminPage() {
                     setEditingId(null);
                     setForm(emptyForm);
                   }}
-                  className="rounded-xl border border-white/20 px-4 py-3 text-white/60 hover:bg-white/5"
+                  className="rounded-xl border border-muted-20 px-4 py-3 text-muted-60 hover:bg-muted-5"
                 >
                   Cancel
                 </button>
@@ -261,7 +261,7 @@ export default function AdminPage() {
         <div className="flex flex-col gap-2">
           {contestants.length === 0 ? (
             <GlassCard className="text-center">
-              <p className="text-white/50 leading-relaxed">
+              <p className="text-muted-50 leading-relaxed">
                 No contestants yet. Use the form above to add the
                 countries competing in this year&apos;s Eurovision. You can
                 add them all now or during the show.
@@ -273,20 +273,20 @@ export default function AdminPage() {
                 key={c.id}
                 className="glass flex items-center gap-3 p-3"
               >
-                <span className="text-xs text-white/30 w-5 text-center">
+                <span className="text-xs text-muted-30 w-5 text-center">
                   {c.performanceOrder}
                 </span>
                 <span className="text-2xl">{c.flagEmoji}</span>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{c.country}</div>
-                  <div className="text-sm text-white/50 truncate">
+                  <div className="text-sm text-muted-50 truncate">
                     {c.artist} &mdash; {c.song}
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => startEdit(c)}
-                    className="rounded-lg bg-white/5 px-3 py-1.5 text-sm text-white/60 hover:bg-white/10"
+                    className="rounded-lg bg-muted-5 px-3 py-1.5 text-sm text-muted-60 hover:bg-muted-10"
                   >
                     Edit
                   </button>
