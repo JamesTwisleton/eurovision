@@ -101,12 +101,20 @@ export default function JuryAdminPage() {
     <div className="flex flex-1 flex-col px-4 py-6">
       <div className="mx-auto w-full max-w-4xl">
         <div className="mb-2 flex items-center justify-between">
-          <h1 className="neon-text text-3xl font-black">MANAGE JURIES</h1>
+          <div className="flex flex-col">
+            <h1 className="neon-text text-3xl font-black">ADMIN</h1>
+            <nav className="mt-1 flex gap-4 text-xs font-bold uppercase tracking-wider">
+              <Link href="/admin" className="text-muted-30 hover:text-neon-cyan transition-colors">
+                Acts
+              </Link>
+              <span className="text-neon-pink">Juries</span>
+            </nav>
+          </div>
           <Link
-            href="/admin"
+            href="/"
             className="text-sm text-muted-30 hover:text-muted-50 transition-colors"
           >
-            &larr; Admin Acts
+            &larr; Home
           </Link>
         </div>
         <p className="mb-6 text-sm text-muted-40 leading-relaxed">

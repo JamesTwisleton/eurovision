@@ -255,9 +255,6 @@ export default function Home() {
         <a href="/scoreboard" className="hover:text-muted-50 transition-colors">
           Scoreboard
         </a>
-        <a href="/admin" className="hover:text-muted-50 transition-colors">
-          Admin
-        </a>
       </div>
     </div>
   );
