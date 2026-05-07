@@ -12,11 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       url: ${{ steps.deploy.outputs.url }}
-    # Only run one deployment at a time per PR.
     concurrency:
       group: pr-${{ github.event.number }}
 
-    # Deploying apps with this "review" environment allows the URL for the app to be displayed in the PR UI.
     environment:
       name: pr-${{ github.event.number }}
       url: ${{ steps.deploy.outputs.url }}
@@ -29,7 +27,8 @@ jobs:
         id: deploy
         uses: superfly/fly-pr-review-apps@1.6.0
         with:
-          postgres: ${{ secrets.FLY_POSTGRES_CLUSTER }}
+          name: eurovision-jury-pr-${{ github.event.number }}
+          postgres: eurovision-jury-db
 
       - name: Clean up GitHub environment
         uses: strumwolf/delete-deployment-environment@v3
