@@ -222,7 +222,8 @@ export default function JuryPage() {
       {/* Instructions */}
       <div className="mx-auto w-full max-w-2xl px-4 pt-3">
         <div className="rounded-lg bg-muted-5 px-3 py-2 text-xs text-muted-40 leading-relaxed">
-          <strong className="text-muted-60">Tap a country</strong> to give it a
+          <strong className="text-muted-60">Tap a country</strong>{" "}
+          to give it a
           score. During the show, feel free to change scores as much as you
           like &mdash; nothing is locked in until you hit &quot;Finalize&quot; at
           the bottom. Everyone with this jury code sees changes in real time.

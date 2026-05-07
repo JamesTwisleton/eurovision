@@ -80,7 +80,7 @@ export default function Home() {
 
       {/* Hero */}
       <div className="relative z-10 mb-10 text-center">
-        <h1 className="neon-text bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-5xl font-black tracking-tight text-transparent sm:text-6xl">
+        <h1 className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-5xl font-black tracking-tight text-transparent drop-shadow-sm sm:text-6xl">
           EUROVISION
         </h1>
         <h2 className="mt-2 text-2xl font-semibold text-neon-cyan sm:text-3xl">
