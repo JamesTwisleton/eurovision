@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateFinalScores, VALID_FINAL_POINTS, createJurySchema, draftScoreSchema, joinJurySchema, contestantSchema } from './validation';
+import { validateFinalScores, VALID_FINAL_POINTS, createJurySchema, draftScoreSchema } from './validation';
 
 describe('validateFinalScores', () => {
   it('should return valid for a correct set of scores', () => {
