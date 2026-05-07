@@ -18,6 +18,7 @@ interface Contestant {
   song: string;
   performanceOrder: number;
   imageUrl: string;
+  youtubeUrl: string;
   flagEmoji: string;
 }
 
@@ -169,6 +170,27 @@ export default function JuryPage() {
   );
 
   const scoredCount = jury.scores.filter((s) => s.points > 0).length;
+
+  function getYoutubeEmbedUrl(url: string) {
+    if (!url) return null;
+    let videoId = "";
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname === "youtu.be") {
+        videoId = urlObj.pathname.slice(1);
+      } else if (urlObj.hostname.includes("youtube.com")) {
+        videoId = urlObj.searchParams.get("v") || "";
+        if (!videoId && urlObj.pathname.startsWith("/embed/")) {
+          videoId = urlObj.pathname.split("/")[2];
+        }
+      }
+    } catch {
+      // Fallback for non-standard or partial URLs
+      const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#/]+)/);
+      if (match) videoId = match[1];
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+  }
 
   return (
     <div className="flex flex-1 flex-col">
@@ -331,6 +353,31 @@ export default function JuryPage() {
                   Tap a number to assign that score. Tap the same number
                   again to clear it.
                 </p>
+
+                {selectedScore.contestant.youtubeUrl && (
+                  <div className="mb-4 aspect-video overflow-hidden rounded-xl bg-black shadow-lg">
+                    {(() => {
+                      const embedUrl = getYoutubeEmbedUrl(selectedScore.contestant.youtubeUrl);
+                      if (embedUrl) {
+                        return (
+                          <iframe
+                            src={embedUrl}
+                            title={`${selectedScore.contestant.country} performance`}
+                            className="h-full w-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        );
+                      }
+                      return (
+                        <div className="flex h-full items-center justify-center text-xs text-muted-40">
+                          Invalid YouTube URL
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
                 <ScoreInput
                   value={selectedScore.points}
                   onChange={(points) => {

@@ -12,6 +12,7 @@ interface Contestant {
   song: string;
   performanceOrder: number;
   imageUrl: string;
+  youtubeUrl: string;
   flagEmoji: string;
 }
 
@@ -21,6 +22,7 @@ const emptyForm = {
   song: "",
   performanceOrder: 1,
   imageUrl: "",
+  youtubeUrl: "",
   flagEmoji: "",
 };
 
@@ -86,6 +88,7 @@ export default function AdminPage() {
       song: c.song,
       performanceOrder: c.performanceOrder,
       imageUrl: c.imageUrl,
+      youtubeUrl: c.youtubeUrl,
       flagEmoji: c.flagEmoji,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -181,6 +184,20 @@ export default function AdminPage() {
                   className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
                 />
               </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-50">
+                YouTube URL (optional)
+              </label>
+              <input
+                type="text"
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={form.youtubeUrl}
+                onChange={(e) =>
+                  setForm({ ...form, youtubeUrl: e.target.value })
+                }
+                className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+              />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-50">

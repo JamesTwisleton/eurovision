@@ -3,8 +3,8 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 const contestants = [
-  { country: 'Albania', artist: 'TBA', song: 'TBA', performanceOrder: 1, flagEmoji: '🇦🇱' },
-  { country: 'Armenia', artist: 'TBA', song: 'TBA', performanceOrder: 2, flagEmoji: '🇦🇲' },
+  { country: 'Albania', artist: 'TBA', song: 'TBA', performanceOrder: 1, flagEmoji: '🇦🇱', youtubeUrl: 'https://www.youtube.com/watch?v=L-K6A-4z-fM' },
+  { country: 'Armenia', artist: 'TBA', song: 'TBA', performanceOrder: 2, flagEmoji: '🇦🇲', youtubeUrl: 'https://www.youtube.com/watch?v=CoYVf75hG60' },
   { country: 'Australia', artist: 'TBA', song: 'TBA', performanceOrder: 3, flagEmoji: '🇦🇺' },
   { country: 'Austria', artist: 'TBA', song: 'TBA', performanceOrder: 4, flagEmoji: '🇦🇹' },
   { country: 'Azerbaijan', artist: 'TBA', song: 'TBA', performanceOrder: 5, flagEmoji: '🇦🇿' },
