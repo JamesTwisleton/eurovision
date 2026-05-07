@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="600" viewBox="0 0 900 600">
+  <rect width="900" height="600" fill="#039"/>
+  <defs>
+    <path id="s" d="M0.00,-30.00L6.73,-9.27L28.53,-9.27L10.90,3.54L17.63,24.27L0.00,11.46L-17.63,24.27L-10.90,3.54L-28.53,-9.27L-6.73,-9.27Z"/>
+  </defs>
+  <g transform="translate(450,300)" fill="#fc0">
+    <use xlink:href="#s" x="0.00" y="-200.00"/>
+    <use xlink:href="#s" x="100.00" y="-173.21"/>
+    <use xlink:href="#s" x="173.21" y="-100.00"/>
+    <use xlink:href="#s" x="200.00" y="0.00"/>
+    <use xlink:href="#s" x="173.21" y="100.00"/>
+    <use xlink:href="#s" x="100.00" y="173.21"/>
+    <use xlink:href="#s" x="0.00" y="200.00"/>
+    <use xlink:href="#s" x="-100.00" y="173.21"/>
+    <use xlink:href="#s" x="-173.21" y="100.00"/>
+    <use xlink:href="#s" x="-200.00" y="0.00"/>
+    <use xlink:href="#s" x="-173.21" y="-100.00"/>
+    <use xlink:href="#s" x="-100.00" y="-173.21"/>
+  </g>
+</svg>
