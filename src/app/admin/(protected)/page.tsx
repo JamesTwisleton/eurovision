@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { GlassCard } from "@/components/GlassCard";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Contestant {
   id: string;
@@ -111,12 +112,15 @@ export default function AdminPage() {
               </Link>
             </nav>
           </div>
-          <Link
-            href="/"
-            className="text-sm text-muted-30 hover:text-muted-50 transition-colors"
-          >
-            &larr; Home
-          </Link>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <Link
+              href="/"
+              className="text-sm text-muted-30 hover:text-muted-50 transition-colors"
+            >
+              &larr; Home
+            </Link>
+          </div>
         </div>
         <p className="mb-6 text-sm text-muted-40 leading-relaxed">
           This is where you set up the contestants for the show. Add each

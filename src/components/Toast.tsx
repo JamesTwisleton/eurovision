@@ -51,7 +51,7 @@ export function Toast({
           </button>
         </div>
         <div
-          className="h-1 bg-white/30 transition-all duration-100 ease-linear"
+          className="h-1 bg-muted-30 transition-all duration-100 ease-linear"
           style={{ width: `${progress}%` }}
         />
       </motion.div>
