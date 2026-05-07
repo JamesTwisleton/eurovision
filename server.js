@@ -1,6 +1,6 @@
-const { createServer } = require("http");
-const next = require("next");
-const { Server } = require("socket.io");
+import http from "node:http";
+import next from "next";
+import { Server } from "socket.io";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "0.0.0.0";
@@ -10,7 +10,7 @@ const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
 app.prepare().then(() => {
-  const httpServer = createServer(handler);
+  const httpServer = http.createServer(handler);
 
   const io = new Server(httpServer, {
     cors: {
@@ -20,6 +20,7 @@ app.prepare().then(() => {
   });
 
   // Make io accessible to API routes via global
+  // @ts-expect-error - global is not typed for io
   global.io = io;
 
   io.on("connection", (socket) => {
