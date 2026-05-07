@@ -44,7 +44,6 @@ export function validateFinalScores(
     }
   }
 
-  const zeroed = scores.filter((s) => s.points === 0).length;
   const nonZeroNonValid = scores.filter(
     (s) =>
       s.points !== 0 &&

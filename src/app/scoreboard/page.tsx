@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
@@ -196,12 +197,12 @@ export default function ScoreboardPage() {
         )}
 
         <div className="mt-8 text-center">
-          <a
+          <Link
             href="/"
             className="text-sm text-white/30 hover:text-white/50 transition-colors"
           >
             &larr; Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { draftScoreSchema } from "@/lib/validation";
 
 declare global {
-  // eslint-disable-next-line no-var
   var io: import("socket.io").Server | undefined;
 }
 
