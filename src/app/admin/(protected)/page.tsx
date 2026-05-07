@@ -124,9 +124,11 @@ export default function AdminPage() {
         </div>
         <p className="mb-6 text-sm text-muted-40 leading-relaxed">
           This is where you set up the contestants for the show. Add each
-          country, their artist, and song title. The <strong className="text-muted-60">performance order</strong> is
-          the running order on the night &mdash; contestants will appear in this
-          order on everyone&apos;s scoresheet. The <strong className="text-muted-60">flag emoji</strong> is shown next to
+          country, their artist, and song title. The{" "}
+          <strong className="text-muted-60">performance order</strong> is the
+          running order on the night &mdash; contestants will appear in this
+          order on everyone&apos;s scoresheet. The{" "}
+          <strong className="text-muted-60">flag emoji</strong> is shown next to
           each country (e.g. copy-paste from{" "}
           <a
             href="https://emojipedia.org/flags"

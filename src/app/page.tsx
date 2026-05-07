@@ -57,14 +57,30 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
+    <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 py-12">
       <div className="fixed right-4 top-4 z-50">
         <ThemeToggle />
       </div>
 
+      {/* Floating Background Elements */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-20 select-none">
+        <span className="absolute left-[10%] top-[15%] text-6xl animate-pulse">🇪🇺</span>
+        <span className="absolute right-[15%] top-[10%] text-5xl rotate-12">🎤</span>
+        <span className="absolute left-[20%] bottom-[20%] text-5xl -rotate-12">🇬🇧</span>
+        <span className="absolute right-[25%] bottom-[15%] text-6xl animate-bounce" style={{ animationDuration: '3s' }}>🌟</span>
+        <span className="absolute left-[5%] top-[50%] text-4xl rotate-45">🇸🇪</span>
+        <span className="absolute right-[5%] top-[40%] text-4xl -rotate-45">🇮🇹</span>
+        <span className="absolute left-[40%] top-[5%] text-3xl">🎵</span>
+        <span className="absolute right-[45%] bottom-[5%] text-4xl">🎸</span>
+        <span className="absolute left-[15%] top-[80%] text-5xl opacity-40">🇺🇦</span>
+        <span className="absolute right-[10%] top-[70%] text-5xl rotate-12 opacity-40">💃</span>
+        <span className="absolute left-[30%] top-[30%] text-2xl opacity-30">✨</span>
+        <span className="absolute right-[35%] top-[60%] text-3xl opacity-30">🔥</span>
+      </div>
+
       {/* Hero */}
-      <div className="mb-10 text-center">
-        <h1 className="neon-text text-5xl font-black tracking-tight sm:text-6xl">
+      <div className="relative z-10 mb-10 text-center">
+        <h1 className="neon-text bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-5xl font-black tracking-tight text-transparent sm:text-6xl">
           EUROVISION
         </h1>
         <h2 className="mt-2 text-2xl font-semibold text-neon-cyan sm:text-3xl">
@@ -78,7 +94,7 @@ export default function Home() {
       </div>
 
       {mode === "choose" && (
-        <GlassCard className="w-full max-w-sm" strong>
+        <GlassCard className="relative z-10 w-full max-w-sm" strong>
           <div className="flex flex-col gap-4">
             <div className="text-center mb-2">
               <p className="text-sm text-muted-60 leading-relaxed">
@@ -103,7 +119,7 @@ export default function Home() {
       )}
 
       {mode === "create" && (
-        <GlassCard className="w-full max-w-sm" strong>
+        <GlassCard className="relative z-10 w-full max-w-sm" strong>
           <h3 className="mb-1 text-xl font-bold">Create Your Jury</h3>
           <p className="mb-4 text-sm text-muted-40 leading-relaxed">
             Give your jury a name and where you&apos;re watching from.
@@ -157,7 +173,7 @@ export default function Home() {
       )}
 
       {mode === "join" && (
-        <GlassCard className="w-full max-w-sm" strong>
+        <GlassCard className="relative z-10 w-full max-w-sm" strong>
           <h3 className="mb-1 text-xl font-bold">Join a Jury</h3>
           <p className="mb-4 text-sm text-muted-40 leading-relaxed">
             Enter the code that was shared with you. It looks something
@@ -200,7 +216,7 @@ export default function Home() {
       )}
 
       {/* How It Works */}
-      <div className="mt-10 w-full max-w-sm">
+      <div className="relative z-10 mt-10 w-full max-w-sm">
         <GlassCard>
           <h3 className="mb-3 text-center text-sm font-bold uppercase tracking-wider text-muted-60">
             How It Works
@@ -211,9 +227,9 @@ export default function Home() {
                 1
               </span>
               <span>
-                <strong className="text-muted-70">Create or join a jury.</strong> One person
-                creates it, then shares the code with friends. Everyone
-                on the same code shares one scoresheet.
+                <strong className="text-muted-70">Create or join a jury.</strong> 🤝 One
+                person creates it, then shares the code with friends.
+                Everyone on the same code shares one scoresheet.
               </span>
             </li>
             <li className="flex gap-3">
@@ -221,8 +237,8 @@ export default function Home() {
                 2
               </span>
               <span>
-                <strong className="text-muted-70">Score each act as you watch.</strong> Tap a
-                country, pick a score from 0&ndash;12. You can change
+                <strong className="text-muted-70">Score each act as you watch.</strong> 📝{" "}
+                Tap a country, pick a score from 0&ndash;12. You can change
                 your mind as many times as you like &mdash; it&apos;s a draft
                 until you finalize.
               </span>
@@ -232,9 +248,9 @@ export default function Home() {
                 3
               </span>
               <span>
-                <strong className="text-muted-70">Finalize your votes.</strong> Just like real
-                Eurovision, you must give out exactly one set of 12, 10,
-                8, 7, 6, 5, 4, 3, 2, and 1 points. The rest get zero.
+                <strong className="text-muted-70">Finalize your votes.</strong> ✅ Just like
+                real Eurovision, you must give out exactly one set of 12,
+                10, 8, 7, 6, 5, 4, 3, 2, and 1 points. The rest get zero.
               </span>
             </li>
             <li className="flex gap-3">
@@ -242,8 +258,8 @@ export default function Home() {
                 4
               </span>
               <span>
-                <strong className="text-muted-70">Check the scoreboard!</strong> See how all
-                the juries voted and which country comes out on top
+                <strong className="text-muted-70">Check the scoreboard!</strong> 🏆 See how
+                all the juries voted and which country comes out on top
                 across all your friends.
               </span>
             </li>
@@ -251,7 +267,7 @@ export default function Home() {
         </GlassCard>
       </div>
 
-      <div className="mt-8 flex gap-6 text-sm text-muted-30">
+      <div className="relative z-10 mt-8 flex gap-6 text-sm text-muted-30">
         <a href="/scoreboard" className="hover:text-muted-50 transition-colors">
           Scoreboard
         </a>
