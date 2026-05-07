@@ -65,7 +65,7 @@ export default function ScoreboardPage() {
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="text-xl text-white/50">Loading scoreboard...</div>
+        <div className="text-xl text-muted-50">Loading scoreboard...</div>
       </div>
     );
   }
@@ -75,7 +75,7 @@ export default function ScoreboardPage() {
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-2 text-center">
           <h1 className="neon-text text-4xl font-black">SCOREBOARD</h1>
-          <p className="mt-2 text-sm text-white/40 leading-relaxed">
+          <p className="mt-2 text-sm text-muted-40 leading-relaxed">
             Combined results from all juries that have finalized their votes.
             {juries.length > 0
               ? ` ${juries.length} ${juries.length === 1 ? "jury has" : "juries have"} voted so far.`
@@ -89,7 +89,7 @@ export default function ScoreboardPage() {
             {juries.map((j) => (
               <span
                 key={j.key}
-                className="rounded-full bg-white/5 px-3 py-1 text-xs text-white/50"
+                className="rounded-full bg-muted-5 px-3 py-1 text-xs text-muted-50"
               >
                 {j.name} ({j.location})
               </span>
@@ -99,7 +99,7 @@ export default function ScoreboardPage() {
 
         {scoreboard.length === 0 ? (
           <GlassCard className="text-center" strong>
-            <p className="text-white/50 leading-relaxed">
+            <p className="text-muted-50 leading-relaxed">
               No contestants have been added yet. The organiser can add
               them on the{" "}
               <a href="/admin" className="text-neon-cyan hover:underline">
@@ -115,20 +115,20 @@ export default function ScoreboardPage() {
                 key={entry.id}
                 className="glass flex items-center gap-3 p-4"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-sm font-bold text-white/40">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted-5 text-sm font-bold text-muted-40">
                   {rank + 1}
                 </span>
                 <span className="text-2xl">{entry.flagEmoji}</span>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{entry.country}</div>
-                  <div className="text-sm text-white/40 truncate">
+                  <div className="text-sm text-muted-40 truncate">
                     {entry.artist} &mdash; {entry.song}
                   </div>
                 </div>
-                <span className="text-lg font-bold text-white/20">—</span>
+                <span className="text-lg font-bold text-muted-20">—</span>
               </div>
             ))}
-            <p className="mt-2 text-center text-xs text-white/30">
+            <p className="mt-2 text-center text-xs text-muted-30">
               Waiting for juries to finalize their votes...
             </p>
           </div>
@@ -153,7 +153,7 @@ export default function ScoreboardPage() {
                         ? "bg-gray-400/20 text-gray-300"
                         : rank === 2
                           ? "bg-amber-700/20 text-amber-600"
-                          : "bg-white/5 text-white/40"
+                          : "bg-muted-5 text-muted-40"
                   )}
                 >
                   {rank + 1}
@@ -161,7 +161,7 @@ export default function ScoreboardPage() {
                 <span className="text-2xl">{entry.flagEmoji}</span>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{entry.country}</div>
-                  <div className="text-sm text-white/40 truncate">
+                  <div className="text-sm text-muted-40 truncate">
                     {entry.artist} &mdash; {entry.song}
                   </div>
                 </div>
@@ -182,7 +182,7 @@ export default function ScoreboardPage() {
                             : js.points === 10
                               ? "bg-gray-400/20 text-gray-300"
                               : js.points > 0
-                                ? "bg-white/5 text-white/30"
+                                ? "bg-muted-5 text-muted-30"
                                 : "hidden"
                         )}
                       >
@@ -199,7 +199,7 @@ export default function ScoreboardPage() {
         <div className="mt-8 text-center">
           <Link
             href="/"
-            className="text-sm text-white/30 hover:text-white/50 transition-colors"
+            className="text-sm text-muted-30 hover:text-muted-50 transition-colors"
           >
             &larr; Back to Home
           </Link>

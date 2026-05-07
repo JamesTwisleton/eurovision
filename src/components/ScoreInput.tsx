@@ -25,7 +25,7 @@ export function ScoreInput({
                 : points === 10
                   ? "score-badge-10"
                   : "score-badge text-white"
-              : "glass hover:bg-white/10 text-white/70"
+              : "glass hover:bg-muted-5 text-muted-70"
           )}
         >
           {points}
