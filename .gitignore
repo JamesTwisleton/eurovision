@@ -17,6 +17,12 @@
 /.next/
 /out/
 
+# testing
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # production
 /build
 

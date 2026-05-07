@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { GlassCard } from "@/components/GlassCard";
 
 interface Contestant {
@@ -29,16 +30,16 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  async function fetchContestants() {
+  const fetchContestants = useCallback(async () => {
     const res = await fetch("/api/contestants");
     const data = await res.json();
     setContestants(data.contestants);
     setLoading(false);
-  }
+  }, []);
 
   useEffect(() => {
     fetchContestants();
-  }, []);
+  }, [fetchContestants]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -102,12 +103,12 @@ export default function AdminPage() {
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-2 flex items-center justify-between">
           <h1 className="neon-text text-3xl font-black">ADMIN</h1>
-          <a
+          <Link
             href="/"
             className="text-sm text-muted-30 hover:text-muted-50 transition-colors"
           >
             &larr; Home
-          </a>
+          </Link>
         </div>
         <p className="mb-6 text-sm text-muted-40 leading-relaxed">
           This is where you set up the contestants for the show. Add each
