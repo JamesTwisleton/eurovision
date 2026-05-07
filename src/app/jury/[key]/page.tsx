@@ -383,14 +383,24 @@ export default function JuryPage() {
         {showHenry && (
           <motion.div
             key="henry"
-            initial={{ opacity: 0, scale: 0.5, y: 100 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.5, y: 100 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60"
             onClick={() => setShowHenry(false)}
           >
-            <div className="glass-strong p-8 text-center max-w-xs mx-4">
-              <div className="text-6xl mb-4">🐕</div>
+            <motion.div
+              initial={{ scale: 0.5, y: 80 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.5, y: 80 }}
+              className="glass-strong p-6 text-center max-w-xs mx-4 neon-glow"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/henry.gif"
+                alt="Henry the cockapoo looking relieved"
+                className="mx-auto mb-4 h-48 w-48 rounded-2xl object-cover"
+              />
               <p className="text-xl font-bold neon-text">
                 Henry is visibly relieved!
               </p>
@@ -398,7 +408,7 @@ export default function JuryPage() {
                 The high-anxiety voting process is over. Good boy, Henry.
               </p>
               <p className="mt-3 text-xs text-white/30">Tap anywhere to close</p>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
