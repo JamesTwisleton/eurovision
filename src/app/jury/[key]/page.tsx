@@ -38,7 +38,6 @@ interface Jury {
 }
 
 export default function JuryPage() {
-  const { theme, toggleTheme } = useTheme();
   const { key } = useParams<{ key: string }>();
   const router = useRouter();
   const socketRef = useSocket(key);
