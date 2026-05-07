@@ -3,10 +3,12 @@
 import { signIn } from "next-auth/react";
 import { GlassCard } from "@/components/GlassCard";
 import Link from "next/link";
+import { FloatingBackground } from "@/components/FloatingBackground";
 
 export default function AdminLoginPage() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
+    <div className="flex flex-1 flex-col items-center justify-center px-4 py-12 relative">
+      <FloatingBackground />
       <div className="mb-10 text-center">
         <h1 className="neon-text text-5xl font-black tracking-tight sm:text-6xl text-white">
           ADMIN

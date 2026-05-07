@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { FloatingBackground } from "@/components/FloatingBackground";
 import { useSocket } from "@/hooks/useSocket";
 import { cn } from "@/lib/cn";
 
@@ -72,7 +73,8 @@ export default function ScoreboardPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-4 py-6">
+    <div className="flex flex-1 flex-col px-4 py-6 relative">
+      <FloatingBackground />
       <div className="fixed right-4 top-4 z-50">
         <ThemeToggle />
       </div>

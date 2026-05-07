@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { GlassCard } from "@/components/GlassCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { FloatingBackground } from "@/components/FloatingBackground";
 
 interface Contestant {
   id: string;
@@ -100,7 +101,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-4 py-6">
+    <div className="flex flex-1 flex-col px-4 py-6 relative">
+      <FloatingBackground />
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex flex-col">

@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "@/components/GlassCard";
+import { slugify } from "@/lib/slugify";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { FloatingBackground } from "@/components/FloatingBackground";
 
 export default function Home() {
   const router = useRouter();
@@ -32,7 +34,8 @@ export default function Home() {
       setLoading(false);
       return;
     }
-    router.push(`/jury/${data.jury.key}`);
+    const slug = slugify(data.jury.name);
+    router.push(`/jury/${data.jury.key}/${slug}`);
   }
 
   async function handleJoin() {
@@ -53,7 +56,8 @@ export default function Home() {
       setLoading(false);
       return;
     }
-    router.push(`/jury/${data.jury.key}`);
+    const slug = slugify(data.jury.name);
+    router.push(`/jury/${data.jury.key}/${slug}`);
   }
 
   return (
@@ -62,21 +66,7 @@ export default function Home() {
         <ThemeToggle />
       </div>
 
-      {/* Floating Background Elements */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-20 select-none">
-        <span className="absolute left-[10%] top-[15%] text-6xl animate-pulse">🇪🇺</span>
-        <span className="absolute right-[15%] top-[10%] text-5xl rotate-12">🎤</span>
-        <span className="absolute left-[20%] bottom-[20%] text-5xl -rotate-12">🇬🇧</span>
-        <span className="absolute right-[25%] bottom-[15%] text-6xl animate-bounce" style={{ animationDuration: '3s' }}>🌟</span>
-        <span className="absolute left-[5%] top-[50%] text-4xl rotate-45">🇸🇪</span>
-        <span className="absolute right-[5%] top-[40%] text-4xl -rotate-45">🇮🇹</span>
-        <span className="absolute left-[40%] top-[5%] text-3xl">🎵</span>
-        <span className="absolute right-[45%] bottom-[5%] text-4xl">🎸</span>
-        <span className="absolute left-[15%] top-[80%] text-5xl opacity-40">🇺🇦</span>
-        <span className="absolute right-[10%] top-[70%] text-5xl rotate-12 opacity-40">💃</span>
-        <span className="absolute left-[30%] top-[30%] text-2xl opacity-30">✨</span>
-        <span className="absolute right-[35%] top-[60%] text-3xl opacity-30">🔥</span>
-      </div>
+      <FloatingBackground />
 
       {/* Hero */}
       <div className="relative z-10 mb-10 text-center">
