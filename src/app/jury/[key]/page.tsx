@@ -55,15 +55,16 @@ export default function JuryPage() {
 
   async function handleShare() {
     const url = `${window.location.origin}/jury/${key}`;
-    const shareData = {
-      title: `Eurovision 2026 Jury — ${key}`,
-      text: `Join my Eurovision jury! Use code "${key}" or tap the link:`,
-      url,
-    };
 
-    if (navigator.share) {
+    // Use native share sheet on mobile, copy URL on desktop
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile && navigator.share) {
       try {
-        await navigator.share(shareData);
+        await navigator.share({
+          title: `Eurovision 2026 Jury — ${key}`,
+          text: `Join my Eurovision jury! Use code "${key}" or tap the link:`,
+          url,
+        });
         return;
       } catch {
         // User cancelled or share failed — fall through to clipboard
