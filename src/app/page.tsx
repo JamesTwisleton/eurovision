@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "@/components/GlassCard";
+import { slugify } from "@/lib/slugify";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
@@ -32,7 +33,8 @@ export default function Home() {
       setLoading(false);
       return;
     }
-    router.push(`/jury/${data.jury.key}`);
+    const slug = slugify(data.jury.name);
+    router.push(`/jury/${data.jury.key}/${slug}`);
   }
 
   async function handleJoin() {
@@ -53,7 +55,8 @@ export default function Home() {
       setLoading(false);
       return;
     }
-    router.push(`/jury/${data.jury.key}`);
+    const slug = slugify(data.jury.name);
+    router.push(`/jury/${data.jury.key}/${slug}`);
   }
 
   return (
