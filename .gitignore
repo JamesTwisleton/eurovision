@@ -23,8 +23,6 @@
 # misc
 .DS_Store
 *.pem
-*.heic
-*.HEIC
 
 # debug
 npm-debug.log*
