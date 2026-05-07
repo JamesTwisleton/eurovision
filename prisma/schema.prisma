@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Jury {
+  id           String   @id @default(uuid())
+  key          String   @unique
+  name         String
+  location     String
+  hasFinalized Boolean  @default(false)
+  scores       Score[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Contestant {
+  id               String   @id @default(uuid())
+  country          String   @unique
+  artist           String
+  song             String
+  performanceOrder Int
+  imageUrl         String   @default("")
+  flagEmoji        String
+  scores           Score[]
+}
+
+model Score {
+  id           String     @id @default(uuid())
+  points       Int        @default(0)
+  juryId       String
+  jury         Jury       @relation(fields: [juryId], references: [id], onDelete: Cascade)
+  contestantId String
+  contestant   Contestant @relation(fields: [contestantId], references: [id], onDelete: Cascade)
+
+  @@unique([juryId, contestantId])
+}
