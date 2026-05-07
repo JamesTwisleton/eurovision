@@ -105,12 +105,7 @@ export default function ScoreboardPage() {
         {scoreboard.length === 0 ? (
           <GlassCard className="text-center" strong>
             <p className="text-muted-50 leading-relaxed">
-              No contestants have been added yet. The organiser can add
-              them on the{" "}
-              <a href="/admin" className="text-neon-cyan hover:underline">
-                admin page
-              </a>
-              .
+              No contestants have been added yet.
             </p>
           </GlassCard>
         ) : juries.length === 0 ? (

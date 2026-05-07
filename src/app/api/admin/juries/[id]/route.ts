@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { contestantSchema } from "@/lib/validation";
+import { z } from "zod";
 
-export async function PUT(
+const updateJurySchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  location: z.string().min(1).max(100).optional(),
+  hasFinalized: z.boolean().optional(),
+});
+
+export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -15,7 +21,7 @@ export async function PUT(
 
   const { id } = await params;
   const body = await request.json();
-  const parsed = contestantSchema.safeParse(body);
+  const parsed = updateJurySchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -24,12 +30,12 @@ export async function PUT(
     );
   }
 
-  const contestant = await prisma.contestant.update({
+  const jury = await prisma.jury.update({
     where: { id },
     data: parsed.data,
   });
 
-  return NextResponse.json({ contestant });
+  return NextResponse.json({ jury });
 }
 
 export async function DELETE(
@@ -43,8 +49,8 @@ export async function DELETE(
 
   const { id } = await params;
 
-  await prisma.score.deleteMany({ where: { contestantId: id } });
-  await prisma.contestant.delete({ where: { id } });
+  // Due to Cascade delete in schema, this will also delete associated scores
+  await prisma.jury.delete({ where: { id } });
 
   return NextResponse.json({ success: true });
 }
