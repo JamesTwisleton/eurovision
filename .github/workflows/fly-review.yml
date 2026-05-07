@@ -49,7 +49,7 @@ jobs:
 
           # Deploy using the existing fly.toml as a template
           echo "Deploying ${{ env.APP_NAME }}..."
-          flyctl deploy --app ${{ env.APP_NAME }} --region ${{ env.FLY_REGION }} --remote-only --ha=false
+          flyctl deploy --app ${{ env.APP_NAME }} --primary-region ${{ env.FLY_REGION }} --remote-only --ha=false
 
     environment:
       name: pr-${{ github.event.number }}
