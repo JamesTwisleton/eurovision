@@ -58,6 +58,11 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
   const [member, setMember] = useState<MemberInfo | null>(null);
   const [scores, setScores] = useState<Score[]>([]);
   const [loading, setLoading] = useState(true);
+  const [needsJoin, setNeedsJoin] = useState(false);
+  const [joinName, setJoinName] = useState("");
+  const [joinLocation, setJoinLocation] = useState("");
+  const [joinError, setJoinError] = useState("");
+  const [joinLoading, setJoinLoading] = useState(false);
   const [selectedContestant, setSelectedContestant] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "error" | "success" } | null>(null);
   const [showHenry, setShowHenry] = useState(false);
@@ -65,6 +70,11 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
 
   const fetchData = useCallback(async () => {
     const res = await fetch(`/api/watch-party/${partyKey}`);
+    if (res.status === 401 || res.status === 403) {
+      setNeedsJoin(true);
+      setLoading(false);
+      return;
+    }
     if (!res.ok) {
       router.push("/");
       return;
@@ -73,6 +83,7 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
     setWatchParty(data.watchParty);
     setMember(data.member);
     setScores(data.scores);
+    setNeedsJoin(false);
     setLoading(false);
   }, [partyKey, router]);
 
@@ -159,6 +170,34 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
     setToast({ message: "Scores and finalisation reset.", type: "success" });
   }
 
+  async function handleJoinParty() {
+    if (!joinName || !joinLocation) {
+      setJoinError("Please fill in both fields");
+      return;
+    }
+    setJoinLoading(true);
+    setJoinError("");
+    const res = await fetch("/api/watch-party/join", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        key: partyKey,
+        name: joinName,
+        location: joinLocation,
+      }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      setJoinError(data.error || "Failed to join watch party");
+      setJoinLoading(false);
+      return;
+    }
+    // Successfully joined — reload data
+    setJoinLoading(false);
+    setLoading(true);
+    fetchData();
+  }
+
   async function handleLogOff() {
     document.cookie = "member_token=; path=/; max-age=0";
     router.push("/");
@@ -168,6 +207,69 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-xl text-muted-50">Loading your scorecard...</div>
+      </div>
+    );
+  }
+
+  if (needsJoin) {
+    return (
+      <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 py-12">
+        <FloatingBackground />
+        <div className="relative z-10 mb-8 text-center">
+          <h1 className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-4xl font-black tracking-tight text-transparent">
+            EUROVISION
+          </h1>
+          <h2 className="mt-1 text-xl font-semibold text-neon-cyan">
+            2026 JURY
+          </h2>
+        </div>
+        <GlassCard className="relative z-10 w-full max-w-sm" strong>
+          <h3 className="mb-1 text-xl font-bold">Join {partyName}</h3>
+          <p className="mb-4 text-sm text-muted-40 leading-relaxed">
+            You&apos;ve been invited to a Watch Party! Enter your name and
+            location to get your own scorecard.
+          </p>
+          <div className="flex flex-col gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-50">
+                Your Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Rebecca"
+                value={joinName}
+                onChange={(e) => setJoinName(e.target.value)}
+                className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-50">
+                Your Location (Jury)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Manchester"
+                value={joinLocation}
+                onChange={(e) => setJoinLocation(e.target.value)}
+                className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+              />
+            </div>
+            {joinError && <p className="text-sm text-red-400">{joinError}</p>}
+            <button
+              onClick={handleJoinParty}
+              disabled={joinLoading}
+              className="rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-3 font-bold text-white transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+            >
+              {joinLoading ? "Joining..." : "Join Watch Party"}
+            </button>
+            <Link
+              href="/"
+              className="text-center text-sm text-muted-40 hover:text-muted-60"
+            >
+              &larr; Back to Home
+            </Link>
+          </div>
+        </GlassCard>
       </div>
     );
   }
