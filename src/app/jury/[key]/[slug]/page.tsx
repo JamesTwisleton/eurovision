@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { JuryClient } from "../JuryClient";
 import { slugify } from "@/lib/slugify";
@@ -50,7 +50,7 @@ export default async function JurySlugPage({ params }: Props) {
 
   const expectedSlug = slugify(jury.name);
   if (slug !== expectedSlug) {
-    redirect(`/jury/${key}/${expectedSlug}`);
+    permanentRedirect(`/jury/${key}/${expectedSlug}`);
   }
 
   return <JuryClient initialJury={jury} />;

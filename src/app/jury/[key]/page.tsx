@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slugify";
 
@@ -19,5 +19,5 @@ export default async function JuryPage({ params }: Props) {
   }
 
   const slug = slugify(jury.name);
-  redirect(`/jury/${key}/${slug}`);
+  permanentRedirect(`/jury/${key}/${slug}`);
 }
