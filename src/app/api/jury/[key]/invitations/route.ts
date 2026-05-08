@@ -59,10 +59,7 @@ export async function POST(
   return NextResponse.json({ invitation });
 }
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ key: string }> }
-) {
+export async function GET() {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -182,7 +182,7 @@ export function JuryClient({ initialJury, initialCurrentMember }: JuryClientProp
 
   async function handleMemberAction(memberId: string, action: "approve" | "reject" | "elevate" | "demote" | "remove") {
     let method = "PATCH";
-    let body: any = {};
+    const body: Record<string, string> = {};
 
     switch (action) {
       case "approve": body.status = "APPROVED"; break;

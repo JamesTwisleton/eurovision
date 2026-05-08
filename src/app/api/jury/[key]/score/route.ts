@@ -40,8 +40,8 @@ export async function PUT(
     data: { points },
   });
 
-  // @ts-ignore - io is attached to global in custom server.js
-  const io: Server = global.io;
+  // @ts-expect-error - io is attached to global in custom server.js
+  const io: Server = (global as any).io;
   if (io) {
     io.to(`jury_${key}`).emit("draft_updated", {
       memberId: session.memberId,

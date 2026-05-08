@@ -41,8 +41,8 @@ export async function POST(
     data: { hasFinalized: true },
   });
 
-  // @ts-ignore
-  const io: Server = global.io;
+  // @ts-expect-error - io is attached to global in custom server.js
+  const io: Server = (global as any).io;
   if (io) {
     io.emit("scoreboard_updated");
     io.to(`jury_${key}`).emit("member_finalized", { memberId: member.id });

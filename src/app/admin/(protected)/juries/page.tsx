@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { GlassCard } from "@/components/GlassCard";
+import { cn } from "@/lib/cn";
 
 interface Member {
   id: string;
@@ -28,7 +29,6 @@ export default function JuryAdminPage() {
   const [juries, setJuries] = useState<Jury[]>([]);
   const [editingJury, setEditingJury] = useState<Jury | null>(null);
   const [juryName, setJuryName] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchJuries = useCallback(async () => {
@@ -76,7 +76,7 @@ export default function JuryAdminPage() {
 
   async function handleMemberAction(juryId: string, memberId: string, action: string, targetJuryId?: string) {
     let method = "PATCH";
-    let body: any = {};
+    const body: Record<string, string | undefined> = {};
 
     if (action === "remove") method = "DELETE";
     else if (action === "approve") body.status = "APPROVED";
