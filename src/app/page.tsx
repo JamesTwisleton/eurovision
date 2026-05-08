@@ -84,8 +84,8 @@ export default function Home() {
       </div>
 
       {mode === "choose" && (
-        <div className="relative z-10 grid w-full max-w-3xl grid-cols-1 gap-6 md:grid-cols-2 md:items-start">
-          <GlassCard className="w-full" strong>
+        <div className="relative z-10 grid w-full max-w-3xl grid-cols-1 gap-6 md:grid-cols-2 md:items-stretch">
+          <GlassCard className="flex w-full flex-col justify-center" strong>
             <div className="flex flex-col gap-4">
               <div className="text-center mb-2">
                 <p className="text-sm text-muted-60 leading-relaxed">

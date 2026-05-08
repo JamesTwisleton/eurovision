@@ -30,13 +30,10 @@ export default function AdminPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-
   const fetchContestants = useCallback(async () => {
     const res = await fetch("/api/contestants");
     const data = await res.json();
     setContestants(data.contestants);
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -90,14 +87,6 @@ export default function AdminPage() {
       flagEmoji: c.flagEmoji,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="text-xl text-muted-50">Loading...</div>
-      </div>
-    );
   }
 
   return (
