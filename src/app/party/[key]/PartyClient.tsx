@@ -40,6 +40,12 @@ interface MemberInfo {
   hasFinalized: boolean;
 }
 
+interface OtherMemberScore {
+  memberId: string;
+  memberName: string;
+  points: number;
+}
+
 interface WatchPartyInfo {
   id: string;
   key: string;
@@ -57,6 +63,7 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
   const [watchParty, setWatchParty] = useState<WatchPartyInfo | null>(null);
   const [member, setMember] = useState<MemberInfo | null>(null);
   const [scores, setScores] = useState<Score[]>([]);
+  const [otherScores, setOtherScores] = useState<Record<string, OtherMemberScore[]>>({});
   const [loading, setLoading] = useState(true);
   const [needsJoin, setNeedsJoin] = useState(false);
   const [joinName, setJoinName] = useState("");
@@ -83,6 +90,7 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
     setWatchParty(data.watchParty);
     setMember(data.member);
     setScores(data.scores);
+    setOtherScores(data.otherScores || {});
     setNeedsJoin(false);
     setLoading(false);
   }, [partyKey, router]);
@@ -95,22 +103,41 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
     const socket = socketRef.current;
     if (!socket) return;
 
-    // Only listen for own draft updates (from other tabs)
-    const handleDraftUpdate = (data: { memberId: string; contestantId: string; points: number }) => {
+    const handleDraftUpdate = (data: { memberId: string; memberName?: string; contestantId: string; points: number }) => {
       if (member && data.memberId === member.id) {
+        // Own score (from another tab)
         setScores((prev) =>
           prev.map((s) =>
             s.contestantId === data.contestantId ? { ...s, points: data.points } : s
           )
         );
+      } else {
+        // Another member's score
+        setOtherScores((prev) => {
+          const list = (prev[data.contestantId] || []).filter(
+            (s) => s.memberId !== data.memberId
+          );
+          list.push({
+            memberId: data.memberId,
+            memberName: data.memberName || "Unknown",
+            points: data.points,
+          });
+          return { ...prev, [data.contestantId]: list };
+        });
       }
     };
 
+    const handleMemberFinalised = () => fetchData();
+
     socket.on("draft_updated", handleDraftUpdate);
+    socket.on("member_finalised", handleMemberFinalised);
+    socket.on("scoreboard_updated", handleMemberFinalised);
     return () => {
       socket.off("draft_updated", handleDraftUpdate);
+      socket.off("member_finalised", handleMemberFinalised);
+      socket.off("scoreboard_updated", handleMemberFinalised);
     };
-  }, [socketRef, member]);
+  }, [socketRef, member, fetchData]);
 
   async function handleShare() {
     const slug = slugify(partyName);
@@ -343,14 +370,12 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
             >
               Scoreboard
             </Link>
-            {member.role === "HOST" && (
-              <Link
-                href={`/party/${partyKey}/members`}
-                className="text-sm text-muted-40 hover:text-muted-60"
-              >
-                Members
-              </Link>
-            )}
+            <Link
+              href={`/party/${partyKey}/members`}
+              className="text-sm text-muted-40 hover:text-muted-60"
+            >
+              Members
+            </Link>
             <ThemeToggle />
           </div>
         </div>
@@ -409,45 +434,75 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
       {/* Contestant List */}
       <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-3">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {scores.map((score) => (
-            <button
-              key={score.contestantId}
-              onClick={() =>
-                setSelectedContestant(
-                  selectedContestant === score.contestantId ? null : score.contestantId
-                )
-              }
-              className={cn(
-                "glass flex items-center gap-3 p-3 text-left transition-all active:scale-[0.98]",
-                selectedContestant === score.contestantId && "ring-2 ring-neon-pink/50"
-              )}
-            >
-              <span className="text-xs text-muted-30 w-5 text-center">
-                {score.contestant.performanceOrder}
-              </span>
-              <span className="text-2xl">{score.contestant.flagEmoji}</span>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold truncate">{score.contestant.country}</div>
-                <div className="text-sm text-muted-50 truncate">
-                  {score.contestant.artist} &mdash; {score.contestant.song}
-                </div>
-              </div>
+          {scores.map((score) => {
+            const others = otherScores[score.contestantId] || [];
+            return (
               <div
+                key={score.contestantId}
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold",
-                  score.points === 12
-                    ? "score-badge-12"
-                    : score.points === 10
-                      ? "score-badge-10"
-                      : score.points > 0
-                        ? "score-badge text-white"
-                        : "bg-muted-5 text-muted-20"
+                  "glass text-left transition-all",
+                  selectedContestant === score.contestantId && "ring-2 ring-neon-pink/50"
                 )}
               >
-                {score.points}
+                <button
+                  onClick={() =>
+                    setSelectedContestant(
+                      selectedContestant === score.contestantId ? null : score.contestantId
+                    )
+                  }
+                  className="flex w-full items-center gap-3 p-3 active:scale-[0.98] transition-all"
+                >
+                  <span className="text-xs text-muted-30 w-5 text-center">
+                    {score.contestant.performanceOrder}
+                  </span>
+                  <span className="text-2xl">{score.contestant.flagEmoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold truncate">{score.contestant.country}</div>
+                    <div className="text-sm text-muted-50 truncate">
+                      {score.contestant.artist} &mdash; {score.contestant.song}
+                    </div>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold",
+                      score.points === 12
+                        ? "score-badge-12"
+                        : score.points === 10
+                          ? "score-badge-10"
+                          : score.points > 0
+                            ? "score-badge text-white"
+                            : "bg-muted-5 text-muted-20"
+                    )}
+                  >
+                    {score.points}
+                  </div>
+                </button>
+                {others.length > 0 && (
+                  <div className="border-t border-muted-10 px-3 py-2 flex flex-wrap gap-x-3 gap-y-1">
+                    {others.map((os) => (
+                      <span key={os.memberId} className="text-xs text-muted-40">
+                        {os.memberName}{" "}
+                        <span
+                          className={cn(
+                            "font-bold",
+                            os.points === 12
+                              ? "text-yellow-400"
+                              : os.points === 10
+                                ? "text-gray-300"
+                                : os.points > 0
+                                  ? "text-muted-60"
+                                  : "text-muted-20"
+                          )}
+                        >
+                          {os.points}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-            </button>
-          ))}
+            );
+          })}
         </div>
 
         {/* Expanded Score Input */}
