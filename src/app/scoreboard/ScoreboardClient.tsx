@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { ThemeToggle } from "@/components/ThemeToggle";
