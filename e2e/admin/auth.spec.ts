@@ -8,8 +8,8 @@ test.describe('Admin Panel', () => {
     await expect(page.locator('h2')).toContainText('RESTRICTED ACCESS');
   });
 
-  test('should redirect unauthenticated users to login page when accessing juries', async ({ page }) => {
-    await page.goto('/admin/juries');
+  test('should redirect unauthenticated users to login page when accessing parties', async ({ page }) => {
+    await page.goto('/admin/parties');
     await expect(page).toHaveURL(/\/admin\/login/);
   });
 });
