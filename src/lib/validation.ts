@@ -24,6 +24,7 @@ export const contestantSchema = z.object({
   song: z.string().min(1).max(200),
   performanceOrder: z.number().int().min(1),
   imageUrl: z.string().optional().default(""),
+  youtubeUrl: z.string().optional().default(""),
   flagEmoji: z.string().min(1).max(10),
 });
 

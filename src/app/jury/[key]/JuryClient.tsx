@@ -8,6 +8,8 @@ import { ScoreInput } from "@/components/ScoreInput";
 import { Toast } from "@/components/Toast";
 import { useSocket } from "@/hooks/useSocket";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { FloatingBackground } from "@/components/FloatingBackground";
+import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { VALID_FINAL_POINTS } from "@/lib/validation";
 import { slugify } from "@/lib/slugify";
@@ -19,6 +21,7 @@ interface Contestant {
   song: string;
   performanceOrder: number;
   imageUrl: string;
+  youtubeUrl: string;
   flagEmoji: string;
 }
 
@@ -118,7 +121,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
     return () => {
       socket.off("draft_updated", handleDraftUpdate);
     };
-  }, [socketRef]);
+  }, [socketRef, fetchJury]);
 
   async function updateScore(contestantId: string, points: number) {
     await fetch(`/api/jury/${key}/score`, {
@@ -139,9 +142,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
     }
 
     setJury((prev) => (prev ? { ...prev, hasFinalized: true } : prev));
-    setToast({ message: "Your votes are in! Check the scoreboard to see the results.", type: "success" });
     setShowHenry(true);
-    setTimeout(() => setShowHenry(false), 4000);
   }
 
   if (loading) {
@@ -172,23 +173,53 @@ export function JuryClient({ initialJury }: JuryClientProps) {
 
   const scoredCount = jury.scores.filter((s) => s.points > 0).length;
 
+  function getYoutubeEmbedUrl(url: string) {
+    if (!url) return null;
+    let videoId = "";
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname === "youtu.be") {
+        videoId = urlObj.pathname.slice(1);
+      } else if (urlObj.hostname.includes("youtube.com")) {
+        videoId = urlObj.searchParams.get("v") || "";
+        if (!videoId && urlObj.pathname.startsWith("/embed/")) {
+          videoId = urlObj.pathname.split("/")[2];
+        }
+      }
+    } catch {
+      const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#/]+)/);
+      if (match) videoId = match[1];
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+  }
+
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col relative">
+      <FloatingBackground />
       {/* Header */}
       <div className="sticky top-0 z-40 glass-strong px-4 py-3">
-        <div className="mx-auto flex max-w-2xl items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold">{jury.name}</h1>
-            <p className="text-xs text-muted-40">
-              {jury.location} &middot;{" "}
-              <span className="font-mono">{jury.key}</span>
-            </p>
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex flex-col items-start leading-none hover:opacity-80 transition-opacity">
+              <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
+                EUROVISION
+              </span>
+              <span className="text-sm font-semibold text-neon-cyan">
+                2026 JURY
+              </span>
+            </Link>
+            <div className="border-l border-muted-20 pl-3">
+              <h1 className="neon-text text-2xl font-black">{jury.name}</h1>
+              <p className="text-xs text-muted-40">
+                {jury.location} &middot;{" "}
+                <span className="font-mono">{jury.key}</span>
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             {jury.hasFinalized && (
               <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-400">
-                Finalized
+                Finalised
               </span>
             )}
             <a
@@ -197,12 +228,13 @@ export function JuryClient({ initialJury }: JuryClientProps) {
             >
               Scoreboard
             </a>
+            <ThemeToggle />
           </div>
         </div>
       </div>
 
       {/* Share button */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-3">
         <button
           onClick={handleShare}
           className="w-full rounded-lg bg-neon-blue/10 px-3 py-2.5 text-center text-xs text-neon-blue/80 transition-all hover:bg-neon-blue/15 active:scale-[0.98]"
@@ -222,17 +254,18 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       </div>
 
       {/* Instructions */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-3 relative z-10">
         <div className="rounded-lg bg-muted-5 px-3 py-2 text-xs text-muted-40 leading-relaxed">
-          <strong className="text-muted-60">Tap a country</strong> to give it a
+          <strong className="text-muted-60">Tap a country</strong>{" "}
+          to give it a
           score. During the show, feel free to change scores as much as you
-          like &mdash; nothing is locked in until you hit &quot;Finalize&quot; at
+          like &mdash; nothing is locked in until you hit &quot;Finalise&quot; at
           the bottom. Everyone with this jury code sees changes in real time.
         </div>
       </div>
 
       {/* Progress summary */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-3">
         <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2 text-xs">
           <span className="text-muted-40">
             {scoredCount} of {jury.scores.length} countries scored
@@ -247,15 +280,15 @@ export function JuryClient({ initialJury }: JuryClientProps) {
           )}
           {missingPoints.length === 0 && (
             <span className="text-green-400/70 font-medium">
-              Ready to finalize!
+              Ready to finalise!
             </span>
           )}
         </div>
       </div>
 
       {/* Contestant List */}
-      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-3">
-        <div className="flex flex-col gap-2">
+      <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {jury.scores.map((score) => (
             <button
               key={score.contestantId}
@@ -312,27 +345,41 @@ export function JuryClient({ initialJury }: JuryClientProps) {
               exit={{ opacity: 0, y: 40 }}
               className="fixed bottom-0 left-0 right-0 z-50 glass-strong p-4 pb-6"
             >
-              <div className="mx-auto max-w-2xl">
-                <div className="mb-1 flex items-center justify-between">
+              <div className="mx-auto max-w-5xl">
+                <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">
                       {selectedScore.contestant.flagEmoji}
                     </span>
-                    <span className="font-bold">
+                    <span className="font-bold text-lg">
                       {selectedScore.contestant.country}
                     </span>
                   </div>
                   <button
                     onClick={() => setSelectedContestant(null)}
-                    className="text-sm text-muted-40 hover:text-muted-60"
+                    className="rounded-lg border border-muted-20 px-4 py-1.5 text-sm font-medium text-primary hover:bg-muted-10 transition-colors"
                   >
                     Done
                   </button>
                 </div>
-                <p className="mb-3 text-xs text-muted-30">
+                <p className="mb-3 text-sm text-primary/70">
                   Tap a number to assign that score. Tap the same number
                   again to clear it.
                 </p>
+                {selectedScore.contestant.youtubeUrl && (() => {
+                  const embedUrl = getYoutubeEmbedUrl(selectedScore.contestant.youtubeUrl);
+                  return embedUrl ? (
+                    <div className="mb-4 aspect-video overflow-hidden rounded-xl bg-black shadow-lg">
+                      <iframe
+                        src={embedUrl}
+                        title={`${selectedScore.contestant.country} performance`}
+                        className="h-full w-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : null;
+                })()}
                 <ScoreInput
                   value={selectedScore.points}
                   onChange={(points) => {
@@ -359,16 +406,16 @@ export function JuryClient({ initialJury }: JuryClientProps) {
 
         {/* Finalize section */}
         <div className="mt-6 pb-24">
-          <GlassCard className="mb-4">
-            <h3 className="mb-1 text-sm font-bold text-muted-70">
+          <GlassCard className="mb-4" strong>
+            <h3 className="mb-2 text-base font-bold text-primary">
               Ready to submit?
             </h3>
-            <p className="text-xs text-muted-40 leading-relaxed">
+            <p className="text-sm text-primary/70 leading-relaxed">
               Just like real Eurovision, your final votes must follow the
-              official format: give exactly <strong className="text-muted-60">one country 12 points</strong> (your
-              favourite), <strong className="text-muted-60">one country 10</strong>, then <strong className="text-muted-60">one each of 8, 7, 6, 5, 4, 3,
+              official format: give exactly <strong className="text-primary">one country 12 points</strong> (your
+              favourite), <strong className="text-primary">one country 10</strong>, then <strong className="text-primary">one each of 8, 7, 6, 5, 4, 3,
               2, and 1</strong>. All other countries get zero. You can still
-              edit after finalizing.
+              edit after finalising.
             </p>
           </GlassCard>
 
@@ -377,13 +424,13 @@ export function JuryClient({ initialJury }: JuryClientProps) {
             className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95 neon-glow"
           >
             {jury.hasFinalized
-              ? "Update Finalized Scores"
-              : "Finalize Jury Votes"}
+              ? "Update Finalised Scores"
+              : "Finalise Jury Votes"}
           </button>
         </div>
       </div>
 
-      {/* Henry Easter Egg */}
+      {/* Finalization Modal */}
       <AnimatePresence>
         {showHenry && (
           <motion.div
@@ -392,7 +439,6 @@ export function JuryClient({ initialJury }: JuryClientProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm"
-            onClick={() => setShowHenry(false)}
           >
             <motion.div
               initial={{ scale: 0.5, y: 80 }}
@@ -407,12 +453,17 @@ export function JuryClient({ initialJury }: JuryClientProps) {
                 className="mx-auto mb-4 h-48 w-48 rounded-2xl object-cover"
               />
               <p className="text-xl font-bold neon-text">
-                Henry is visibly relieved!
+                The votes are in from {jury.name} from {jury.location}!
               </p>
               <p className="mt-2 text-muted-50 text-sm">
-                The high-anxiety voting process is over. Good boy, Henry.
+                Head over to the scoreboard to see the rest of the results...
               </p>
-              <p className="mt-3 text-xs text-muted-30">Tap anywhere to close</p>
+              <a
+                href="/scoreboard"
+                className="mt-4 inline-block w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-3 font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
+              >
+                GO TO SCOREBOARD
+              </a>
             </motion.div>
           </motion.div>
         )}

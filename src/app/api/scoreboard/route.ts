@@ -19,6 +19,7 @@ export async function GET() {
       artist: c.artist,
       song: c.song,
       flagEmoji: c.flagEmoji,
+      youtubeUrl: c.youtubeUrl,
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
       juryScores: c.scores.map((s) => ({
         juryName: s.jury.name,

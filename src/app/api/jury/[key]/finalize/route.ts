@@ -37,5 +37,5 @@ export async function POST(
 
   global.io?.to("room:global").emit("scoreboard_updated");
 
-  return NextResponse.json({ success: true, message: "Scores finalized!" });
+  return NextResponse.json({ success: true, message: "Scores finalised!" });
 }

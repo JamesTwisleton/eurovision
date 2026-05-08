@@ -25,6 +25,7 @@ model Contestant {
   song             String
   performanceOrder Int
   imageUrl         String   @default("")
+  youtubeUrl       String   @default("")
   flagEmoji        String
   scores           Score[]
 }

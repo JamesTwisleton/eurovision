@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { GlassCard } from "@/components/GlassCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { FloatingBackground } from "@/components/FloatingBackground";
 
 interface Contestant {
   id: string;
@@ -12,6 +13,7 @@ interface Contestant {
   song: string;
   performanceOrder: number;
   imageUrl: string;
+  youtubeUrl: string;
   flagEmoji: string;
 }
 
@@ -21,6 +23,7 @@ const emptyForm = {
   song: "",
   performanceOrder: 1,
   imageUrl: "",
+  youtubeUrl: "",
   flagEmoji: "",
 };
 
@@ -29,13 +32,10 @@ export default function AdminPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-
   const fetchContestants = useCallback(async () => {
     const res = await fetch("/api/contestants");
     const data = await res.json();
     setContestants(data.contestants);
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -86,22 +86,16 @@ export default function AdminPage() {
       song: c.song,
       performanceOrder: c.performanceOrder,
       imageUrl: c.imageUrl,
+      youtubeUrl: c.youtubeUrl,
       flagEmoji: c.flagEmoji,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="text-xl text-muted-50">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-1 flex-col px-4 py-6">
-      <div className="mx-auto w-full max-w-2xl">
+    <div className="flex flex-1 flex-col px-4 py-6 relative">
+      <FloatingBackground />
+      <div className="mx-auto w-full max-w-5xl">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex flex-col">
             <h1 className="neon-text text-3xl font-black">ADMIN</h1>
@@ -124,9 +118,11 @@ export default function AdminPage() {
         </div>
         <p className="mb-6 text-sm text-muted-40 leading-relaxed">
           This is where you set up the contestants for the show. Add each
-          country, their artist, and song title. The <strong className="text-muted-60">performance order</strong> is
-          the running order on the night &mdash; contestants will appear in this
-          order on everyone&apos;s scoresheet. The <strong className="text-muted-60">flag emoji</strong> is shown next to
+          country, their artist, and song title. The{" "}
+          <strong className="text-muted-60">performance order</strong> is the
+          running order on the night &mdash; contestants will appear in this
+          order on everyone&apos;s scoresheet. The{" "}
+          <strong className="text-muted-60">flag emoji</strong> is shown next to
           each country (e.g. copy-paste from{" "}
           <a
             href="https://emojipedia.org/flags"
@@ -181,6 +177,20 @@ export default function AdminPage() {
                   className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
                 />
               </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-50">
+                YouTube URL (optional)
+              </label>
+              <input
+                type="text"
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={form.youtubeUrl}
+                onChange={(e) =>
+                  setForm({ ...form, youtubeUrl: e.target.value })
+                }
+                className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+              />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-50">
@@ -271,7 +281,7 @@ export default function AdminPage() {
         <h2 className="mb-3 text-lg font-bold">
           Contestants ({contestants.length})
         </h2>
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {contestants.length === 0 ? (
             <GlassCard className="text-center">
               <p className="text-muted-50 leading-relaxed">
