@@ -137,7 +137,7 @@ export default function Home() {
                   <strong className="text-muted-70">Score each act as you watch.</strong>{" "}
                   Tap a country, pick a score from 0&ndash;12. You can change
                   your mind as many times as you like &mdash; it&apos;s a draft
-                  until you finalize.
+                  until you finalise.
                 </span>
               </li>
               <li className="flex gap-3">
@@ -145,7 +145,7 @@ export default function Home() {
                   3
                 </span>
                 <span>
-                  <strong className="text-muted-70">Finalize your votes.</strong> Just like
+                  <strong className="text-muted-70">Finalise your votes.</strong> Just like
                   real Eurovision, you must give out exactly one set of 12,
                   10, 8, 7, 6, 5, 4, 3, 2, and 1 points. The rest get zero.
                 </span>

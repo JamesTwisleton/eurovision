@@ -114,10 +114,10 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
             <div className="border-l border-muted-20 pl-3">
               <h1 className="neon-text text-2xl font-black">SCOREBOARD</h1>
               <p className="text-xs text-muted-40 leading-relaxed">
-                Combined results from all finalized juries.
+                Combined results from all finalised juries.
                 {juries.length > 0
                   ? ` ${juries.length} ${juries.length === 1 ? "jury has" : "juries have"} voted so far.`
-                  : " No juries have finalized yet."}
+                  : " No juries have finalised yet."}
               </p>
             </div>
           </div>
@@ -168,7 +168,7 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
               </div>
             ))}
             <p className="mt-2 text-center text-xs text-muted-30 sm:col-span-2 lg:col-span-3">
-              Waiting for juries to finalize their votes...
+              Waiting for juries to finalise their votes...
             </p>
           </div>
         ) : (

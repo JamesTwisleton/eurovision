@@ -119,7 +119,7 @@ export default function JuryAdminPage() {
         </div>
         <p className="mb-6 text-sm text-muted-40 leading-relaxed">
           View and manage all registered juries. You can edit their names, locations,
-          or manually toggle their finalized status.
+          or manually toggle their finalised status.
         </p>
 
         {editingId && (
@@ -167,7 +167,7 @@ export default function JuryAdminPage() {
                   className="h-4 w-4 rounded border-muted-20 bg-muted-5 text-neon-pink focus:ring-neon-pink/50"
                 />
                 <label htmlFor="hasFinalized" className="text-sm text-muted-50">
-                  Finalized (Scoreboard active)
+                  Finalised (Scoreboard active)
                 </label>
               </div>
               {error && <p className="text-sm text-red-400">{error}</p>}
@@ -209,7 +209,7 @@ export default function JuryAdminPage() {
                     <span className="font-bold text-lg">{j.name}</span>
                     {j.hasFinalized && (
                       <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-400 uppercase tracking-wider">
-                        Finalized
+                        Finalised
                       </span>
                     )}
                   </div>

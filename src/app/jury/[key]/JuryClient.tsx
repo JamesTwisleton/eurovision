@@ -219,7 +219,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
           <div className="flex items-center gap-3">
             {jury.hasFinalized && (
               <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-400">
-                Finalized
+                Finalised
               </span>
             )}
             <a
@@ -259,7 +259,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
           <strong className="text-muted-60">Tap a country</strong>{" "}
           to give it a
           score. During the show, feel free to change scores as much as you
-          like &mdash; nothing is locked in until you hit &quot;Finalize&quot; at
+          like &mdash; nothing is locked in until you hit &quot;Finalise&quot; at
           the bottom. Everyone with this jury code sees changes in real time.
         </div>
       </div>
@@ -280,7 +280,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
           )}
           {missingPoints.length === 0 && (
             <span className="text-green-400/70 font-medium">
-              Ready to finalize!
+              Ready to finalise!
             </span>
           )}
         </div>
@@ -415,7 +415,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
               official format: give exactly <strong className="text-primary">one country 12 points</strong> (your
               favourite), <strong className="text-primary">one country 10</strong>, then <strong className="text-primary">one each of 8, 7, 6, 5, 4, 3,
               2, and 1</strong>. All other countries get zero. You can still
-              edit after finalizing.
+              edit after finalising.
             </p>
           </GlassCard>
 
@@ -424,8 +424,8 @@ export function JuryClient({ initialJury }: JuryClientProps) {
             className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95 neon-glow"
           >
             {jury.hasFinalized
-              ? "Update Finalized Scores"
-              : "Finalize Jury Votes"}
+              ? "Update Finalised Scores"
+              : "Finalise Jury Votes"}
           </button>
         </div>
       </div>
