@@ -69,11 +69,16 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
 
       {/* Sticky header */}
       <div className="sticky top-0 z-40 glass-strong px-4 py-3">
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
+        <div className="mx-auto flex max-w-2xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent uppercase leading-none">
-              Eurovision<br />2026 Jury
-            </span>
+            <div className="flex flex-col items-start leading-none">
+              <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
+                EUROVISION
+              </span>
+              <span className="text-sm font-semibold text-neon-cyan">
+                2026 JURY
+              </span>
+            </div>
             <div className="border-l border-muted-20 pl-3">
               <h1 className="neon-text text-2xl font-black">SCOREBOARD</h1>
               <p className="text-xs text-muted-40 leading-relaxed">
@@ -88,7 +93,7 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-3xl px-4 pt-4">
+      <div className="mx-auto w-full max-w-2xl px-4 pt-4">
 
         {/* Jury list */}
         {juries.length > 0 && (

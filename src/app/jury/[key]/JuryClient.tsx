@@ -140,9 +140,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
     }
 
     setJury((prev) => (prev ? { ...prev, hasFinalized: true } : prev));
-    setToast({ message: "Your votes are in! Check the scoreboard to see the results.", type: "success" });
     setShowHenry(true);
-    setTimeout(() => setShowHenry(false), 4000);
   }
 
   if (loading) {
@@ -180,11 +178,16 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       <div className="sticky top-0 z-40 glass-strong px-4 py-3">
         <div className="mx-auto flex max-w-2xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent uppercase leading-none">
-              Eurovision<br />2026 Jury
-            </span>
+            <div className="flex flex-col items-start leading-none">
+              <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
+                EUROVISION
+              </span>
+              <span className="text-sm font-semibold text-neon-cyan">
+                2026 JURY
+              </span>
+            </div>
             <div className="border-l border-muted-20 pl-3">
-              <h1 className="text-lg font-bold leading-tight">{jury.name}</h1>
+              <h1 className="neon-text text-2xl font-black">{jury.name}</h1>
               <p className="text-xs text-muted-40">
                 {jury.location} &middot;{" "}
                 <span className="font-mono">{jury.key}</span>
@@ -391,7 +394,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
         </div>
       </div>
 
-      {/* Henry Easter Egg */}
+      {/* Finalization Modal */}
       <AnimatePresence>
         {showHenry && (
           <motion.div
@@ -400,7 +403,6 @@ export function JuryClient({ initialJury }: JuryClientProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm"
-            onClick={() => setShowHenry(false)}
           >
             <motion.div
               initial={{ scale: 0.5, y: 80 }}
@@ -415,12 +417,17 @@ export function JuryClient({ initialJury }: JuryClientProps) {
                 className="mx-auto mb-4 h-48 w-48 rounded-2xl object-cover"
               />
               <p className="text-xl font-bold neon-text">
-                Henry is visibly relieved!
+                The votes are in from {jury.name} from {jury.location}!
               </p>
               <p className="mt-2 text-muted-50 text-sm">
-                The high-anxiety voting process is over. Good boy, Henry.
+                Head over to the scoreboard to see the rest of the results...
               </p>
-              <p className="mt-3 text-xs text-muted-30">Tap anywhere to close</p>
+              <a
+                href="/scoreboard"
+                className="mt-4 inline-block w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-3 font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
+              >
+                GO TO SCOREBOARD
+              </a>
             </motion.div>
           </motion.div>
         )}
