@@ -179,17 +179,17 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       {/* Header */}
       <div className="sticky top-0 z-40 glass-strong px-4 py-3">
         <div className="mx-auto flex max-w-2xl items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-[10px] font-black tracking-tighter text-transparent uppercase">
-                Eurovision 2026 Jury
-              </span>
+          <div className="flex items-center gap-3">
+            <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent uppercase leading-none">
+              Eurovision<br />2026 Jury
+            </span>
+            <div className="border-l border-muted-20 pl-3">
+              <h1 className="text-lg font-bold leading-tight">{jury.name}</h1>
+              <p className="text-xs text-muted-40">
+                {jury.location} &middot;{" "}
+                <span className="font-mono">{jury.key}</span>
+              </p>
             </div>
-            <h1 className="text-lg font-bold leading-tight">{jury.name}</h1>
-            <p className="text-xs text-muted-40">
-              {jury.location} &middot;{" "}
-              <span className="font-mono">{jury.key}</span>
-            </p>
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
