@@ -7,15 +7,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Jury {
-  id           String   @id @default(uuid())
-  key          String   @unique
+model WatchParty {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  name      String
+  members   Member[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum MemberRole {
+  HOST
+  GUEST
+}
+
+model Member {
+  id           String     @id @default(uuid())
   name         String
   location     String
-  hasFinalized Boolean  @default(false)
+  role         MemberRole @default(GUEST)
+  hasFinalized Boolean    @default(false)
+  watchPartyId String
+  watchParty   WatchParty @relation(fields: [watchPartyId], references: [id], onDelete: Cascade)
   scores       Score[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model Contestant {
@@ -33,10 +49,10 @@ model Contestant {
 model Score {
   id           String     @id @default(uuid())
   points       Int        @default(0)
-  juryId       String
-  jury         Jury       @relation(fields: [juryId], references: [id], onDelete: Cascade)
+  memberId     String
+  member       Member     @relation(fields: [memberId], references: [id], onDelete: Cascade)
   contestantId String
   contestant   Contestant @relation(fields: [contestantId], references: [id], onDelete: Cascade)
 
-  @@unique([juryId, contestantId])
+  @@unique([memberId, contestantId])
 }

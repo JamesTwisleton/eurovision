@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateFinalScores, VALID_FINAL_POINTS, createJurySchema, draftScoreSchema } from './validation';
+import { validateFinalScores, VALID_FINAL_POINTS, createWatchPartySchema, draftScoreSchema } from './validation';
 
 describe('validateFinalScores', () => {
   it('should return valid for a correct set of scores', () => {
@@ -38,15 +38,16 @@ describe('validateFinalScores', () => {
 });
 
 describe('Zod schemas', () => {
-  describe('createJurySchema', () => {
-    it('should validate correct jury data', () => {
-      const data = { name: 'Rebecca', location: 'London' };
-      expect(createJurySchema.safeParse(data).success).toBe(true);
+  describe('createWatchPartySchema', () => {
+    it('should validate correct watch party data', () => {
+      const data = { partyName: 'London Legends', memberName: 'Rebecca', memberLocation: 'London' };
+      expect(createWatchPartySchema.safeParse(data).success).toBe(true);
     });
 
-    it('should reject empty name or location', () => {
-      expect(createJurySchema.safeParse({ name: '', location: 'London' }).success).toBe(false);
-      expect(createJurySchema.safeParse({ name: 'Rebecca', location: '' }).success).toBe(false);
+    it('should reject empty fields', () => {
+      expect(createWatchPartySchema.safeParse({ partyName: '', memberName: 'Rebecca', memberLocation: 'London' }).success).toBe(false);
+      expect(createWatchPartySchema.safeParse({ partyName: 'Party', memberName: '', memberLocation: 'London' }).success).toBe(false);
+      expect(createWatchPartySchema.safeParse({ partyName: 'Party', memberName: 'Rebecca', memberLocation: '' }).success).toBe(false);
     });
   });
 

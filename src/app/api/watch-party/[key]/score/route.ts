@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { draftScoreSchema } from "@/lib/validation";
+import { requireMember } from "@/lib/session";
 
 declare global {
   var io: import("socket.io").Server | undefined;
@@ -21,36 +22,43 @@ export async function PUT(
     );
   }
 
-  const jury = await prisma.jury.findUnique({ where: { key } });
-  if (!jury) {
-    return NextResponse.json({ error: "Jury not found" }, { status: 404 });
+  const { member, error } = await requireMember(request);
+  if (error) return error;
+
+  // Verify member belongs to this party
+  const watchParty = await prisma.watchParty.findUnique({ where: { key } });
+  if (!watchParty || member.watchPartyId !== watchParty.id) {
+    return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
   }
 
   const score = await prisma.score.upsert({
     where: {
-      juryId_contestantId: {
-        juryId: jury.id,
+      memberId_contestantId: {
+        memberId: member.id,
         contestantId: parsed.data.contestantId,
       },
     },
     update: { points: parsed.data.points },
     create: {
-      juryId: jury.id,
+      memberId: member.id,
       contestantId: parsed.data.contestantId,
       points: parsed.data.points,
     },
     include: { contestant: true },
   });
 
-  // Emit real-time update to jury room
-  global.io?.to(`room:jury_${key}`).emit("draft_updated", {
+  // Emit to party room so others can see live updates
+  global.io?.to(`room:party_${key}`).emit("draft_updated", {
+    memberId: member.id,
+    memberName: member.name,
     contestantId: score.contestantId,
     points: score.points,
     country: score.contestant.country,
   });
 
-  // If jury was already finalized, also update global scoreboard
-  if (jury.hasFinalized) {
+  // If member already finalised, update scoreboards
+  if (member.hasFinalized) {
+    global.io?.to(`room:party_${key}`).emit("scoreboard_updated");
     global.io?.to("room:global").emit("scoreboard_updated");
   }
 

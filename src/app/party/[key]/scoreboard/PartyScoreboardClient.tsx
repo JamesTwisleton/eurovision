@@ -14,8 +14,6 @@ interface MemberScore {
   memberName: string;
   memberId: string;
   memberLocation: string;
-  partyName: string;
-  partyKey: string;
   points: number;
 }
 
@@ -30,14 +28,17 @@ interface ScoreboardEntry {
   memberScores: MemberScore[];
 }
 
-interface PartyInfo {
-  key: string;
+interface MemberInfo {
+  id: string;
   name: string;
+  location: string;
 }
 
-interface ScoreboardClientProps {
+interface PartyScoreboardClientProps {
+  partyKey: string;
+  partyName: string;
   initialScoreboard: ScoreboardEntry[];
-  initialParties: PartyInfo[];
+  initialMembers: MemberInfo[];
 }
 
 function getYoutubeEmbedUrl(url: string) {
@@ -60,18 +61,23 @@ function getYoutubeEmbedUrl(url: string) {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 }
 
-export function ScoreboardClient({ initialScoreboard, initialParties }: ScoreboardClientProps) {
-  const socketRef = useSocket();
+export function PartyScoreboardClient({
+  partyKey,
+  partyName,
+  initialScoreboard,
+  initialMembers,
+}: PartyScoreboardClientProps) {
+  const socketRef = useSocket(partyKey);
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
-  const [parties, setParties] = useState(initialParties);
+  const [members, setMembers] = useState(initialMembers);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const fetchScoreboard = useCallback(async () => {
-    const res = await fetch("/api/scoreboard");
+    const res = await fetch(`/api/watch-party/${partyKey}/scoreboard`);
     const data = await res.json();
     setScoreboard(data.scoreboard);
-    setParties(data.parties);
-  }, []);
+    setMembers(data.members);
+  }, [partyKey]);
 
   useEffect(() => {
     const socket = socketRef.current;
@@ -79,8 +85,10 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
 
     const handleUpdate = () => fetchScoreboard();
     socket.on("scoreboard_updated", handleUpdate);
+    socket.on("member_finalised", handleUpdate);
     return () => {
       socket.off("scoreboard_updated", handleUpdate);
+      socket.off("member_finalised", handleUpdate);
     };
   }, [socketRef, fetchScoreboard]);
 
@@ -100,12 +108,12 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
               </span>
             </Link>
             <div className="border-l border-muted-20 pl-3">
-              <h1 className="neon-text text-2xl font-black">GLOBAL SCOREBOARD</h1>
+              <h1 className="neon-text text-2xl font-black">SCOREBOARD</h1>
               <p className="text-xs text-muted-40 leading-relaxed">
-                Combined results from all Watch Parties.
-                {parties.length > 0
-                  ? ` ${parties.length} ${parties.length === 1 ? "party" : "parties"} with finalised votes.`
-                  : " No members have finalised yet."}
+                {partyName} &middot;{" "}
+                {members.length > 0
+                  ? `${members.length} ${members.length === 1 ? "member has" : "members have"} finalised.`
+                  : "No members have finalised yet."}
               </p>
             </div>
           </div>
@@ -114,16 +122,12 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
       </div>
 
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
-        {parties.length > 0 && (
+        {members.length > 0 && (
           <div className="mb-4 flex flex-wrap justify-center gap-2">
-            {parties.map((p) => (
-              <Link
-                key={p.key}
-                href={`/party/${p.key}/scoreboard`}
-                className="rounded-full bg-muted-5 px-3 py-1 text-xs text-muted-50 hover:text-muted-70 transition-colors"
-              >
-                {p.name}
-              </Link>
+            {members.map((m) => (
+              <span key={m.id} className="rounded-full bg-muted-5 px-3 py-1 text-xs text-muted-50">
+                {m.name} ({m.location})
+              </span>
             ))}
           </div>
         )}
@@ -132,7 +136,7 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
           <GlassCard className="text-center" strong>
             <p className="text-muted-50 leading-relaxed">No contestants have been added yet.</p>
           </GlassCard>
-        ) : parties.length === 0 ? (
+        ) : members.length === 0 ? (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {scoreboard.map((entry, rank) => (
               <div key={entry.id} className="glass flex items-center gap-3 p-4">
@@ -219,7 +223,7 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
                             ) : null;
                           })()}
                           <p className="text-xs font-semibold text-muted-50 uppercase tracking-wider mb-2">
-                            Votes Breakdown
+                            Member Breakdown
                           </p>
                           <div className="flex flex-col gap-1.5">
                             {entry.memberScores
@@ -228,8 +232,7 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
                               .map((ms) => (
                                 <div key={ms.memberId} className="flex items-center justify-between text-sm">
                                   <span className="text-muted-50 truncate">
-                                    {ms.memberName}{" "}
-                                    <span className="text-muted-30">({ms.partyName})</span>
+                                    {ms.memberName} <span className="text-muted-30">({ms.memberLocation})</span>
                                   </span>
                                   <span
                                     className={cn(
@@ -259,8 +262,11 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
         )}
 
         <div className="mt-8 flex justify-center gap-6">
-          <Link href="/" className="text-sm text-muted-30 hover:text-muted-50 transition-colors">
-            &larr; Back to Home
+          <Link href={`/party/${partyKey}`} className="text-sm text-muted-30 hover:text-muted-50 transition-colors">
+            &larr; Back to your scorecard
+          </Link>
+          <Link href="/scoreboard" className="text-sm text-muted-30 hover:text-muted-50 transition-colors">
+            Global Scoreboard
           </Link>
         </div>
       </div>

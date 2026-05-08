@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { GlassCard } from "@/components/GlassCard";
 import { ScoreInput } from "@/components/ScoreInput";
 import { Toast } from "@/components/Toast";
 import { useSocket } from "@/hooks/useSocket";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FloatingBackground } from "@/components/FloatingBackground";
-import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { VALID_FINAL_POINTS } from "@/lib/validation";
 import { slugify } from "@/lib/slugify";
@@ -32,51 +32,90 @@ interface Score {
   contestant: Contestant;
 }
 
-interface Jury {
+interface MemberInfo {
+  id: string;
+  name: string;
+  location: string;
+  role: "HOST" | "GUEST";
+  hasFinalized: boolean;
+}
+
+interface WatchPartyInfo {
   id: string;
   key: string;
   name: string;
-  location: string;
-  hasFinalized: boolean;
-  scores: Score[];
 }
 
-interface JuryClientProps {
-  initialJury: Jury;
+interface PartyClientProps {
+  partyKey: string;
+  partyName: string;
 }
 
-export function JuryClient({ initialJury }: JuryClientProps) {
-  const { key } = useParams<{ key: string }>();
+export function PartyClient({ partyKey, partyName }: PartyClientProps) {
   const router = useRouter();
-  const socketRef = useSocket(key);
-  const [jury, setJury] = useState<Jury>(initialJury);
-  const [loading, setLoading] = useState(false);
-  const [selectedContestant, setSelectedContestant] = useState<string | null>(
-    null
-  );
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "error" | "success";
-  } | null>(null);
+  const socketRef = useSocket(partyKey);
+  const [watchParty, setWatchParty] = useState<WatchPartyInfo | null>(null);
+  const [member, setMember] = useState<MemberInfo | null>(null);
+  const [scores, setScores] = useState<Score[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedContestant, setSelectedContestant] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "error" | "success" } | null>(null);
   const [showHenry, setShowHenry] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  async function handleShare() {
-    const slug = slugify(jury.name);
-    const url = `${window.location.origin}/jury/${key}/${slug}`;
+  const fetchData = useCallback(async () => {
+    const res = await fetch(`/api/watch-party/${partyKey}`);
+    if (!res.ok) {
+      router.push("/");
+      return;
+    }
+    const data = await res.json();
+    setWatchParty(data.watchParty);
+    setMember(data.member);
+    setScores(data.scores);
+    setLoading(false);
+  }, [partyKey, router]);
 
-    // Use native share sheet on mobile, copy URL on desktop
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+
+    // Only listen for own draft updates (from other tabs)
+    const handleDraftUpdate = (data: { memberId: string; contestantId: string; points: number }) => {
+      if (member && data.memberId === member.id) {
+        setScores((prev) =>
+          prev.map((s) =>
+            s.contestantId === data.contestantId ? { ...s, points: data.points } : s
+          )
+        );
+      }
+    };
+
+    socket.on("draft_updated", handleDraftUpdate);
+    return () => {
+      socket.off("draft_updated", handleDraftUpdate);
+    };
+  }, [socketRef, member]);
+
+  async function handleShare() {
+    const slug = slugify(partyName);
+    const url = `${window.location.origin}/party/${partyKey}/${slug}`;
+
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile && navigator.share) {
       try {
         await navigator.share({
-          title: `Eurovision 2026 Jury — ${jury.name}`,
-          text: `Join my Eurovision jury! Use code "${key}" or tap the link:`,
+          title: `Eurovision 2026 — ${partyName}`,
+          text: `Join my Watch Party! Use code "${partyKey}" or tap the link:`,
           url,
         });
         return;
       } catch {
-        // User cancelled or share failed — fall through to clipboard
+        // Fall through to clipboard
       }
     }
 
@@ -85,54 +124,16 @@ export function JuryClient({ initialJury }: JuryClientProps) {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const fetchJury = useCallback(async () => {
-    const res = await fetch(`/api/jury/${key}`);
-    if (!res.ok) {
-      router.push("/");
-      return;
-    }
-    const data = await res.json();
-    setJury(data.jury);
-    setLoading(false);
-  }, [key, router]);
-
-  useEffect(() => {
-    const socket = socketRef.current;
-    if (!socket) return;
-
-    const handleDraftUpdate = (data: {
-      contestantId: string;
-      points: number;
-    }) => {
-      setJury((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          scores: prev.scores.map((s) =>
-            s.contestantId === data.contestantId
-              ? { ...s, points: data.points }
-              : s
-          ),
-        };
-      });
-    };
-
-    socket.on("draft_updated", handleDraftUpdate);
-    return () => {
-      socket.off("draft_updated", handleDraftUpdate);
-    };
-  }, [socketRef, fetchJury]);
-
   async function updateScore(contestantId: string, points: number) {
-    await fetch(`/api/jury/${key}/score`, {
+    await fetch(`/api/watch-party/${partyKey}/score`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contestantId, points }),
     });
   }
 
-  async function handleFinalize() {
-    const res = await fetch(`/api/jury/${key}/finalize`, { method: "POST" });
+  async function handleFinalise() {
+    const res = await fetch(`/api/watch-party/${partyKey}/finalise`, { method: "POST" });
     const data = await res.json();
 
     if (!res.ok) {
@@ -141,37 +142,49 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       return;
     }
 
-    setJury((prev) => (prev ? { ...prev, hasFinalized: true } : prev));
+    setMember((prev) => (prev ? { ...prev, hasFinalized: true } : prev));
     setShowHenry(true);
+  }
+
+  async function handleResetDraft() {
+    await fetch(`/api/watch-party/${partyKey}/reset-draft`, { method: "POST" });
+    setScores((prev) => prev.map((s) => ({ ...s, points: 0 })));
+    setToast({ message: "All draft scores reset to zero.", type: "success" });
+  }
+
+  async function handleResetFinal() {
+    await fetch(`/api/watch-party/${partyKey}/reset-final`, { method: "POST" });
+    setScores((prev) => prev.map((s) => ({ ...s, points: 0 })));
+    setMember((prev) => (prev ? { ...prev, hasFinalized: false } : prev));
+    setToast({ message: "Scores and finalisation reset.", type: "success" });
+  }
+
+  async function handleLogOff() {
+    document.cookie = "member_token=; path=/; max-age=0";
+    router.push("/");
   }
 
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="text-xl text-muted-50">Loading your jury...</div>
+        <div className="text-xl text-muted-50">Loading your scorecard...</div>
       </div>
     );
   }
 
-  if (!jury) return null;
+  if (!watchParty || !member) return null;
 
-  const selectedScore = jury.scores.find(
-    (s) => s.contestantId === selectedContestant
-  );
+  const selectedScore = scores.find((s) => s.contestantId === selectedContestant);
 
-  // Summary of which final point values are used
   const usedPoints = new Map<number, string>();
-  for (const s of jury.scores) {
+  for (const s of scores) {
     if (s.points > 0) {
       usedPoints.set(s.points, s.contestant.country);
     }
   }
 
-  const missingPoints = VALID_FINAL_POINTS.filter(
-    (p) => !usedPoints.has(p)
-  );
-
-  const scoredCount = jury.scores.filter((s) => s.points > 0).length;
+  const missingPoints = VALID_FINAL_POINTS.filter((p) => !usedPoints.has(p));
+  const scoredCount = scores.filter((s) => s.points > 0).length;
 
   function getYoutubeEmbedUrl(url: string) {
     if (!url) return null;
@@ -209,25 +222,33 @@ export function JuryClient({ initialJury }: JuryClientProps) {
               </span>
             </Link>
             <div className="border-l border-muted-20 pl-3">
-              <h1 className="neon-text text-2xl font-black">{jury.name}</h1>
+              <h1 className="neon-text text-2xl font-black">{partyName}</h1>
               <p className="text-xs text-muted-40">
-                {jury.location} &middot;{" "}
-                <span className="font-mono">{jury.key}</span>
+                {member.name} &middot; {member.location} &middot;{" "}
+                <span className="text-xs uppercase tracking-wider text-neon-cyan/70">{member.role}</span>
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {jury.hasFinalized && (
+            {member.hasFinalized && (
               <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-400">
                 Finalised
               </span>
             )}
-            <a
-              href="/scoreboard"
+            <Link
+              href={`/party/${partyKey}/scoreboard`}
               className="text-sm text-muted-40 hover:text-muted-60"
             >
               Scoreboard
-            </a>
+            </Link>
+            {member.role === "HOST" && (
+              <Link
+                href={`/party/${partyKey}/members`}
+                className="text-sm text-muted-40 hover:text-muted-60"
+              >
+                Members
+              </Link>
+            )}
             <ThemeToggle />
           </div>
         </div>
@@ -243,11 +264,9 @@ export function JuryClient({ initialJury }: JuryClientProps) {
             <span className="text-green-400 font-medium">Link copied to clipboard!</span>
           ) : (
             <>
-              <span className="font-medium">Invite friends to this jury</span>
+              <span className="font-medium">Invite friends to this Watch Party</span>
               {" — "}
-              <span className="font-mono font-bold text-neon-cyan">{jury.key}</span>
-              {" "}
-              <span className="inline-block ml-1">📤</span>
+              <span className="font-mono font-bold text-neon-cyan">{partyKey}</span>
             </>
           )}
         </button>
@@ -257,10 +276,9 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       <div className="mx-auto w-full max-w-5xl px-4 pt-3 relative z-10">
         <div className="rounded-lg bg-muted-5 px-3 py-2 text-xs text-muted-40 leading-relaxed">
           <strong className="text-muted-60">Tap a country</strong>{" "}
-          to give it a
-          score. During the show, feel free to change scores as much as you
+          to give it a score. During the show, feel free to change scores as much as you
           like &mdash; nothing is locked in until you hit &quot;Finalise&quot; at
-          the bottom. Everyone with this jury code sees changes in real time.
+          the bottom. This is your personal scorecard.
         </div>
       </div>
 
@@ -268,7 +286,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       <div className="mx-auto w-full max-w-5xl px-4 pt-3">
         <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2 text-xs">
           <span className="text-muted-40">
-            {scoredCount} of {jury.scores.length} countries scored
+            {scoredCount} of {scores.length} countries scored
           </span>
           {missingPoints.length > 0 && missingPoints.length <= 5 && (
             <span className="text-muted-30">
@@ -289,20 +307,17 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       {/* Contestant List */}
       <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-3">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {jury.scores.map((score) => (
+          {scores.map((score) => (
             <button
               key={score.contestantId}
               onClick={() =>
                 setSelectedContestant(
-                  selectedContestant === score.contestantId
-                    ? null
-                    : score.contestantId
+                  selectedContestant === score.contestantId ? null : score.contestantId
                 )
               }
               className={cn(
                 "glass flex items-center gap-3 p-3 text-left transition-all active:scale-[0.98]",
-                selectedContestant === score.contestantId &&
-                  "ring-2 ring-neon-pink/50"
+                selectedContestant === score.contestantId && "ring-2 ring-neon-pink/50"
               )}
             >
               <span className="text-xs text-muted-30 w-5 text-center">
@@ -310,9 +325,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
               </span>
               <span className="text-2xl">{score.contestant.flagEmoji}</span>
               <div className="flex-1 min-w-0">
-                <div className="font-semibold truncate">
-                  {score.contestant.country}
-                </div>
+                <div className="font-semibold truncate">{score.contestant.country}</div>
                 <div className="text-sm text-muted-50 truncate">
                   {score.contestant.artist} &mdash; {score.contestant.song}
                 </div>
@@ -348,12 +361,8 @@ export function JuryClient({ initialJury }: JuryClientProps) {
               <div className="mx-auto max-w-5xl">
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">
-                      {selectedScore.contestant.flagEmoji}
-                    </span>
-                    <span className="font-bold text-lg">
-                      {selectedScore.contestant.country}
-                    </span>
+                    <span className="text-2xl">{selectedScore.contestant.flagEmoji}</span>
+                    <span className="font-bold text-lg">{selectedScore.contestant.country}</span>
                   </div>
                   <button
                     onClick={() => setSelectedContestant(null)}
@@ -363,8 +372,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
                   </button>
                 </div>
                 <p className="mb-3 text-sm text-primary/70">
-                  Tap a number to assign that score. Tap the same number
-                  again to clear it.
+                  Tap a number to assign that score. Tap the same number again to clear it.
                 </p>
                 {selectedScore.contestant.youtubeUrl && (() => {
                   const embedUrl = getYoutubeEmbedUrl(selectedScore.contestant.youtubeUrl);
@@ -383,20 +391,15 @@ export function JuryClient({ initialJury }: JuryClientProps) {
                 <ScoreInput
                   value={selectedScore.points}
                   onChange={(points) => {
-                    const newPoints =
-                      points === selectedScore.points ? 0 : points;
+                    const newPoints = points === selectedScore.points ? 0 : points;
                     updateScore(selectedScore.contestantId, newPoints);
-                    setJury((prev) => {
-                      if (!prev) return prev;
-                      return {
-                        ...prev,
-                        scores: prev.scores.map((s) =>
-                          s.contestantId === selectedScore.contestantId
-                            ? { ...s, points: newPoints }
-                            : s
-                        ),
-                      };
-                    });
+                    setScores((prev) =>
+                      prev.map((s) =>
+                        s.contestantId === selectedScore.contestantId
+                          ? { ...s, points: newPoints }
+                          : s
+                      )
+                    );
                   }}
                 />
               </div>
@@ -404,7 +407,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
           )}
         </AnimatePresence>
 
-        {/* Finalize section */}
+        {/* Finalise section */}
         <div className="mt-6 pb-24">
           <GlassCard className="mb-4" strong>
             <h3 className="mb-2 text-base font-bold text-primary">
@@ -420,17 +423,39 @@ export function JuryClient({ initialJury }: JuryClientProps) {
           </GlassCard>
 
           <button
-            onClick={handleFinalize}
+            onClick={handleFinalise}
             className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95 neon-glow"
           >
-            {jury.hasFinalized
-              ? "Update Finalised Scores"
-              : "Finalise Jury Votes"}
+            {member.hasFinalized ? "Update Finalised Scores" : "Finalise My Votes"}
           </button>
+
+          {/* Reset and log off options */}
+          <div className="mt-4 flex flex-wrap gap-2 justify-center">
+            <button
+              onClick={handleResetDraft}
+              className="rounded-lg border border-muted-20 px-4 py-2 text-sm text-muted-50 hover:bg-muted-5 transition-colors"
+            >
+              Reset Draft Scores
+            </button>
+            {member.hasFinalized && (
+              <button
+                onClick={handleResetFinal}
+                className="rounded-lg border border-red-500/20 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+              >
+                Reset Finalised Scores
+              </button>
+            )}
+            <button
+              onClick={handleLogOff}
+              className="rounded-lg border border-muted-20 px-4 py-2 text-sm text-muted-50 hover:bg-muted-5 transition-colors"
+            >
+              Log Off
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Finalization Modal */}
+      {/* Finalisation Modal */}
       <AnimatePresence>
         {showHenry && (
           <motion.div
@@ -453,17 +478,17 @@ export function JuryClient({ initialJury }: JuryClientProps) {
                 className="mx-auto mb-4 h-48 w-48 rounded-2xl object-cover"
               />
               <p className="text-xl font-bold neon-text">
-                The votes are in from {jury.name} from {jury.location}!
+                The votes are in from {member.name} from {member.location}!
               </p>
               <p className="mt-2 text-muted-50 text-sm">
                 Head over to the scoreboard to see the rest of the results...
               </p>
-              <a
-                href="/scoreboard"
+              <Link
+                href={`/party/${partyKey}/scoreboard`}
                 className="mt-4 inline-block w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-3 font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
               >
                 GO TO SCOREBOARD
-              </a>
+              </Link>
             </motion.div>
           </motion.div>
         )}

@@ -6,18 +6,18 @@ interface Props {
   params: Promise<{ key: string }>;
 }
 
-export default async function JuryPage({ params }: Props) {
+export default async function PartyPage({ params }: Props) {
   const { key } = await params;
 
-  const jury = await prisma.jury.findUnique({
+  const party = await prisma.watchParty.findUnique({
     where: { key },
     select: { name: true },
   });
 
-  if (!jury) {
+  if (!party) {
     notFound();
   }
 
-  const slug = slugify(jury.name);
-  permanentRedirect(`/jury/${key}/${slug}`);
+  const slug = slugify(party.name);
+  permanentRedirect(`/party/${key}/${slug}`);
 }

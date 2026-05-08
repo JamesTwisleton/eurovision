@@ -4,10 +4,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { z } from "zod";
 
-const updateJurySchema = z.object({
+const updatePartySchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  location: z.string().min(1).max(100).optional(),
-  hasFinalized: z.boolean().optional(),
+  key: z.string().min(1).max(100).optional(),
 });
 
 export async function PATCH(
@@ -16,12 +15,12 @@ export async function PATCH(
 ) {
   const session = await getServerSession(authOptions);
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 
   const { id } = await params;
   const body = await request.json();
-  const parsed = updateJurySchema.safeParse(body);
+  const parsed = updatePartySchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -30,12 +29,12 @@ export async function PATCH(
     );
   }
 
-  const jury = await prisma.jury.update({
+  const party = await prisma.watchParty.update({
     where: { id },
     data: parsed.data,
   });
 
-  return NextResponse.json({ jury });
+  return NextResponse.json({ party });
 }
 
 export async function DELETE(
@@ -44,13 +43,11 @@ export async function DELETE(
 ) {
   const session = await getServerSession(authOptions);
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 
   const { id } = await params;
-
-  // Due to Cascade delete in schema, this will also delete associated scores
-  await prisma.jury.delete({ where: { id } });
+  await prisma.watchParty.delete({ where: { id } });
 
   return NextResponse.json({ success: true });
 }

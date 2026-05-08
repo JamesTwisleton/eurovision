@@ -101,8 +101,8 @@ export default function AdminPage() {
             <h1 className="neon-text text-3xl font-black">ADMIN</h1>
             <nav className="mt-1 flex gap-4 text-xs font-bold uppercase tracking-wider">
               <span className="text-neon-pink">Acts</span>
-              <Link href="/admin/juries" className="text-muted-30 hover:text-neon-cyan transition-colors">
-                Juries
+              <Link href="/admin/parties" className="text-muted-30 hover:text-neon-cyan transition-colors">
+                Watch Parties
               </Link>
             </nav>
           </div>

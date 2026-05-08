@@ -7,12 +7,13 @@ export const draftScoreSchema = z.object({
   points: z.number().int().min(0).max(12),
 });
 
-export const createJurySchema = z.object({
-  name: z.string().min(1).max(100),
-  location: z.string().min(1).max(100),
+export const createWatchPartySchema = z.object({
+  partyName: z.string().min(1).max(100),
+  memberName: z.string().min(1).max(100),
+  memberLocation: z.string().min(1).max(100),
 });
 
-export const joinJurySchema = z.object({
+export const joinWatchPartySchema = z.object({
   key: z.string().min(1),
   name: z.string().min(1).max(100),
   location: z.string().min(1).max(100),
