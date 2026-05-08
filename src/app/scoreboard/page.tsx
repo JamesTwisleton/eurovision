@@ -73,22 +73,31 @@ export default function ScoreboardPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-4 py-6 relative">
+    <div className="flex flex-1 flex-col relative">
       <FloatingBackground />
-      <div className="fixed right-4 top-4 z-50">
-        <ThemeToggle />
+
+      {/* Sticky header */}
+      <div className="sticky top-0 z-40 glass-strong px-4 py-3">
+        <div className="mx-auto flex max-w-3xl items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent uppercase leading-none">
+              Eurovision<br />2026 Jury
+            </span>
+            <div className="border-l border-muted-20 pl-3">
+              <h1 className="neon-text text-2xl font-black">SCOREBOARD</h1>
+              <p className="text-xs text-muted-40 leading-relaxed">
+                Combined results from all finalized juries.
+                {juries.length > 0
+                  ? ` ${juries.length} ${juries.length === 1 ? "jury has" : "juries have"} voted so far.`
+                  : " No juries have finalized yet."}
+              </p>
+            </div>
+          </div>
+          <ThemeToggle />
+        </div>
       </div>
 
-      <div className="mx-auto w-full max-w-3xl">
-        <div className="mb-2 text-center">
-          <h1 className="neon-text text-4xl font-black">SCOREBOARD</h1>
-          <p className="mt-2 text-sm text-muted-40 leading-relaxed">
-            Combined results from all juries that have finalized their votes.
-            {juries.length > 0
-              ? ` ${juries.length} ${juries.length === 1 ? "jury has" : "juries have"} voted so far.`
-              : " No juries have finalized yet — scores will appear here once they do."}
-          </p>
-        </div>
+      <div className="mx-auto w-full max-w-3xl px-4 pt-4">
 
         {/* Jury list */}
         {juries.length > 0 && (
