@@ -352,27 +352,27 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
             </Link>
             <div className="border-l border-muted-20 pl-3">
               <h1 className="neon-text text-2xl font-black">{partyName}</h1>
-              <p className="text-xs text-muted-40">
+              <p className="text-sm text-muted-60">
                 {member.name} &middot; {member.location} &middot;{" "}
-                <span className="text-xs uppercase tracking-wider text-neon-cyan/70">{member.role}</span>
+                <span className="text-sm uppercase tracking-wider text-neon-cyan">{member.role}</span>
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {member.hasFinalized && (
-              <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-400">
+              <span className="rounded-full bg-green-500/20 px-3 py-1 text-sm font-semibold text-green-400">
                 Finalised
               </span>
             )}
             <Link
               href={`/party/${partyKey}/scoreboard`}
-              className="text-sm text-muted-40 hover:text-muted-60"
+              className="text-sm font-medium text-muted-60 hover:text-primary transition-colors"
             >
               Scoreboard
             </Link>
             <Link
               href={`/party/${partyKey}/members`}
-              className="text-sm text-muted-40 hover:text-muted-60"
+              className="text-sm font-medium text-muted-60 hover:text-primary transition-colors"
             >
               Members
             </Link>
@@ -385,7 +385,7 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
       <div className="mx-auto w-full max-w-5xl px-4 pt-3">
         <button
           onClick={handleShare}
-          className="w-full rounded-lg bg-neon-blue/10 px-3 py-2.5 text-center text-xs text-neon-blue/80 transition-all hover:bg-neon-blue/15 active:scale-[0.98]"
+          className="w-full rounded-lg bg-neon-blue/10 px-3 py-2.5 text-center text-sm text-neon-blue transition-all hover:bg-neon-blue/15 active:scale-[0.98]"
         >
           {copied ? (
             <span className="text-green-400 font-medium">Link copied to clipboard!</span>
@@ -401,8 +401,8 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
 
       {/* Instructions */}
       <div className="mx-auto w-full max-w-5xl px-4 pt-3 relative z-10">
-        <div className="rounded-lg bg-muted-5 px-3 py-2 text-xs text-muted-40 leading-relaxed">
-          <strong className="text-muted-60">Tap a country</strong>{" "}
+        <div className="rounded-lg bg-muted-5 px-3 py-2 text-sm text-muted-60 leading-relaxed">
+          <strong className="text-muted-70">Tap a country</strong>{" "}
           to give it a score. During the show, feel free to change scores as much as you
           like &mdash; nothing is locked in until you hit &quot;Finalise&quot; at
           the bottom. This is your personal scorecard.
@@ -411,20 +411,20 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
 
       {/* Progress summary */}
       <div className="mx-auto w-full max-w-5xl px-4 pt-3">
-        <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2 text-xs">
-          <span className="text-muted-40">
+        <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2.5 text-sm">
+          <span className="text-muted-60 font-medium">
             {scoredCount} of {scores.length} countries scored
           </span>
           {missingPoints.length > 0 && missingPoints.length <= 5 && (
-            <span className="text-muted-30">
+            <span className="text-muted-50">
               Still need to give out:{" "}
-              <span className="font-mono text-neon-pink/70">
+              <span className="font-mono font-bold text-neon-pink">
                 {missingPoints.join(", ")}
               </span>
             </span>
           )}
           {missingPoints.length === 0 && (
-            <span className="text-green-400/70 font-medium">
+            <span className="text-green-400 font-bold">
               Ready to finalise!
             </span>
           )}
@@ -452,13 +452,13 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
                   }
                   className="flex w-full items-center gap-3 p-3 active:scale-[0.98] transition-all"
                 >
-                  <span className="text-xs text-muted-30 w-5 text-center">
+                  <span className="text-sm text-muted-50 w-5 text-center font-medium">
                     {score.contestant.performanceOrder}
                   </span>
                   <span className="text-2xl">{score.contestant.flagEmoji}</span>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold truncate">{score.contestant.country}</div>
-                    <div className="text-sm text-muted-50 truncate">
+                    <div className="text-sm text-muted-60 truncate">
                       {score.contestant.artist} &mdash; {score.contestant.song}
                     </div>
                   </div>
@@ -480,7 +480,7 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
                 {others.length > 0 && (
                   <div className="border-t border-muted-10 px-3 py-2 flex flex-wrap gap-x-3 gap-y-1">
                     {others.map((os) => (
-                      <span key={os.memberId} className="text-xs text-muted-40">
+                      <span key={os.memberId} className="text-sm text-muted-50">
                         {os.memberName}{" "}
                         <span
                           className={cn(
@@ -490,8 +490,8 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
                               : os.points === 10
                                 ? "text-gray-300"
                                 : os.points > 0
-                                  ? "text-muted-60"
-                                  : "text-muted-20"
+                                  ? "text-muted-70"
+                                  : "text-muted-30"
                           )}
                         >
                           {os.points}
@@ -528,7 +528,7 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
                     Done
                   </button>
                 </div>
-                <p className="mb-3 text-sm text-primary/70">
+                <p className="mb-3 text-base text-primary/80">
                   Tap a number to assign that score. Tap the same number again to clear it.
                 </p>
                 {selectedScore.contestant.youtubeUrl && (() => {
@@ -567,10 +567,10 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
         {/* Finalise section */}
         <div className="mt-6 pb-24">
           <GlassCard className="mb-4" strong>
-            <h3 className="mb-2 text-base font-bold text-primary">
+            <h3 className="mb-2 text-lg font-bold text-primary">
               Ready to submit?
             </h3>
-            <p className="text-sm text-primary/70 leading-relaxed">
+            <p className="text-base text-primary/80 leading-relaxed">
               Just like real Eurovision, your final votes must follow the
               official format: give exactly <strong className="text-primary">one country 12 points</strong> (your
               favourite), <strong className="text-primary">one country 10</strong>, then <strong className="text-primary">one each of 8, 7, 6, 5, 4, 3,
@@ -590,21 +590,21 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
           <div className="mt-4 flex flex-wrap gap-2 justify-center">
             <button
               onClick={handleResetDraft}
-              className="rounded-lg border border-muted-20 px-4 py-2 text-sm text-muted-50 hover:bg-muted-5 transition-colors"
+              className="rounded-lg border border-muted-20 px-4 py-2.5 text-sm font-medium text-muted-60 hover:bg-muted-5 transition-colors"
             >
               Reset Draft Scores
             </button>
             {member.hasFinalized && (
               <button
                 onClick={handleResetFinal}
-                className="rounded-lg border border-red-500/20 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                className="rounded-lg border border-red-500/20 px-4 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
               >
                 Reset Finalised Scores
               </button>
             )}
             <button
               onClick={handleLogOff}
-              className="rounded-lg border border-muted-20 px-4 py-2 text-sm text-muted-50 hover:bg-muted-5 transition-colors"
+              className="rounded-lg border border-muted-20 px-4 py-2.5 text-sm font-medium text-muted-60 hover:bg-muted-5 transition-colors"
             >
               Log Off
             </button>

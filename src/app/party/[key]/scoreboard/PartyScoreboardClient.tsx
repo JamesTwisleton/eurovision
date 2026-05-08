@@ -109,7 +109,7 @@ export function PartyScoreboardClient({
             </Link>
             <div className="border-l border-muted-20 pl-3">
               <h1 className="neon-text text-2xl font-black">SCOREBOARD</h1>
-              <p className="text-xs text-muted-40 leading-relaxed">
+              <p className="text-sm text-muted-60 leading-relaxed">
                 {partyName} &middot;{" "}
                 {members.length > 0
                   ? `${members.length} ${members.length === 1 ? "member has" : "members have"} finalised.`
@@ -125,7 +125,7 @@ export function PartyScoreboardClient({
         {members.length > 0 && (
           <div className="mb-4 flex flex-wrap justify-center gap-2">
             {members.map((m) => (
-              <span key={m.id} className="rounded-full bg-muted-5 px-3 py-1 text-xs text-muted-50">
+              <span key={m.id} className="rounded-full bg-muted-5 px-3 py-1 text-sm text-muted-60">
                 {m.name} ({m.location})
               </span>
             ))}
@@ -140,20 +140,20 @@ export function PartyScoreboardClient({
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {scoreboard.map((entry, rank) => (
               <div key={entry.id} className="glass flex items-center gap-3 p-4">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted-5 text-sm font-bold text-muted-40">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted-5 text-sm font-bold text-muted-50">
                   {rank + 1}
                 </span>
                 <span className="text-2xl">{entry.flagEmoji}</span>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{entry.country}</div>
-                  <div className="text-sm text-muted-40 truncate">
+                  <div className="text-sm text-muted-60 truncate">
                     {entry.artist} &mdash; {entry.song}
                   </div>
                 </div>
-                <span className="text-lg font-bold text-muted-20">&mdash;</span>
+                <span className="text-lg font-bold text-muted-30">&mdash;</span>
               </div>
             ))}
-            <p className="mt-2 text-center text-xs text-muted-30 sm:col-span-2 lg:col-span-3">
+            <p className="mt-2 text-center text-sm font-medium text-muted-50 sm:col-span-2 lg:col-span-3">
               Waiting for members to finalise their votes...
             </p>
           </div>
@@ -183,7 +183,7 @@ export function PartyScoreboardClient({
                             ? "bg-gray-400/20 text-gray-300"
                             : rank === 2
                               ? "bg-amber-700/20 text-amber-600"
-                              : "bg-muted-5 text-muted-40"
+                              : "bg-muted-5 text-muted-50"
                       )}
                     >
                       {rank + 1}
@@ -191,7 +191,7 @@ export function PartyScoreboardClient({
                     <span className="text-2xl">{entry.flagEmoji}</span>
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold truncate">{entry.country}</div>
-                      <div className="text-sm text-muted-40 truncate">
+                      <div className="text-sm text-muted-60 truncate">
                         {entry.artist} &mdash; {entry.song}
                       </div>
                     </div>
@@ -222,7 +222,7 @@ export function PartyScoreboardClient({
                               </div>
                             ) : null;
                           })()}
-                          <p className="text-xs font-semibold text-muted-50 uppercase tracking-wider mb-2">
+                          <p className="text-sm font-semibold text-muted-60 uppercase tracking-wider mb-2">
                             Member Breakdown
                           </p>
                           <div className="flex flex-col gap-1.5">
@@ -230,20 +230,20 @@ export function PartyScoreboardClient({
                               .slice()
                               .sort((a, b) => b.points - a.points)
                               .map((ms) => (
-                                <div key={ms.memberId} className="flex items-center justify-between text-sm">
-                                  <span className="text-muted-50 truncate">
-                                    {ms.memberName} <span className="text-muted-30">({ms.memberLocation})</span>
+                                <div key={ms.memberId} className="flex items-center justify-between text-base">
+                                  <span className="text-muted-60 truncate">
+                                    {ms.memberName} <span className="text-muted-50">({ms.memberLocation})</span>
                                   </span>
                                   <span
                                     className={cn(
-                                      "rounded px-2 py-0.5 text-xs font-bold",
+                                      "rounded px-2 py-0.5 text-sm font-bold",
                                       ms.points === 12
                                         ? "bg-yellow-500/20 text-yellow-400"
                                         : ms.points === 10
                                           ? "bg-gray-400/20 text-gray-300"
                                           : ms.points > 0
-                                            ? "bg-muted-5 text-muted-50"
-                                            : "text-muted-20"
+                                            ? "bg-muted-5 text-muted-60"
+                                            : "text-muted-30"
                                     )}
                                   >
                                     {ms.points} pts
@@ -262,10 +262,10 @@ export function PartyScoreboardClient({
         )}
 
         <div className="mt-8 flex justify-center gap-6">
-          <Link href={`/party/${partyKey}`} className="text-sm text-muted-30 hover:text-muted-50 transition-colors">
+          <Link href={`/party/${partyKey}`} className="text-base font-medium text-muted-50 hover:text-primary transition-colors">
             &larr; Back to your scorecard
           </Link>
-          <Link href="/scoreboard" className="text-sm text-muted-30 hover:text-muted-50 transition-colors">
+          <Link href="/scoreboard" className="text-base font-medium text-muted-50 hover:text-primary transition-colors">
             Global Scoreboard
           </Link>
         </div>

@@ -107,7 +107,7 @@ export default function MembersPage() {
             </Link>
             <div className="border-l border-muted-20 pl-3">
               <h1 className="neon-text text-2xl font-black">MEMBERS</h1>
-              <p className="text-xs text-muted-40">
+              <p className="text-sm text-muted-60">
                 {members.length} {members.length === 1 ? "member" : "members"} in this Watch Party
               </p>
             </div>
@@ -119,7 +119,7 @@ export default function MembersPage() {
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
         {/* Share code */}
         <GlassCard className="mb-4" strong>
-          <p className="text-sm text-primary/70 mb-2">
+          <p className="text-base text-primary/80 mb-2">
             Share this code with friends so they can join your Watch Party:
           </p>
           <div className="flex items-center gap-3">
@@ -145,28 +145,28 @@ export default function MembersPage() {
                     <span className="font-bold text-lg">{m.name}</span>
                     <span
                       className={cn(
-                        "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                        "rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider",
                         m.role === "HOST"
                           ? "bg-neon-pink/20 text-neon-pink"
-                          : "bg-muted-5 text-muted-50"
+                          : "bg-muted-5 text-muted-60"
                       )}
                     >
                       {m.role}
                     </span>
                     {m.hasFinalized && (
-                      <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-400 uppercase tracking-wider">
+                      <span className="rounded-full bg-green-500/20 px-2.5 py-0.5 text-xs font-bold text-green-400 uppercase tracking-wider">
                         Finalised
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-40">{m.location}</p>
+                  <p className="text-base text-muted-60">{m.location}</p>
                 </div>
                 {isHost && (
                   <div className="flex gap-1">
                     {m.role === "GUEST" && (
                       <button
                         onClick={() => handleChangeRole(m.id, "HOST")}
-                        className="rounded-lg bg-muted-5 px-3 py-1.5 text-xs text-muted-60 hover:bg-muted-10"
+                        className="rounded-lg bg-muted-5 px-3 py-1.5 text-sm text-muted-70 hover:bg-muted-10"
                       >
                         Make Host
                       </button>
@@ -174,14 +174,14 @@ export default function MembersPage() {
                     {m.role === "HOST" && (
                       <button
                         onClick={() => handleChangeRole(m.id, "GUEST")}
-                        className="rounded-lg bg-muted-5 px-3 py-1.5 text-xs text-muted-60 hover:bg-muted-10"
+                        className="rounded-lg bg-muted-5 px-3 py-1.5 text-sm text-muted-70 hover:bg-muted-10"
                       >
                         Make Guest
                       </button>
                     )}
                     <button
                       onClick={() => handleRemove(m.id)}
-                      className="rounded-lg bg-red-500/10 px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/20"
+                      className="rounded-lg bg-red-500/10 px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/20"
                     >
                       Remove
                     </button>
@@ -196,7 +196,7 @@ export default function MembersPage() {
           <div className="mt-4 text-center">
             <button
               onClick={handleLeave}
-              className="rounded-lg border border-red-500/20 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+              className="rounded-lg border border-red-500/20 px-5 py-2.5 text-base font-medium text-red-400 hover:bg-red-500/10 transition-colors"
             >
               Leave Watch Party
             </button>
@@ -204,7 +204,7 @@ export default function MembersPage() {
         )}
 
         <div className="mt-8 flex justify-center gap-6">
-          <Link href={`/party/${key}`} className="text-sm text-muted-30 hover:text-muted-50 transition-colors">
+          <Link href={`/party/${key}`} className="text-base font-medium text-muted-50 hover:text-primary transition-colors">
             &larr; Back to your scorecard
           </Link>
         </div>

@@ -303,8 +303,8 @@ export default function Home() {
         </GlassCard>
       )}
 
-      <div className="relative z-10 mt-8 flex gap-6 text-sm text-muted-30">
-        <a href="/scoreboard" className="hover:text-muted-50 transition-colors">
+      <div className="relative z-10 mt-8 flex gap-6 text-base font-medium text-muted-50">
+        <a href="/scoreboard" className="hover:text-primary transition-colors">
           Global Scoreboard
         </a>
       </div>
