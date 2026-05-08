@@ -1,211 +1,43 @@
-"use client";
+import { prisma } from "@/lib/prisma";
+import { ScoreboardClient } from "./ScoreboardClient";
 
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { GlassCard } from "@/components/GlassCard";
-import { AnimatedNumber } from "@/components/AnimatedNumber";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { FloatingBackground } from "@/components/FloatingBackground";
-import { useSocket } from "@/hooks/useSocket";
-import { cn } from "@/lib/cn";
+async function getScoreboardData() {
+  const contestants = await prisma.contestant.findMany({
+    include: {
+      scores: {
+        where: { jury: { hasFinalized: true } },
+        include: { jury: { select: { key: true, name: true } } },
+      },
+    },
+    orderBy: { performanceOrder: "asc" },
+  });
 
-interface JuryScore {
-  juryName: string;
-  juryKey: string;
-  points: number;
+  const scoreboard = contestants
+    .map((c) => ({
+      id: c.id,
+      country: c.country,
+      artist: c.artist,
+      song: c.song,
+      flagEmoji: c.flagEmoji,
+      totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
+      juryScores: c.scores.map((s) => ({
+        juryName: s.jury.name,
+        juryKey: s.jury.key,
+        points: s.points,
+      })),
+    }))
+    .sort((a, b) => b.totalPoints - a.totalPoints);
+
+  const juries = await prisma.jury.findMany({
+    where: { hasFinalized: true },
+    select: { key: true, name: true, location: true },
+  });
+
+  return { scoreboard, juries };
 }
 
-interface ScoreboardEntry {
-  id: string;
-  country: string;
-  artist: string;
-  song: string;
-  flagEmoji: string;
-  totalPoints: number;
-  juryScores: JuryScore[];
-}
+export default async function ScoreboardPage() {
+  const { scoreboard, juries } = await getScoreboardData();
 
-interface JuryInfo {
-  key: string;
-  name: string;
-  location: string;
-}
-
-export default function ScoreboardPage() {
-  const socketRef = useSocket();
-  const [scoreboard, setScoreboard] = useState<ScoreboardEntry[]>([]);
-  const [juries, setJuries] = useState<JuryInfo[]>([]);
-
-  const fetchScoreboard = useCallback(async () => {
-    const res = await fetch("/api/scoreboard");
-    const data = await res.json();
-    setScoreboard(data.scoreboard);
-    setJuries(data.juries);
-  }, []);
-
-  useEffect(() => {
-    fetchScoreboard();
-  }, [fetchScoreboard]);
-
-  useEffect(() => {
-    const socket = socketRef.current;
-    if (!socket) return;
-
-    const handleUpdate = () => {
-      fetchScoreboard();
-    };
-
-    socket.on("scoreboard_updated", handleUpdate);
-    return () => {
-      socket.off("scoreboard_updated", handleUpdate);
-    };
-  }, [socketRef, fetchScoreboard]);
-
-  return (
-    <div className="flex flex-1 flex-col relative">
-      <FloatingBackground />
-
-      {/* Sticky header */}
-      <div className="sticky top-0 z-40 glass-strong px-4 py-3">
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent uppercase leading-none">
-              Eurovision<br />2026 Jury
-            </span>
-            <div className="border-l border-muted-20 pl-3">
-              <h1 className="neon-text text-2xl font-black">SCOREBOARD</h1>
-              <p className="text-xs text-muted-40 leading-relaxed">
-                Combined results from all finalized juries.
-                {juries.length > 0
-                  ? ` ${juries.length} ${juries.length === 1 ? "jury has" : "juries have"} voted so far.`
-                  : " No juries have finalized yet."}
-              </p>
-            </div>
-          </div>
-          <ThemeToggle />
-        </div>
-      </div>
-
-      <div className="mx-auto w-full max-w-3xl px-4 pt-4">
-
-        {/* Jury list */}
-        {juries.length > 0 && (
-          <div className="mb-4 flex flex-wrap justify-center gap-2">
-            {juries.map((j) => (
-              <span
-                key={j.key}
-                className="rounded-full bg-muted-5 px-3 py-1 text-xs text-muted-50"
-              >
-                {j.name} ({j.location})
-              </span>
-            ))}
-          </div>
-        )}
-
-        {scoreboard.length === 0 ? (
-          <GlassCard className="text-center" strong>
-            <p className="text-muted-50 leading-relaxed">
-              No contestants have been added yet.
-            </p>
-          </GlassCard>
-        ) : juries.length === 0 ? (
-          <div className="flex flex-col gap-2">
-            {scoreboard.map((entry, rank) => (
-              <div
-                key={entry.id}
-                className="glass flex items-center gap-3 p-4"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted-5 text-sm font-bold text-muted-40">
-                  {rank + 1}
-                </span>
-                <span className="text-2xl">{entry.flagEmoji}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">{entry.country}</div>
-                  <div className="text-sm text-muted-40 truncate">
-                    {entry.artist} &mdash; {entry.song}
-                  </div>
-                </div>
-                <span className="text-lg font-bold text-muted-20">—</span>
-              </div>
-            ))}
-            <p className="mt-2 text-center text-xs text-muted-30">
-              Waiting for juries to finalize their votes...
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {scoreboard.map((entry, rank) => (
-              <motion.div
-                key={entry.id}
-                layout
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className={cn(
-                  "glass flex items-center gap-3 p-4",
-                  rank === 0 && entry.totalPoints > 0 && "neon-glow"
-                )}
-              >
-                <span
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold",
-                    rank === 0
-                      ? "bg-yellow-500/20 text-yellow-400"
-                      : rank === 1
-                        ? "bg-gray-400/20 text-gray-300"
-                        : rank === 2
-                          ? "bg-amber-700/20 text-amber-600"
-                          : "bg-muted-5 text-muted-40"
-                  )}
-                >
-                  {rank + 1}
-                </span>
-                <span className="text-2xl">{entry.flagEmoji}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">{entry.country}</div>
-                  <div className="text-sm text-muted-40 truncate">
-                    {entry.artist} &mdash; {entry.song}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <AnimatedNumber
-                    value={entry.totalPoints}
-                    className="text-2xl font-black neon-text"
-                  />
-                  <div className="mt-1 flex flex-wrap justify-end gap-1">
-                    {entry.juryScores.map((js) => (
-                      <span
-                        key={js.juryKey}
-                        title={`${js.juryName}: ${js.points} pts`}
-                        className={cn(
-                          "rounded px-1.5 py-0.5 text-[10px] font-medium",
-                          js.points === 12
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : js.points === 10
-                              ? "bg-gray-400/20 text-gray-300"
-                              : js.points > 0
-                                ? "bg-muted-5 text-muted-30"
-                                : "hidden"
-                        )}
-                      >
-                        {js.points}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-8 text-center">
-          <Link
-            href="/"
-            className="text-sm text-muted-30 hover:text-muted-50 transition-colors"
-          >
-            &larr; Back to Home
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+  return <ScoreboardClient initialScoreboard={scoreboard} initialJuries={juries} />;
 }
