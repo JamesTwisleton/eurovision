@@ -68,7 +68,11 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [juries, setJuries] = useState(initialJuries);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [juryKey] = useState(() => typeof document !== "undefined" ? getJuryKeyFromCookie() : null);
+  const [juryKey, setJuryKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    setJuryKey(getJuryKeyFromCookie());
+  }, []);
 
   const fetchScoreboard = useCallback(async () => {
     const res = await fetch("/api/scoreboard");
