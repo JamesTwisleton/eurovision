@@ -41,6 +41,7 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
   const socketRef = useSocket();
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [juries, setJuries] = useState(initialJuries);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const fetchScoreboard = useCallback(async () => {
     const res = await fetch("/api/scoreboard");
@@ -141,65 +142,95 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {scoreboard.map((entry, rank) => (
-              <motion.div
-                key={entry.id}
-                layout
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className={cn(
-                  "glass flex items-center gap-3 p-4",
-                  rank === 0 && entry.totalPoints > 0 && "neon-glow"
-                )}
-              >
-                <span
+            {scoreboard.map((entry, rank) => {
+              const isExpanded = selectedId === entry.id;
+              return (
+                <motion.div
+                  key={entry.id}
+                  layout
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold",
-                    rank === 0
-                      ? "bg-yellow-500/20 text-yellow-400"
-                      : rank === 1
-                        ? "bg-gray-400/20 text-gray-300"
-                        : rank === 2
-                          ? "bg-amber-700/20 text-amber-600"
-                          : "bg-muted-5 text-muted-40"
+                    "glass cursor-pointer p-4 transition-all",
+                    rank === 0 && entry.totalPoints > 0 && "neon-glow",
+                    isExpanded && "ring-2 ring-neon-pink/50"
                   )}
+                  onClick={() => setSelectedId(isExpanded ? null : entry.id)}
                 >
-                  {rank + 1}
-                </span>
-                <span className="text-2xl">{entry.flagEmoji}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">{entry.country}</div>
-                  <div className="text-sm text-muted-40 truncate">
-                    {entry.artist} &mdash; {entry.song}
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={cn(
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold",
+                        rank === 0
+                          ? "bg-yellow-500/20 text-yellow-400"
+                          : rank === 1
+                            ? "bg-gray-400/20 text-gray-300"
+                            : rank === 2
+                              ? "bg-amber-700/20 text-amber-600"
+                              : "bg-muted-5 text-muted-40"
+                      )}
+                    >
+                      {rank + 1}
+                    </span>
+                    <span className="text-2xl">{entry.flagEmoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">{entry.country}</div>
+                      <div className="text-sm text-muted-40 truncate">
+                        {entry.artist} &mdash; {entry.song}
+                      </div>
+                    </div>
+                    <AnimatedNumber
+                      value={entry.totalPoints}
+                      className="text-2xl font-black neon-text"
+                    />
                   </div>
-                </div>
-                <div className="text-right">
-                  <AnimatedNumber
-                    value={entry.totalPoints}
-                    className="text-2xl font-black neon-text"
-                  />
-                  <div className="mt-1 flex flex-wrap justify-end gap-1">
-                    {entry.juryScores.map((js) => (
-                      <span
-                        key={js.juryKey}
-                        title={`${js.juryName}: ${js.points} pts`}
-                        className={cn(
-                          "rounded px-1.5 py-0.5 text-[10px] font-medium",
-                          js.points === 12
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : js.points === 10
-                              ? "bg-gray-400/20 text-gray-300"
-                              : js.points > 0
-                                ? "bg-muted-5 text-muted-30"
-                                : "hidden"
-                        )}
+
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
                       >
-                        {js.points}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                        <div className="mt-3 border-t border-muted-10 pt-3">
+                          <p className="text-xs font-semibold text-muted-50 uppercase tracking-wider mb-2">
+                            Jury Breakdown
+                          </p>
+                          <div className="flex flex-col gap-1.5">
+                            {entry.juryScores
+                              .slice()
+                              .sort((a, b) => b.points - a.points)
+                              .map((js) => (
+                                <div
+                                  key={js.juryKey}
+                                  className="flex items-center justify-between text-sm"
+                                >
+                                  <span className="text-muted-50 truncate">{js.juryName}</span>
+                                  <span
+                                    className={cn(
+                                      "rounded px-2 py-0.5 text-xs font-bold",
+                                      js.points === 12
+                                        ? "bg-yellow-500/20 text-yellow-400"
+                                        : js.points === 10
+                                          ? "bg-gray-400/20 text-gray-300"
+                                          : js.points > 0
+                                            ? "bg-muted-5 text-muted-50"
+                                            : "text-muted-20"
+                                    )}
+                                  >
+                                    {js.points} pts
+                                  </span>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </div>
         )}
 
