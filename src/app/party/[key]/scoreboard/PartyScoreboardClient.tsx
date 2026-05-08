@@ -267,9 +267,6 @@ export function PartyScoreboardClient({
           <Link href={`/party/${partyKey}`} className="text-base font-medium text-muted-50 hover:text-primary transition-colors">
             &larr; Back to your scorecard
           </Link>
-          <Link href="/scoreboard" className="text-base font-medium text-muted-50 hover:text-primary transition-colors">
-            Global Scoreboard
-          </Link>
         </div>
       </div>
     </div>
