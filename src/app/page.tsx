@@ -87,24 +87,29 @@ export default function Home() {
         <div className="relative z-10 grid w-full max-w-3xl grid-cols-1 gap-6 md:grid-cols-2 md:items-stretch">
           <GlassCard className="flex w-full flex-col justify-center" strong>
             <div className="flex flex-col gap-4">
-              <div className="text-center mb-2">
-                <p className="text-sm text-muted-60 leading-relaxed">
+              <div>
+                <p className="text-center text-sm text-muted-60 leading-relaxed mb-2">
                   <strong className="text-muted-70">First time?</strong> Create a new jury for your
-                  watch party. <strong className="text-muted-70">Been sent a code?</strong> Join an existing one.
+                  watch party.
                 </p>
+                <button
+                  onClick={() => setMode("create")}
+                  className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
+                >
+                  Create a New Jury
+                </button>
               </div>
-              <button
-                onClick={() => setMode("create")}
-                className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
-              >
-                Create a New Jury
-              </button>
-              <button
-                onClick={() => setMode("join")}
-                className="w-full rounded-xl border border-muted-20 px-6 py-4 text-lg font-semibold text-muted-70 transition-all hover:bg-muted-5 active:scale-95"
-              >
-                Join an Existing Jury
-              </button>
+              <div>
+                <p className="text-center text-sm text-muted-60 leading-relaxed mb-2">
+                  <strong className="text-muted-70">Been sent a code?</strong> Join an existing one.
+                </p>
+                <button
+                  onClick={() => setMode("join")}
+                  className="w-full rounded-xl border border-muted-20 px-6 py-4 text-lg font-semibold text-muted-70 transition-all hover:bg-muted-5 active:scale-95"
+                >
+                  Join an Existing Jury
+                </button>
+              </div>
             </div>
           </GlassCard>
 
