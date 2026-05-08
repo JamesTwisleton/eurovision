@@ -132,130 +132,124 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
           <GlassCard className="text-center" strong>
             <p className="text-muted-50 leading-relaxed">No contestants have been added yet.</p>
           </GlassCard>
-        ) : parties.length === 0 ? (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {scoreboard.map((entry, rank) => (
-              <div key={entry.id} className="glass flex items-center gap-3 p-4">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted-5 text-sm font-bold text-muted-50">
-                  {rank + 1}
-                </span>
-                <span className="text-2xl">{entry.flagEmoji}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">{entry.country}</div>
-                  <div className="text-sm text-muted-60 truncate">
-                    {entry.artist} &mdash; {entry.song}
-                  </div>
-                </div>
-                <span className="text-lg font-bold text-muted-30">&mdash;</span>
-              </div>
-            ))}
-            <p className="mt-2 text-center text-sm font-medium text-muted-50 sm:col-span-2 lg:col-span-3">
-              Waiting for members to finalise their votes...
-            </p>
-          </div>
         ) : (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {scoreboard.map((entry, rank) => {
-              const isExpanded = selectedId === entry.id;
-              return (
-                <motion.div
-                  key={entry.id}
-                  layout
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className={cn(
-                    "glass cursor-pointer p-4 transition-all",
-                    rank === 0 && entry.totalPoints > 0 && "neon-glow",
-                    isExpanded && "ring-2 ring-neon-pink/50"
-                  )}
-                  onClick={() => setSelectedId(isExpanded ? null : entry.id)}
-                >
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={cn(
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-                        rank === 0
-                          ? "bg-yellow-500/20 text-yellow-400"
-                          : rank === 1
-                            ? "bg-gray-400/20 text-gray-300"
-                            : rank === 2
-                              ? "bg-amber-700/20 text-amber-600"
-                              : "bg-muted-5 text-muted-50"
-                      )}
-                    >
-                      {rank + 1}
-                    </span>
-                    <span className="text-2xl">{entry.flagEmoji}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold truncate">{entry.country}</div>
-                      <div className="text-sm text-muted-60 truncate">
-                        {entry.artist} &mdash; {entry.song}
-                      </div>
-                    </div>
-                    <AnimatedNumber value={entry.totalPoints} className="text-2xl font-black neon-text" />
-                  </div>
-
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="mt-3 border-t border-muted-10 pt-3">
-                          {entry.youtubeUrl && (() => {
-                            const embedUrl = getYoutubeEmbedUrl(entry.youtubeUrl);
-                            return embedUrl ? (
-                              <div className="mb-3 aspect-video overflow-hidden rounded-xl bg-black shadow-lg">
-                                <iframe
-                                  src={embedUrl}
-                                  title={`${entry.country} performance`}
-                                  className="h-full w-full border-0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                  allowFullScreen
-                                />
-                              </div>
-                            ) : null;
-                          })()}
-                          <p className="text-sm font-semibold text-muted-60 uppercase tracking-wider mb-2">
-                            Votes Breakdown
-                          </p>
-                          <div className="flex flex-col gap-1.5">
-                            {entry.memberScores
-                              .slice()
-                              .sort((a, b) => b.points - a.points)
-                              .map((ms) => (
-                                <div key={ms.memberId} className="flex items-center justify-between text-base">
-                                  <span className="text-muted-60 truncate">
-                                    {ms.memberName}{" "}
-                                    <span className="text-muted-50">({ms.partyName})</span>
-                                  </span>
-                                  <span
-                                    className={cn(
-                                      "rounded px-2 py-0.5 text-sm font-bold",
-                                      ms.points === 12
-                                        ? "bg-yellow-500/20 text-yellow-400"
-                                        : ms.points === 10
-                                          ? "bg-gray-400/20 text-gray-300"
-                                          : ms.points > 0
-                                            ? "bg-muted-5 text-muted-60"
-                                            : "text-muted-30"
-                                    )}
-                                  >
-                                    {ms.points} pts
-                                  </span>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      </motion.div>
+          <>
+            {parties.length === 0 && (
+              <p className="mb-3 text-center text-sm font-medium text-muted-50">
+                Waiting for members to finalise their votes...
+              </p>
+            )}
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {scoreboard.map((entry, rank) => {
+                const isExpanded = selectedId === entry.id;
+                return (
+                  <motion.div
+                    key={entry.id}
+                    layout
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className={cn(
+                      "glass cursor-pointer p-4 transition-all",
+                      rank === 0 && entry.totalPoints > 0 && "neon-glow",
+                      isExpanded && "ring-2 ring-neon-pink/50"
                     )}
-                  </AnimatePresence>
-                </motion.div>
-              );
-            })}
-          </div>
+                    onClick={() => setSelectedId(isExpanded ? null : entry.id)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={cn(
+                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold",
+                          rank === 0 && parties.length > 0
+                            ? "bg-yellow-500/20 text-yellow-400"
+                            : rank === 1 && parties.length > 0
+                              ? "bg-gray-400/20 text-gray-300"
+                              : rank === 2 && parties.length > 0
+                                ? "bg-amber-700/20 text-amber-600"
+                                : "bg-muted-5 text-muted-50"
+                        )}
+                      >
+                        {rank + 1}
+                      </span>
+                      <span className="text-2xl">{entry.flagEmoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold truncate">{entry.country}</div>
+                        <div className="text-sm text-muted-60 truncate">
+                          {entry.artist} &mdash; {entry.song}
+                        </div>
+                      </div>
+                      {parties.length > 0 ? (
+                        <AnimatedNumber value={entry.totalPoints} className="text-2xl font-black neon-text" />
+                      ) : (
+                        <span className="text-lg font-bold text-muted-30">&mdash;</span>
+                      )}
+                    </div>
+
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-3 border-t border-muted-10 pt-3">
+                            {entry.youtubeUrl && (() => {
+                              const embedUrl = getYoutubeEmbedUrl(entry.youtubeUrl);
+                              return embedUrl ? (
+                                <div className="mb-3 aspect-video overflow-hidden rounded-xl bg-black shadow-lg">
+                                  <iframe
+                                    src={embedUrl}
+                                    title={`${entry.country} performance`}
+                                    className="h-full w-full border-0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                  />
+                                </div>
+                              ) : null;
+                            })()}
+                            {entry.memberScores.length > 0 && (
+                              <>
+                                <p className="text-sm font-semibold text-muted-60 uppercase tracking-wider mb-2">
+                                  Votes Breakdown
+                                </p>
+                                <div className="flex flex-col gap-1.5">
+                                  {entry.memberScores
+                                    .slice()
+                                    .sort((a, b) => b.points - a.points)
+                                    .map((ms) => (
+                                      <div key={ms.memberId} className="flex items-center justify-between text-base">
+                                        <span className="text-muted-60 truncate">
+                                          {ms.memberName}{" "}
+                                          <span className="text-muted-50">({ms.partyName})</span>
+                                        </span>
+                                        <span
+                                          className={cn(
+                                            "rounded px-2 py-0.5 text-sm font-bold",
+                                            ms.points === 12
+                                              ? "bg-yellow-500/20 text-yellow-400"
+                                              : ms.points === 10
+                                                ? "bg-gray-400/20 text-gray-300"
+                                                : ms.points > 0
+                                                  ? "bg-muted-5 text-muted-60"
+                                                  : "text-muted-30"
+                                          )}
+                                        >
+                                          {ms.points} pts
+                                        </span>
+                                      </div>
+                                    ))}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </>
         )}
 
         <div className="mt-8 flex justify-center gap-6">
