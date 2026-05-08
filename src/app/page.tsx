@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "@/components/GlassCard";
-import { slugify } from "@/lib/slugify";
+
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FloatingBackground } from "@/components/FloatingBackground";
 
@@ -37,8 +37,7 @@ export default function Home() {
       setLoading(false);
       return;
     }
-    const slug = slugify(data.watchParty.name);
-    router.push(`/party/${data.watchParty.key}/${slug}`);
+    router.push(`/party/${data.watchParty.key}`);
   }
 
   async function handleJoin() {
@@ -63,8 +62,7 @@ export default function Home() {
       setLoading(false);
       return;
     }
-    const slug = slugify(data.watchParty.name);
-    router.push(`/party/${data.watchParty.key}/${slug}`);
+    router.push(`/party/${data.watchParty.key}`);
   }
 
   return (
