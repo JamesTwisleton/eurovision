@@ -1,12 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const contestants = await prisma.contestant.findMany({
     include: {
       scores: {
-        where: { jury: { hasFinalized: true } },
-        include: { jury: { select: { key: true, name: true } } },
+        where: {
+          member: {
+            juryId: session.juryId,
+            hasFinalized: true
+          }
+        },
+        include: { member: { select: { id: true, name: true } } },
       },
     },
     orderBy: { performanceOrder: "asc" },
@@ -20,18 +31,26 @@ export async function GET() {
       song: c.song,
       flagEmoji: c.flagEmoji,
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
-      juryScores: c.scores.map((s) => ({
-        juryName: s.jury.name,
-        juryKey: s.jury.key,
+      memberScores: c.scores.map((s) => ({
+        memberName: s.member.name,
+        memberId: s.member.id,
         points: s.points,
       })),
     }))
     .sort((a, b) => b.totalPoints - a.totalPoints);
 
-  const juries = await prisma.jury.findMany({
-    where: { hasFinalized: true },
-    select: { key: true, name: true, location: true },
+  const members = await prisma.member.findMany({
+    where: {
+      juryId: session.juryId,
+      hasFinalized: true
+    },
+    select: { id: true, name: true, location: true },
   });
 
-  return NextResponse.json({ scoreboard, juries });
+  const jury = await prisma.jury.findUnique({
+    where: { id: session.juryId },
+    select: { name: true }
+  });
+
+  return NextResponse.json({ scoreboard, members, juryName: jury?.name });
 }

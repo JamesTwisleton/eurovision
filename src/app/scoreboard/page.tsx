@@ -8,10 +8,11 @@ import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useSocket } from "@/hooks/useSocket";
 import { cn } from "@/lib/cn";
+import { useRouter } from "next/navigation";
 
-interface JuryScore {
-  juryName: string;
-  juryKey: string;
+interface MemberScore {
+  memberName: string;
+  memberId: string;
   points: number;
 }
 
@@ -22,28 +23,35 @@ interface ScoreboardEntry {
   song: string;
   flagEmoji: string;
   totalPoints: number;
-  juryScores: JuryScore[];
+  memberScores: MemberScore[];
 }
 
-interface JuryInfo {
-  key: string;
+interface MemberInfo {
+  id: string;
   name: string;
   location: string;
 }
 
 export default function ScoreboardPage() {
   const socketRef = useSocket();
+  const router = useRouter();
   const [scoreboard, setScoreboard] = useState<ScoreboardEntry[]>([]);
-  const [juries, setJuries] = useState<JuryInfo[]>([]);
+  const [members, setMembers] = useState<MemberInfo[]>([]);
+  const [juryName, setJuryName] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchScoreboard = useCallback(async () => {
     const res = await fetch("/api/scoreboard");
+    if (res.status === 401) {
+      router.push("/");
+      return;
+    }
     const data = await res.json();
     setScoreboard(data.scoreboard);
-    setJuries(data.juries);
+    setMembers(data.members);
+    setJuryName(data.juryName);
     setLoading(false);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     fetchScoreboard();
@@ -79,24 +87,24 @@ export default function ScoreboardPage() {
 
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-2 text-center">
-          <h1 className="neon-text text-4xl font-black">SCOREBOARD</h1>
+          <h1 className="neon-text text-4xl font-black uppercase">{juryName} SCOREBOARD</h1>
           <p className="mt-2 text-sm text-muted-40 leading-relaxed">
-            Combined results from all juries that have finalized their votes.
-            {juries.length > 0
-              ? ` ${juries.length} ${juries.length === 1 ? "jury has" : "juries have"} voted so far.`
-              : " No juries have finalized yet — scores will appear here once they do."}
+            Combined results from all members of this party who have finalized their votes.
+            {members.length > 0
+              ? ` ${members.length} ${members.length === 1 ? "member has" : "members have"} finalized so far.`
+              : " No members have finalized yet — scores will appear here once they do."}
           </p>
         </div>
 
-        {/* Jury list */}
-        {juries.length > 0 && (
+        {/* Member list */}
+        {members.length > 0 && (
           <div className="mb-4 flex flex-wrap justify-center gap-2">
-            {juries.map((j) => (
+            {members.map((m) => (
               <span
-                key={j.key}
+                key={m.id}
                 className="rounded-full bg-muted-5 px-3 py-1 text-xs text-muted-50"
               >
-                {j.name} ({j.location})
+                {m.name} ({m.location})
               </span>
             ))}
           </div>
@@ -108,7 +116,7 @@ export default function ScoreboardPage() {
               No contestants have been added yet.
             </p>
           </GlassCard>
-        ) : juries.length === 0 ? (
+        ) : members.length === 0 ? (
           <div className="flex flex-col gap-2">
             {scoreboard.map((entry, rank) => (
               <div
@@ -129,7 +137,7 @@ export default function ScoreboardPage() {
               </div>
             ))}
             <p className="mt-2 text-center text-xs text-muted-30">
-              Waiting for juries to finalize their votes...
+              Waiting for members to finalize their votes...
             </p>
           </div>
         ) : (
@@ -171,22 +179,22 @@ export default function ScoreboardPage() {
                     className="text-2xl font-black neon-text"
                   />
                   <div className="mt-1 flex flex-wrap justify-end gap-1">
-                    {entry.juryScores.map((js) => (
+                    {entry.memberScores.map((ms) => (
                       <span
-                        key={js.juryKey}
-                        title={`${js.juryName}: ${js.points} pts`}
+                        key={ms.memberId}
+                        title={`${ms.memberName}: ${ms.points} pts`}
                         className={cn(
                           "rounded px-1.5 py-0.5 text-[10px] font-medium",
-                          js.points === 12
+                          ms.points === 12
                             ? "bg-yellow-500/20 text-yellow-400"
-                            : js.points === 10
+                            : ms.points === 10
                               ? "bg-gray-400/20 text-gray-300"
-                              : js.points > 0
+                              : ms.points > 0
                                 ? "bg-muted-5 text-muted-30"
                                 : "hidden"
                         )}
                       >
-                        {js.points}
+                        {ms.points}
                       </span>
                     ))}
                   </div>
@@ -197,12 +205,12 @@ export default function ScoreboardPage() {
         )}
 
         <div className="mt-8 text-center">
-          <Link
-            href="/"
+          <button
+            onClick={() => router.back()}
             className="text-sm text-muted-30 hover:text-muted-50 transition-colors"
           >
-            &larr; Back to Home
-          </Link>
+            &larr; Back to Watch Party
+          </button>
         </div>
       </div>
     </div>

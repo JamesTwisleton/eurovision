@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createJurySchema } from "@/lib/validation";
+import { setSession } from "@/lib/session";
 import {
   uniqueNamesGenerator,
   adjectives,
@@ -31,24 +32,34 @@ export async function POST(request: NextRequest) {
     data: {
       key,
       name: parsed.data.name,
-      location: parsed.data.location,
-      scores: {
-        create: contestants.map((c) => ({
-          contestantId: c.id,
-          points: 0,
-        })),
+      members: {
+        create: {
+          name: parsed.data.hostName,
+          location: parsed.data.hostLocation,
+          role: "HOST",
+          status: "APPROVED",
+          scores: {
+            create: contestants.map((c) => ({
+              contestantId: c.id,
+              points: 0,
+            })),
+          },
+        },
       },
     },
-    include: { scores: true },
+    include: {
+      members: {
+        take: 1
+      }
+    },
   });
 
-  const response = NextResponse.json({ jury }, { status: 201 });
-  response.cookies.set("jury_key", jury.key, {
-    path: "/",
-    httpOnly: false,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+  const member = jury.members[0];
+  await setSession({
+    memberId: member.id,
+    juryId: jury.id,
+    juryKey: jury.key,
   });
 
-  return response;
+  return NextResponse.json({ jury, member }, { status: 201 });
 }

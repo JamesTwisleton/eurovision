@@ -9,13 +9,26 @@ export const draftScoreSchema = z.object({
 
 export const createJurySchema = z.object({
   name: z.string().min(1).max(100),
-  location: z.string().min(1).max(100),
+  hostName: z.string().min(1).max(100),
+  hostLocation: z.string().min(1).max(100),
 });
 
 export const joinJurySchema = z.object({
   key: z.string().min(1),
   name: z.string().min(1).max(100),
   location: z.string().min(1).max(100),
+});
+
+export const memberUpdateSchema = z.object({
+  role: z.enum(["HOST", "GUEST"]).optional(),
+  status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional(),
+  name: z.string().min(1).max(100).optional(),
+  location: z.string().min(1).max(100).optional(),
+});
+
+export const invitationSchema = z.object({
+  email: z.string().email(),
+  role: z.enum(["HOST", "GUEST"]).default("GUEST"),
 });
 
 export const contestantSchema = z.object({

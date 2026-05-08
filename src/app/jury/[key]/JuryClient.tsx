@@ -29,24 +29,34 @@ interface Score {
   contestant: Contestant;
 }
 
-interface Jury {
+interface Member {
   id: string;
-  key: string;
   name: string;
   location: string;
+  role: "HOST" | "GUEST";
+  status: "PENDING" | "APPROVED" | "REJECTED";
   hasFinalized: boolean;
   scores: Score[];
 }
 
-interface JuryClientProps {
-  initialJury: Jury;
+interface Jury {
+  id: string;
+  key: string;
+  name: string;
+  members: Member[];
 }
 
-export function JuryClient({ initialJury }: JuryClientProps) {
+interface JuryClientProps {
+  initialJury: Jury;
+  initialCurrentMember: Member | null;
+}
+
+export function JuryClient({ initialJury, initialCurrentMember }: JuryClientProps) {
   const { key } = useParams<{ key: string }>();
   const router = useRouter();
   const socketRef = useSocket(key);
   const [jury, setJury] = useState<Jury>(initialJury);
+  const [currentMember, setCurrentMember] = useState<Member | null>(initialCurrentMember);
   const [loading, setLoading] = useState(false);
   const [selectedContestant, setSelectedContestant] = useState<string | null>(
     null
@@ -57,30 +67,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
   } | null>(null);
   const [showHenry, setShowHenry] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  async function handleShare() {
-    const slug = slugify(jury.name);
-    const url = `${window.location.origin}/jury/${key}/${slug}`;
-
-    // Use native share sheet on mobile, copy URL on desktop
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile && navigator.share) {
-      try {
-        await navigator.share({
-          title: `Eurovision 2026 Jury — ${jury.name}`,
-          text: `Join my Eurovision jury! Use code "${key}" or tap the link:`,
-          url,
-        });
-        return;
-      } catch {
-        // User cancelled or share failed — fall through to clipboard
-      }
-    }
-
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
+  const [activeTab, setActiveTab] = useState<"scores" | "members">("scores");
 
   const fetchJury = useCallback(async () => {
     const res = await fetch(`/api/jury/${key}`);
@@ -90,6 +77,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
     }
     const data = await res.json();
     setJury(data.jury);
+    setCurrentMember(data.currentMember);
     setLoading(false);
   }, [key, router]);
 
@@ -98,27 +86,75 @@ export function JuryClient({ initialJury }: JuryClientProps) {
     if (!socket) return;
 
     const handleDraftUpdate = (data: {
+      memberId: string;
       contestantId: string;
       points: number;
     }) => {
+      if (data.memberId === currentMember?.id) {
+         setCurrentMember(prev => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              scores: prev.scores.map(s => s.contestantId === data.contestantId ? { ...s, points: data.points } : s)
+            };
+         });
+      }
       setJury((prev) => {
         if (!prev) return prev;
         return {
           ...prev,
-          scores: prev.scores.map((s) =>
-            s.contestantId === data.contestantId
-              ? { ...s, points: data.points }
-              : s
+          members: prev.members.map((m) =>
+            m.id === data.memberId
+              ? {
+                  ...m,
+                  scores: m.scores.map((s) =>
+                    s.contestantId === data.contestantId
+                      ? { ...s, points: data.points }
+                      : s
+                  ),
+                }
+              : m
           ),
         };
       });
     };
 
+    const handleRefresh = () => fetchJury();
+
     socket.on("draft_updated", handleDraftUpdate);
+    socket.on("member_updated", handleRefresh);
+    socket.on("member_removed", handleRefresh);
+    socket.on("member_finalized", handleRefresh);
+
     return () => {
       socket.off("draft_updated", handleDraftUpdate);
+      socket.off("member_updated", handleRefresh);
+      socket.off("member_removed", handleRefresh);
+      socket.off("member_finalized", handleRefresh);
     };
-  }, [socketRef]);
+  }, [socketRef, currentMember?.id, fetchJury]);
+
+  async function handleShare() {
+    const slug = slugify(jury.name);
+    const url = `${window.location.origin}/jury/${key}/${slug}`;
+
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share({
+          title: `Eurovision 2026 Jury — ${jury.name}`,
+          text: `Join my Eurovision watch party! Use code "${key}" or tap the link:`,
+          url,
+        });
+        return;
+      } catch {
+      }
+    }
+
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   async function updateScore(contestantId: string, points: number) {
     await fetch(`/api/jury/${key}/score`, {
@@ -138,10 +174,46 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       return;
     }
 
-    setJury((prev) => (prev ? { ...prev, hasFinalized: true } : prev));
+    setCurrentMember((prev) => (prev ? { ...prev, hasFinalized: true } : prev));
     setToast({ message: "Your votes are in! Check the scoreboard to see the results.", type: "success" });
     setShowHenry(true);
     setTimeout(() => setShowHenry(false), 4000);
+  }
+
+  async function handleMemberAction(memberId: string, action: "approve" | "reject" | "elevate" | "demote" | "remove") {
+    let method = "PATCH";
+    let body: any = {};
+
+    switch (action) {
+      case "approve": body.status = "APPROVED"; break;
+      case "reject": body.status = "REJECTED"; break;
+      case "elevate": body.role = "HOST"; break;
+      case "demote": body.role = "GUEST"; break;
+      case "remove": method = "DELETE"; break;
+    }
+
+    const res = await fetch(`/api/jury/${key}/members/${memberId}`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: method === "PATCH" ? JSON.stringify(body) : undefined,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      setToast({ message: data.error || "Action failed", type: "error" });
+    } else {
+      fetchJury();
+    }
+  }
+
+  async function handleLeave() {
+    if (!confirm("Are you sure you want to leave this watch party?")) return;
+    const res = await fetch(`/api/jury/${key}/members/${currentMember?.id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      router.push("/");
+    }
   }
 
   if (loading) {
@@ -154,23 +226,60 @@ export function JuryClient({ initialJury }: JuryClientProps) {
 
   if (!jury) return null;
 
-  const selectedScore = jury.scores.find(
+  if (currentMember?.status === "PENDING") {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-4">
+        <GlassCard className="max-w-md text-center" strong>
+          <h2 className="text-2xl font-bold mb-4">Waiting for Approval</h2>
+          <p className="text-muted-50 mb-6">
+            You&apos;ve requested to join <strong>{jury.name}</strong>.
+            The host needs to approve your admission before you can start scoring.
+          </p>
+          <div className="animate-pulse flex space-x-2 justify-center">
+            <div className="h-2 w-2 bg-neon-pink rounded-full"></div>
+            <div className="h-2 w-2 bg-neon-purple rounded-full"></div>
+            <div className="h-2 w-2 bg-neon-blue rounded-full"></div>
+          </div>
+          <button
+            onClick={handleLeave}
+            className="mt-8 text-sm text-muted-40 hover:text-muted-60"
+          >
+            Cancel Request & Leave
+          </button>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (currentMember?.status === "REJECTED") {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-4">
+        <GlassCard className="max-w-md text-center" strong>
+          <h2 className="text-2xl font-bold mb-4 text-red-400">Admission Rejected</h2>
+          <p className="text-muted-50 mb-6">
+            Sorry, your request to join <strong>{jury.name}</strong> was rejected by the host.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="rounded-xl bg-muted-5 px-6 py-3 font-bold text-primary"
+          >
+            Back to Home
+          </button>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  const selectedScore = currentMember?.scores.find(
     (s) => s.contestantId === selectedContestant
   );
 
-  // Summary of which final point values are used
-  const usedPoints = new Map<number, string>();
-  for (const s of jury.scores) {
-    if (s.points > 0) {
-      usedPoints.set(s.points, s.contestant.country);
-    }
-  }
-
+  const scoredCount = currentMember?.scores.filter((s) => s.points > 0).length || 0;
   const missingPoints = VALID_FINAL_POINTS.filter(
-    (p) => !usedPoints.has(p)
+    (p) => !currentMember?.scores.some(s => s.points === p)
   );
 
-  const scoredCount = jury.scores.filter((s) => s.points > 0).length;
+  const isHost = currentMember?.role === "HOST";
 
   return (
     <div className="flex flex-1 flex-col">
@@ -180,208 +289,288 @@ export function JuryClient({ initialJury }: JuryClientProps) {
           <div>
             <h1 className="text-lg font-bold">{jury.name}</h1>
             <p className="text-xs text-muted-40">
-              {jury.location} &middot;{" "}
+              {currentMember?.name} ({currentMember?.location}) &middot;{" "}
               <span className="font-mono">{jury.key}</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            {jury.hasFinalized && (
-              <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-400">
-                Finalized
-              </span>
-            )}
             <a
               href="/scoreboard"
               className="text-sm text-muted-40 hover:text-muted-60"
             >
               Scoreboard
             </a>
+            <button
+              onClick={() => router.push("/")}
+              className="text-sm text-muted-40 hover:text-muted-60"
+            >
+              Log off
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Share button */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3">
-        <button
-          onClick={handleShare}
-          className="w-full rounded-lg bg-neon-blue/10 px-3 py-2.5 text-center text-xs text-neon-blue/80 transition-all hover:bg-neon-blue/15 active:scale-[0.98]"
-        >
-          {copied ? (
-            <span className="text-green-400 font-medium">Link copied to clipboard!</span>
-          ) : (
-            <>
-              <span className="font-medium">Invite friends to this jury</span>
-              {" — "}
-              <span className="font-mono font-bold text-neon-cyan">{jury.key}</span>
-              {" "}
-              <span className="inline-block ml-1">📤</span>
-            </>
-          )}
-        </button>
+      {/* Tabs */}
+      <div className="mx-auto w-full max-w-2xl px-4 mt-4 flex gap-2">
+         <button
+           onClick={() => setActiveTab("scores")}
+           className={cn(
+             "flex-1 py-2 rounded-lg text-sm font-bold transition-all",
+             activeTab === "scores" ? "bg-neon-pink text-white" : "bg-muted-5 text-muted-40"
+           )}
+         >
+           My Scores
+         </button>
+         <button
+           onClick={() => setActiveTab("members")}
+           className={cn(
+             "flex-1 py-2 rounded-lg text-sm font-bold transition-all",
+             activeTab === "members" ? "bg-neon-pink text-white" : "bg-muted-5 text-muted-40"
+           )}
+         >
+           Members {jury.members.some(m => m.status === "PENDING") && "●"}
+         </button>
       </div>
 
-      {/* Instructions */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3">
-        <div className="rounded-lg bg-muted-5 px-3 py-2 text-xs text-muted-40 leading-relaxed">
-          <strong className="text-muted-60">Tap a country</strong> to give it a
-          score. During the show, feel free to change scores as much as you
-          like &mdash; nothing is locked in until you hit &quot;Finalize&quot; at
-          the bottom. Everyone with this jury code sees changes in real time.
-        </div>
-      </div>
-
-      {/* Progress summary */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3">
-        <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2 text-xs">
-          <span className="text-muted-40">
-            {scoredCount} of {jury.scores.length} countries scored
-          </span>
-          {missingPoints.length > 0 && missingPoints.length <= 5 && (
-            <span className="text-muted-30">
-              Still need to give out:{" "}
-              <span className="font-mono text-neon-pink/70">
-                {missingPoints.join(", ")}
+      {activeTab === "scores" && (
+        <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-3">
+          {/* Progress summary */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2 text-xs">
+              <span className="text-muted-40">
+                {scoredCount} of {currentMember?.scores.length} countries scored
               </span>
-            </span>
-          )}
-          {missingPoints.length === 0 && (
-            <span className="text-green-400/70 font-medium">
-              Ready to finalize!
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Contestant List */}
-      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-3">
-        <div className="flex flex-col gap-2">
-          {jury.scores.map((score) => (
-            <button
-              key={score.contestantId}
-              onClick={() =>
-                setSelectedContestant(
-                  selectedContestant === score.contestantId
-                    ? null
-                    : score.contestantId
-                )
-              }
-              className={cn(
-                "glass flex items-center gap-3 p-3 text-left transition-all active:scale-[0.98]",
-                selectedContestant === score.contestantId &&
-                  "ring-2 ring-neon-pink/50"
+              {missingPoints.length > 0 && missingPoints.length <= 5 && (
+                <span className="text-muted-30">
+                  Need:{" "}
+                  <span className="font-mono text-neon-pink/70">
+                    {missingPoints.join(", ")}
+                  </span>
+                </span>
               )}
-            >
-              <span className="text-xs text-muted-30 w-5 text-center">
-                {score.contestant.performanceOrder}
-              </span>
-              <span className="text-2xl">{score.contestant.flagEmoji}</span>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold truncate">
-                  {score.contestant.country}
-                </div>
-                <div className="text-sm text-muted-50 truncate">
-                  {score.contestant.artist} &mdash; {score.contestant.song}
-                </div>
-              </div>
-              <div
+              {missingPoints.length === 0 && (
+                <span className="text-green-400/70 font-medium">
+                  Ready to finalize!
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {currentMember?.scores.map((score) => (
+              <button
+                key={score.contestantId}
+                onClick={() =>
+                  setSelectedContestant(
+                    selectedContestant === score.contestantId
+                      ? null
+                      : score.contestantId
+                  )
+                }
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold",
-                  score.points === 12
-                    ? "score-badge-12"
-                    : score.points === 10
-                      ? "score-badge-10"
-                      : score.points > 0
-                        ? "score-badge text-white"
-                        : "bg-muted-5 text-muted-20"
+                  "glass flex items-center gap-3 p-3 text-left transition-all active:scale-[0.98]",
+                  selectedContestant === score.contestantId &&
+                    "ring-2 ring-neon-pink/50"
                 )}
               >
-                {score.points}
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Expanded Score Input */}
-        <AnimatePresence>
-          {selectedContestant && selectedScore && (
-            <motion.div
-              key="score-input"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
-              className="fixed bottom-0 left-0 right-0 z-50 glass-strong p-4 pb-6"
-            >
-              <div className="mx-auto max-w-2xl">
-                <div className="mb-1 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">
-                      {selectedScore.contestant.flagEmoji}
-                    </span>
-                    <span className="font-bold">
-                      {selectedScore.contestant.country}
-                    </span>
+                <span className="text-xs text-muted-30 w-5 text-center">
+                  {score.contestant.performanceOrder}
+                </span>
+                <span className="text-2xl">{score.contestant.flagEmoji}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold truncate">
+                    {score.contestant.country}
                   </div>
-                  <button
-                    onClick={() => setSelectedContestant(null)}
-                    className="text-sm text-muted-40 hover:text-muted-60"
-                  >
-                    Done
-                  </button>
+                  <div className="text-sm text-muted-50 truncate">
+                    {score.contestant.artist} &mdash; {score.contestant.song}
+                  </div>
                 </div>
-                <p className="mb-3 text-xs text-muted-30">
-                  Tap a number to assign that score. Tap the same number
-                  again to clear it.
-                </p>
-                <ScoreInput
-                  value={selectedScore.points}
-                  onChange={(points) => {
-                    const newPoints =
-                      points === selectedScore.points ? 0 : points;
-                    updateScore(selectedScore.contestantId, newPoints);
-                    setJury((prev) => {
-                      if (!prev) return prev;
-                      return {
-                        ...prev,
-                        scores: prev.scores.map((s) =>
-                          s.contestantId === selectedScore.contestantId
-                            ? { ...s, points: newPoints }
-                            : s
-                        ),
-                      };
-                    });
-                  }}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <div
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold",
+                    score.points === 12
+                      ? "score-badge-12"
+                      : score.points === 10
+                        ? "score-badge-10"
+                        : score.points > 0
+                          ? "score-badge text-white"
+                          : "bg-muted-5 text-muted-20"
+                  )}
+                >
+                  {score.points}
+                </div>
+              </button>
+            ))}
+          </div>
 
-        {/* Finalize section */}
-        <div className="mt-6 pb-24">
-          <GlassCard className="mb-4">
-            <h3 className="mb-1 text-sm font-bold text-muted-70">
-              Ready to submit?
-            </h3>
-            <p className="text-xs text-muted-40 leading-relaxed">
-              Just like real Eurovision, your final votes must follow the
-              official format: give exactly <strong className="text-muted-60">one country 12 points</strong> (your
-              favourite), <strong className="text-muted-60">one country 10</strong>, then <strong className="text-muted-60">one each of 8, 7, 6, 5, 4, 3,
-              2, and 1</strong>. All other countries get zero. You can still
-              edit after finalizing.
-            </p>
-          </GlassCard>
-
-          <button
-            onClick={handleFinalize}
-            className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95 neon-glow"
-          >
-            {jury.hasFinalized
-              ? "Update Finalized Scores"
-              : "Finalize Jury Votes"}
-          </button>
+          {/* Finalize section */}
+          <div className="mt-8 pb-32">
+            <button
+              onClick={handleFinalize}
+              className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95 neon-glow"
+            >
+              {currentMember?.hasFinalized
+                ? "Update Finalized Scores"
+                : "Finalize My Votes"}
+            </button>
+            <button
+              onClick={handleLeave}
+              className="w-full mt-4 text-sm text-muted-40 hover:text-red-400"
+            >
+              Leave Watch Party
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === "members" && (
+        <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-3">
+          {/* Share button */}
+          <div className="mb-6">
+            <button
+              onClick={handleShare}
+              className="w-full rounded-lg bg-neon-blue/10 px-3 py-2.5 text-center text-xs text-neon-blue/80 transition-all hover:bg-neon-blue/15 active:scale-[0.98]"
+            >
+              {copied ? (
+                <span className="text-green-400 font-medium">Link copied!</span>
+              ) : (
+                <>
+                  <span className="font-medium">Invite friends</span>
+                  {" — "}
+                  <span className="font-mono font-bold text-neon-cyan">{jury.key}</span>
+                  {" "}
+                  <span className="inline-block ml-1">📤</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {jury.members.map((member) => (
+              <GlassCard key={member.id} className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="font-bold flex items-center gap-2">
+                      {member.name}
+                      {member.role === "HOST" && (
+                        <span className="text-[10px] bg-neon-purple/20 text-neon-purple px-1.5 py-0.5 rounded uppercase">Host</span>
+                      )}
+                      {member.hasFinalized && (
+                        <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded uppercase">Finalized</span>
+                      )}
+                      {member.status === "PENDING" && (
+                        <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded uppercase">Pending Admission</span>
+                      )}
+                    </h3>
+                    <p className="text-xs text-muted-40">{member.location}</p>
+                  </div>
+
+                  {isHost && member.id !== currentMember?.id && (
+                    <div className="flex gap-2">
+                      {member.status === "PENDING" ? (
+                        <>
+                          <button
+                            onClick={() => handleMemberAction(member.id, "approve")}
+                            className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded hover:bg-green-500/30"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleMemberAction(member.id, "reject")}
+                            className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded hover:bg-red-500/30"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {member.role === "GUEST" ? (
+                             <button
+                               onClick={() => handleMemberAction(member.id, "elevate")}
+                               className="text-xs bg-neon-purple/20 text-neon-purple px-2 py-1 rounded hover:bg-neon-purple/30"
+                             >
+                               Make Host
+                             </button>
+                          ) : (
+                             <button
+                               onClick={() => handleMemberAction(member.id, "demote")}
+                               className="text-xs bg-muted-10 text-muted-40 px-2 py-1 rounded hover:bg-muted-20"
+                             >
+                               Make Guest
+                             </button>
+                          )}
+                          <button
+                            onClick={() => handleMemberAction(member.id, "remove")}
+                            className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded hover:bg-red-500/30"
+                          >
+                            Remove
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Expanded Score Input */}
+      <AnimatePresence>
+        {selectedContestant && selectedScore && (
+          <motion.div
+            key="score-input"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            className="fixed bottom-0 left-0 right-0 z-50 glass-strong p-4 pb-6"
+          >
+            <div className="mx-auto max-w-2xl">
+              <div className="mb-1 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">
+                    {selectedScore.contestant.flagEmoji}
+                  </span>
+                  <span className="font-bold">
+                    {selectedScore.contestant.country}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setSelectedContestant(null)}
+                  className="text-sm text-muted-40 hover:text-muted-60"
+                >
+                  Done
+                </button>
+              </div>
+              <p className="mb-3 text-xs text-muted-30">
+                Tap a number to assign that score. Tap the same number
+                again to clear it.
+              </p>
+              <ScoreInput
+                value={selectedScore.points}
+                onChange={(points) => {
+                  const newPoints =
+                    points === selectedScore.points ? 0 : points;
+                  updateScore(selectedScore.contestantId, newPoints);
+                  setCurrentMember((prev) => {
+                    if (!prev) return prev;
+                    return {
+                      ...prev,
+                      scores: prev.scores.map((s) =>
+                        s.contestantId === selectedScore.contestantId
+                          ? { ...s, points: newPoints }
+                          : s
+                      ),
+                    };
+                  });
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Henry Easter Egg */}
       <AnimatePresence>

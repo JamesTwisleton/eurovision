@@ -1,41 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
 import { validateFinalScores } from "@/lib/validation";
-
-declare global {
-  var io: import("socket.io").Server | undefined;
-}
+import { Server } from "socket.io";
 
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ key: string }> }
 ) {
-  const { key } = await params;
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  const jury = await prisma.jury.findUnique({
-    where: { key },
+  const { key } = await params;
+  if (session.juryKey !== key) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const member = await prisma.member.findUnique({
+    where: { id: session.memberId },
     include: { scores: true },
   });
 
-  if (!jury) {
-    return NextResponse.json({ error: "Jury not found" }, { status: 404 });
+  if (!member) {
+    return NextResponse.json({ error: "Member not found" }, { status: 404 });
   }
 
-  const { valid, errors } = validateFinalScores(jury.scores);
+  const { valid, errors } = validateFinalScores(member.scores);
 
   if (!valid) {
     return NextResponse.json(
-      { error: "Invalid score distribution", details: errors },
+      { error: "Invalid scores", details: errors },
       { status: 400 }
     );
   }
 
-  await prisma.jury.update({
-    where: { key },
+  await prisma.member.update({
+    where: { id: member.id },
     data: { hasFinalized: true },
   });
 
-  global.io?.to("room:global").emit("scoreboard_updated");
+  // @ts-ignore
+  const io: Server = global.io;
+  if (io) {
+    io.emit("scoreboard_updated");
+    io.to(`jury_${key}`).emit("member_finalized", { memberId: member.id });
+  }
 
-  return NextResponse.json({ success: true, message: "Scores finalized!" });
+  return NextResponse.json({ success: true });
 }

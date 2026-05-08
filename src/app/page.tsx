@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { GlassCard } from "@/components/GlassCard";
 import { slugify } from "@/lib/slugify";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
   const [mode, setMode] = useState<"choose" | "create" | "join">("choose");
+  const [partyName, setPartyName] = useState("");
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [juryCode, setJuryCode] = useState("");
@@ -16,8 +18,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   async function handleCreate() {
-    if (!name || !location) {
-      setError("Please fill in both fields");
+    if (!partyName || !name || !location) {
+      setError("Please fill in all fields");
       return;
     }
     setLoading(true);
@@ -25,11 +27,15 @@ export default function Home() {
     const res = await fetch("/api/jury", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, location }),
+      body: JSON.stringify({
+        name: partyName,
+        hostName: name,
+        hostLocation: location
+      }),
     });
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error || "Failed to create jury");
+      setError(data.error || "Failed to create watch party");
       setLoading(false);
       return;
     }
@@ -38,8 +44,8 @@ export default function Home() {
   }
 
   async function handleJoin() {
-    if (!juryCode) {
-      setError("Please enter the jury code you were given");
+    if (!juryCode || !name || !location) {
+      setError("Please fill in all fields");
       return;
     }
     setLoading(true);
@@ -47,11 +53,15 @@ export default function Home() {
     const res = await fetch("/api/jury/join", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key: juryCode.trim().toLowerCase() }),
+      body: JSON.stringify({
+        key: juryCode.trim().toLowerCase(),
+        name,
+        location
+      }),
     });
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error || "Couldn't find that jury. Double-check the code and try again.");
+      setError(data.error || "Couldn't find that party. Double-check the code and try again.");
       setLoading(false);
       return;
     }
@@ -85,42 +95,58 @@ export default function Home() {
           <div className="flex flex-col gap-4">
             <div className="text-center mb-2">
               <p className="text-sm text-muted-60 leading-relaxed">
-                <strong className="text-muted-70">First time?</strong> Create a new jury for your
-                watch party. <strong className="text-muted-70">Been sent a code?</strong> Join an existing one.
+                <strong className="text-muted-70">First time?</strong> Create a new watch party as a Host. <strong className="text-muted-70">Been sent a code?</strong> Join an existing one as a Guest.
               </p>
             </div>
             <button
               onClick={() => setMode("create")}
               className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
             >
-              Create a New Jury
+              Create a Watch Party (Host)
             </button>
             <button
               onClick={() => setMode("join")}
               className="w-full rounded-xl border border-muted-20 px-6 py-4 text-lg font-semibold text-muted-70 transition-all hover:bg-muted-5 active:scale-95"
             >
-              Join an Existing Jury
+              Join a Watch Party (Guest)
             </button>
+            <Link
+              href="/admin"
+              className="w-full rounded-xl border border-muted-20 px-6 py-4 text-lg font-semibold text-muted-70 text-center transition-all hover:bg-muted-5 active:scale-95"
+            >
+              Log on as Admin
+            </Link>
           </div>
         </GlassCard>
       )}
 
       {mode === "create" && (
         <GlassCard className="w-full max-w-sm" strong>
-          <h3 className="mb-1 text-xl font-bold">Create Your Jury</h3>
+          <h3 className="mb-1 text-xl font-bold">Create Watch Party</h3>
           <p className="mb-4 text-sm text-muted-40 leading-relaxed">
-            Give your jury a name and where you&apos;re watching from.
-            You&apos;ll get a unique code to share with anyone who wants
-            to score together on the same scoresheet.
+            Give your party a name and set up your host profile.
+            You&apos;ll get a unique code to share with your friends.
           </p>
           <div className="flex flex-col gap-3">
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-50">
-                Jury Name
+                Party Name
               </label>
               <input
                 type="text"
-                placeholder="e.g. The Twisletons"
+                placeholder="e.g. Neon Eurovision Party"
+                value={partyName}
+                onChange={(e) => setPartyName(e.target.value)}
+                className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-50">
+                Your Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. James"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
@@ -128,7 +154,7 @@ export default function Home() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-50">
-                Where are you watching?
+                Your Jury (Location)
               </label>
               <input
                 type="text"
@@ -144,7 +170,7 @@ export default function Home() {
               disabled={loading}
               className="rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-3 font-bold text-white transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
             >
-              {loading ? "Creating..." : "Create Jury"}
+              {loading ? "Creating..." : "Create Party"}
             </button>
             <button
               onClick={() => {
@@ -161,17 +187,15 @@ export default function Home() {
 
       {mode === "join" && (
         <GlassCard className="w-full max-w-sm" strong>
-          <h3 className="mb-1 text-xl font-bold">Join a Jury</h3>
+          <h3 className="mb-1 text-xl font-bold">Join as Guest</h3>
           <p className="mb-4 text-sm text-muted-40 leading-relaxed">
-            Enter the code that was shared with you. It looks something
-            like <span className="text-muted-60 font-mono">neon-disco-glitter</span>.
-            This lets you score on the same scoresheet as everyone else
-            in that jury &mdash; changes sync in real time!
+            Enter the code shared with you and set up your profile.
+            The host will need to approve your admission.
           </p>
           <div className="flex flex-col gap-3">
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-50">
-                Jury Code
+                Party Code
               </label>
               <input
                 type="text"
@@ -181,13 +205,37 @@ export default function Home() {
                 className="w-full rounded-xl bg-muted-5 px-4 py-3 font-mono text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
               />
             </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-50">
+                Your Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Rebecca"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-50">
+                Your Jury (Location)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Bristol"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full rounded-xl bg-muted-5 px-4 py-3 text-primary placeholder:text-muted-30 focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+              />
+            </div>
             {error && <p className="text-sm text-red-400">{error}</p>}
             <button
               onClick={handleJoin}
               disabled={loading}
               className="rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-3 font-bold text-white transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
             >
-              {loading ? "Joining..." : "Join Jury"}
+              {loading ? "Joining..." : "Join Party"}
             </button>
             <button
               onClick={() => {
@@ -214,9 +262,8 @@ export default function Home() {
                 1
               </span>
               <span>
-                <strong className="text-muted-70">Create or join a jury.</strong> One person
-                creates it, then shares the code with friends. Everyone
-                on the same code shares one scoresheet.
+                <strong className="text-muted-70">Create or join a party.</strong> One person
+                is the host, others join as guests. Each person has their own scoreboard.
               </span>
             </li>
             <li className="flex gap-3">
@@ -225,9 +272,7 @@ export default function Home() {
               </span>
               <span>
                 <strong className="text-muted-70">Score each act as you watch.</strong> Tap a
-                country, pick a score from 0&ndash;12. You can change
-                your mind as many times as you like &mdash; it&apos;s a draft
-                until you finalize.
+                country, pick a score from 0&ndash;12. Your scores are yours alone until finalized.
               </span>
             </li>
             <li className="flex gap-3">
@@ -237,7 +282,7 @@ export default function Home() {
               <span>
                 <strong className="text-muted-70">Finalize your votes.</strong> Just like real
                 Eurovision, you must give out exactly one set of 12, 10,
-                8, 7, 6, 5, 4, 3, 2, and 1 points. The rest get zero.
+                8, 7, 6, 5, 4, 3, 2, and 1 points.
               </span>
             </li>
             <li className="flex gap-3">
@@ -245,19 +290,12 @@ export default function Home() {
                 4
               </span>
               <span>
-                <strong className="text-muted-70">Check the scoreboard!</strong> See how all
-                the juries voted and which country comes out on top
-                across all your friends.
+                <strong className="text-muted-70">Check the scoreboard!</strong> See the combined
+                results from your Watch Party.
               </span>
             </li>
           </ol>
         </GlassCard>
-      </div>
-
-      <div className="mt-8 flex gap-6 text-sm text-muted-30">
-        <a href="/scoreboard" className="hover:text-muted-50 transition-colors">
-          Scoreboard
-        </a>
       </div>
     </div>
   );

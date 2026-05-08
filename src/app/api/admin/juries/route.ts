@@ -11,8 +11,9 @@ export async function GET() {
 
   const juries = await prisma.jury.findMany({
     include: {
+      members: true,
       _count: {
-        select: { scores: true },
+        select: { members: true },
       },
     },
     orderBy: { createdAt: "desc" },

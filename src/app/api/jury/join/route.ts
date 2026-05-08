@@ -1,26 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { setSession } from "@/lib/session";
+import { joinJurySchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
-  const { key } = await request.json();
+  const body = await request.json();
+  const parsed = joinJurySchema.safeParse(body);
 
-  if (!key || typeof key !== "string") {
-    return NextResponse.json({ error: "Jury key is required" }, { status: 400 });
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input", details: parsed.error.issues }, { status: 400 });
   }
 
-  const jury = await prisma.jury.findUnique({ where: { key } });
+  const { key, name, location } = parsed.data;
+
+  const jury = await prisma.jury.findUnique({
+    where: { key: key.trim().toLowerCase() }
+  });
 
   if (!jury) {
     return NextResponse.json({ error: "Jury not found" }, { status: 404 });
   }
 
-  const response = NextResponse.json({ jury });
-  response.cookies.set("jury_key", jury.key, {
-    path: "/",
-    httpOnly: false,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 30,
+  const contestants = await prisma.contestant.findMany();
+
+  // Create member as PENDING
+  const member = await prisma.member.create({
+    data: {
+      name,
+      location,
+      juryId: jury.id,
+      role: "GUEST",
+      status: "PENDING",
+      scores: {
+        create: contestants.map((c) => ({
+          contestantId: c.id,
+          points: 0,
+        })),
+      },
+    },
   });
 
-  return response;
+  await setSession({
+    memberId: member.id,
+    juryId: jury.id,
+    juryKey: jury.key,
+  });
+
+  return NextResponse.json({ jury, member });
 }
