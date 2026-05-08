@@ -9,6 +9,7 @@ import { Toast } from "@/components/Toast";
 import { useSocket } from "@/hooks/useSocket";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FloatingBackground } from "@/components/FloatingBackground";
+import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { VALID_FINAL_POINTS } from "@/lib/validation";
 import { slugify } from "@/lib/slugify";
@@ -199,14 +200,14 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       <div className="sticky top-0 z-40 glass-strong px-4 py-3">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex flex-col items-start leading-none">
+            <Link href="/" className="flex flex-col items-start leading-none hover:opacity-80 transition-opacity">
               <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
                 EUROVISION
               </span>
               <span className="text-sm font-semibold text-neon-cyan">
                 2026 JURY
               </span>
-            </div>
+            </Link>
             <div className="border-l border-muted-20 pl-3">
               <h1 className="neon-text text-2xl font-black">{jury.name}</h1>
               <p className="text-xs text-muted-40">

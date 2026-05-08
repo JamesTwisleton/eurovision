@@ -22,6 +22,7 @@ interface ScoreboardEntry {
   artist: string;
   song: string;
   flagEmoji: string;
+  youtubeUrl: string;
   totalPoints: number;
   juryScores: JuryScore[];
 }
@@ -35,6 +36,26 @@ interface JuryInfo {
 interface ScoreboardClientProps {
   initialScoreboard: ScoreboardEntry[];
   initialJuries: JuryInfo[];
+}
+
+function getYoutubeEmbedUrl(url: string) {
+  if (!url) return null;
+  let videoId = "";
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.hostname === "youtu.be") {
+      videoId = urlObj.pathname.slice(1);
+    } else if (urlObj.hostname.includes("youtube.com")) {
+      videoId = urlObj.searchParams.get("v") || "";
+      if (!videoId && urlObj.pathname.startsWith("/embed/")) {
+        videoId = urlObj.pathname.split("/")[2];
+      }
+    }
+  } catch {
+    const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#/]+)/);
+    if (match) videoId = match[1];
+  }
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 }
 
 export function ScoreboardClient({ initialScoreboard, initialJuries }: ScoreboardClientProps) {
@@ -72,14 +93,14 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
       <div className="sticky top-0 z-40 glass-strong px-4 py-3">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex flex-col items-start leading-none">
+            <Link href="/" className="flex flex-col items-start leading-none hover:opacity-80 transition-opacity">
               <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
                 EUROVISION
               </span>
               <span className="text-sm font-semibold text-neon-cyan">
                 2026 JURY
               </span>
-            </div>
+            </Link>
             <div className="border-l border-muted-20 pl-3">
               <h1 className="neon-text text-2xl font-black">SCOREBOARD</h1>
               <p className="text-xs text-muted-40 leading-relaxed">
@@ -194,6 +215,20 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
                         className="overflow-hidden"
                       >
                         <div className="mt-3 border-t border-muted-10 pt-3">
+                          {entry.youtubeUrl && (() => {
+                            const embedUrl = getYoutubeEmbedUrl(entry.youtubeUrl);
+                            return embedUrl ? (
+                              <div className="mb-3 aspect-video overflow-hidden rounded-xl bg-black shadow-lg">
+                                <iframe
+                                  src={embedUrl}
+                                  title={`${entry.country} performance`}
+                                  className="h-full w-full border-0"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                  allowFullScreen
+                                />
+                              </div>
+                            ) : null;
+                          })()}
                           <p className="text-xs font-semibold text-muted-50 uppercase tracking-wider mb-2">
                             Jury Breakdown
                           </p>
