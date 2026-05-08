@@ -41,8 +41,8 @@ export async function PATCH(
     data: parsed.data,
   });
 
-  // @ts-expect-error - io is attached to global in custom server.js
-  const io: Server = (global as any).io;
+  // io is attached to global in custom server.js
+  const io = (global as unknown as { io?: Server }).io;
   if (io) {
     io.to(`jury_${key}`).emit("member_updated", { memberId: id });
   }
@@ -83,8 +83,8 @@ export async function DELETE(
     await clearSession();
   }
 
-  // @ts-expect-error - io is attached to global in custom server.js
-  const io: Server = (global as any).io;
+  // io is attached to global in custom server.js
+  const io = (global as unknown as { io?: Server }).io;
   if (io) {
     io.to(`jury_${key}`).emit("member_removed", { memberId: id });
   }

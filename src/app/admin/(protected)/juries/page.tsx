@@ -49,7 +49,6 @@ export default function JuryAdminPage() {
   async function handleUpdateJury(e: React.FormEvent) {
     e.preventDefault();
     if (!editingJury) return;
-    setError("");
 
     const res = await fetch(`/api/admin/juries/${editingJury.id}`, {
       method: "PATCH",
