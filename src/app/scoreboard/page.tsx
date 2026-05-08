@@ -36,14 +36,12 @@ export default function ScoreboardPage() {
   const socketRef = useSocket();
   const [scoreboard, setScoreboard] = useState<ScoreboardEntry[]>([]);
   const [juries, setJuries] = useState<JuryInfo[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const fetchScoreboard = useCallback(async () => {
     const res = await fetch("/api/scoreboard");
     const data = await res.json();
     setScoreboard(data.scoreboard);
     setJuries(data.juries);
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -63,14 +61,6 @@ export default function ScoreboardPage() {
       socket.off("scoreboard_updated", handleUpdate);
     };
   }, [socketRef, fetchScoreboard]);
-
-  if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="text-xl text-muted-50">Loading scoreboard...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-1 flex-col relative">
