@@ -12,7 +12,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { FloatingBackground } from "@/components/FloatingBackground";
 import { cn } from "@/lib/cn";
 import { VALID_FINAL_POINTS } from "@/lib/validation";
-import { slugify } from "@/lib/slugify";
+
 
 interface Contestant {
   id: string;
@@ -140,8 +140,7 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
   }, [socketRef, member, fetchData]);
 
   async function handleShare() {
-    const slug = slugify(partyName);
-    const url = `${window.location.origin}/party/${partyKey}/${slug}`;
+    const url = `${window.location.origin}/party/${partyKey}`;
 
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile && navigator.share) {

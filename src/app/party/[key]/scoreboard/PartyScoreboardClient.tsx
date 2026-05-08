@@ -263,8 +263,11 @@ export function PartyScoreboardClient({
           </>
         )}
 
-        <div className="mt-8 flex justify-center gap-6">
-          <Link href={`/party/${partyKey}`} className="text-base font-medium text-muted-50 hover:text-primary transition-colors">
+        <div className="mt-8 mb-12 flex justify-center">
+          <Link
+            href={`/party/${partyKey}`}
+            className="rounded-xl border border-muted-20 px-6 py-3 text-base font-medium text-muted-60 hover:bg-muted-5 transition-colors"
+          >
             &larr; Back to your scorecard
           </Link>
         </div>
