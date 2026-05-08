@@ -103,7 +103,7 @@ export default function AdminPage() {
   return (
     <div className="flex flex-1 flex-col px-4 py-6 relative">
       <FloatingBackground />
-      <div className="mx-auto w-full max-w-2xl">
+      <div className="mx-auto w-full max-w-5xl">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex flex-col">
             <h1 className="neon-text text-3xl font-black">ADMIN</h1>
@@ -275,7 +275,7 @@ export default function AdminPage() {
         <h2 className="mb-3 text-lg font-bold">
           Contestants ({contestants.length})
         </h2>
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {contestants.length === 0 ? (
             <GlassCard className="text-center">
               <p className="text-muted-50 leading-relaxed">

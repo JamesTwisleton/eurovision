@@ -84,28 +84,80 @@ export default function Home() {
       </div>
 
       {mode === "choose" && (
-        <GlassCard className="relative z-10 w-full max-w-sm" strong>
-          <div className="flex flex-col gap-4">
-            <div className="text-center mb-2">
-              <p className="text-sm text-muted-60 leading-relaxed">
-                <strong className="text-muted-70">First time?</strong> Create a new jury for your
-                watch party. <strong className="text-muted-70">Been sent a code?</strong> Join an existing one.
-              </p>
+        <div className="relative z-10 grid w-full max-w-3xl grid-cols-1 gap-6 md:grid-cols-2 md:items-start">
+          <GlassCard className="w-full" strong>
+            <div className="flex flex-col gap-4">
+              <div className="text-center mb-2">
+                <p className="text-sm text-muted-60 leading-relaxed">
+                  <strong className="text-muted-70">First time?</strong> Create a new jury for your
+                  watch party. <strong className="text-muted-70">Been sent a code?</strong> Join an existing one.
+                </p>
+              </div>
+              <button
+                onClick={() => setMode("create")}
+                className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
+              >
+                Create a New Jury
+              </button>
+              <button
+                onClick={() => setMode("join")}
+                className="w-full rounded-xl border border-muted-20 px-6 py-4 text-lg font-semibold text-muted-70 transition-all hover:bg-muted-5 active:scale-95"
+              >
+                Join an Existing Jury
+              </button>
             </div>
-            <button
-              onClick={() => setMode("create")}
-              className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
-            >
-              Create a New Jury
-            </button>
-            <button
-              onClick={() => setMode("join")}
-              className="w-full rounded-xl border border-muted-20 px-6 py-4 text-lg font-semibold text-muted-70 transition-all hover:bg-muted-5 active:scale-95"
-            >
-              Join an Existing Jury
-            </button>
-          </div>
-        </GlassCard>
+          </GlassCard>
+
+          {/* How It Works - beside on desktop, below on mobile */}
+          <GlassCard className="w-full">
+            <h3 className="mb-3 text-center text-sm font-bold uppercase tracking-wider text-muted-60">
+              How It Works
+            </h3>
+            <ol className="flex flex-col gap-3 text-sm text-muted-50">
+              <li className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neon-pink/20 text-xs font-bold text-neon-pink">
+                  1
+                </span>
+                <span>
+                  <strong className="text-muted-70">Create or join a jury.</strong> One
+                  person creates it, then shares the code with friends.
+                  Everyone on the same code shares one scoresheet.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neon-purple/20 text-xs font-bold text-neon-purple">
+                  2
+                </span>
+                <span>
+                  <strong className="text-muted-70">Score each act as you watch.</strong>{" "}
+                  Tap a country, pick a score from 0&ndash;12. You can change
+                  your mind as many times as you like &mdash; it&apos;s a draft
+                  until you finalize.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neon-blue/20 text-xs font-bold text-neon-blue">
+                  3
+                </span>
+                <span>
+                  <strong className="text-muted-70">Finalize your votes.</strong> Just like
+                  real Eurovision, you must give out exactly one set of 12,
+                  10, 8, 7, 6, 5, 4, 3, 2, and 1 points. The rest get zero.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neon-cyan/20 text-xs font-bold text-neon-cyan">
+                  4
+                </span>
+                <span>
+                  <strong className="text-muted-70">Check the scoreboard!</strong> See how
+                  all the juries voted and which country comes out on top
+                  across all your friends.
+                </span>
+              </li>
+            </ol>
+          </GlassCard>
+        </div>
       )}
 
       {mode === "create" && (
@@ -204,58 +256,6 @@ export default function Home() {
           </div>
         </GlassCard>
       )}
-
-      {/* How It Works */}
-      <div className="relative z-10 mt-10 w-full max-w-sm">
-        <GlassCard>
-          <h3 className="mb-3 text-center text-sm font-bold uppercase tracking-wider text-muted-60">
-            How It Works
-          </h3>
-          <ol className="flex flex-col gap-3 text-sm text-muted-50">
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neon-pink/20 text-xs font-bold text-neon-pink">
-                1
-              </span>
-              <span>
-                <strong className="text-muted-70">Create or join a jury.</strong> 🤝 One
-                person creates it, then shares the code with friends.
-                Everyone on the same code shares one scoresheet.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neon-purple/20 text-xs font-bold text-neon-purple">
-                2
-              </span>
-              <span>
-                <strong className="text-muted-70">Score each act as you watch.</strong> 📝{" "}
-                Tap a country, pick a score from 0&ndash;12. You can change
-                your mind as many times as you like &mdash; it&apos;s a draft
-                until you finalize.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neon-blue/20 text-xs font-bold text-neon-blue">
-                3
-              </span>
-              <span>
-                <strong className="text-muted-70">Finalize your votes.</strong> ✅ Just like
-                real Eurovision, you must give out exactly one set of 12,
-                10, 8, 7, 6, 5, 4, 3, 2, and 1 points. The rest get zero.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neon-cyan/20 text-xs font-bold text-neon-cyan">
-                4
-              </span>
-              <span>
-                <strong className="text-muted-70">Check the scoreboard!</strong> 🏆 See how
-                all the juries voted and which country comes out on top
-                across all your friends.
-              </span>
-            </li>
-          </ol>
-        </GlassCard>
-      </div>
 
       <div className="relative z-10 mt-8 flex gap-6 text-sm text-muted-30">
         <a href="/scoreboard" className="hover:text-muted-50 transition-colors">

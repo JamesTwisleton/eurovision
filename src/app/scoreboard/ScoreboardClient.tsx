@@ -69,7 +69,7 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
 
       {/* Sticky header */}
       <div className="sticky top-0 z-40 glass-strong px-4 py-3">
-        <div className="mx-auto flex max-w-2xl items-center justify-between">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-start leading-none">
               <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
@@ -93,7 +93,7 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-2xl px-4 pt-4">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-4">
 
         {/* Jury list */}
         {juries.length > 0 && (
@@ -116,7 +116,7 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
             </p>
           </GlassCard>
         ) : juries.length === 0 ? (
-          <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {scoreboard.map((entry, rank) => (
               <div
                 key={entry.id}
@@ -135,12 +135,12 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
                 <span className="text-lg font-bold text-muted-20">—</span>
               </div>
             ))}
-            <p className="mt-2 text-center text-xs text-muted-30">
+            <p className="mt-2 text-center text-xs text-muted-30 sm:col-span-2 lg:col-span-3">
               Waiting for juries to finalize their votes...
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {scoreboard.map((entry, rank) => (
               <motion.div
                 key={entry.id}

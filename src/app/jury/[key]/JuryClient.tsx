@@ -176,7 +176,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       <FloatingBackground />
       {/* Header */}
       <div className="sticky top-0 z-40 glass-strong px-4 py-3">
-        <div className="mx-auto flex max-w-2xl items-center justify-between">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-start leading-none">
               <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
@@ -212,7 +212,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       </div>
 
       {/* Share button */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-3">
         <button
           onClick={handleShare}
           className="w-full rounded-lg bg-neon-blue/10 px-3 py-2.5 text-center text-xs text-neon-blue/80 transition-all hover:bg-neon-blue/15 active:scale-[0.98]"
@@ -232,7 +232,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       </div>
 
       {/* Instructions */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3 relative z-10">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-3 relative z-10">
         <div className="rounded-lg bg-muted-5 px-3 py-2 text-xs text-muted-40 leading-relaxed">
           <strong className="text-muted-60">Tap a country</strong>{" "}
           to give it a
@@ -243,7 +243,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       </div>
 
       {/* Progress summary */}
-      <div className="mx-auto w-full max-w-2xl px-4 pt-3">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-3">
         <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2 text-xs">
           <span className="text-muted-40">
             {scoredCount} of {jury.scores.length} countries scored
@@ -265,8 +265,8 @@ export function JuryClient({ initialJury }: JuryClientProps) {
       </div>
 
       {/* Contestant List */}
-      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-3">
-        <div className="flex flex-col gap-2">
+      <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {jury.scores.map((score) => (
             <button
               key={score.contestantId}
@@ -323,7 +323,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
               exit={{ opacity: 0, y: 40 }}
               className="fixed bottom-0 left-0 right-0 z-50 glass-strong p-4 pb-6"
             >
-              <div className="mx-auto max-w-2xl">
+              <div className="mx-auto max-w-5xl">
                 <div className="mb-1 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">
