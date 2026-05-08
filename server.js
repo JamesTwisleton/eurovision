@@ -29,10 +29,10 @@ app.prepare().then(() => {
     // Join global room for scoreboard updates
     socket.join("room:global");
 
-    // Join a specific jury room
-    socket.on("join_jury", (juryKey) => {
-      socket.join(`room:jury_${juryKey}`);
-      console.log(`${socket.id} joined room:jury_${juryKey}`);
+    // Join a specific watch party room
+    socket.on("join_party", (partyKey) => {
+      socket.join(`room:party_${partyKey}`);
+      console.log(`${socket.id} joined room:party_${partyKey}`);
     });
 
     socket.on("disconnect", () => {

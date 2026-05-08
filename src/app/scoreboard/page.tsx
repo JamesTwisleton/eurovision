@@ -7,8 +7,17 @@ async function getScoreboardData() {
   const contestants = await prisma.contestant.findMany({
     include: {
       scores: {
-        where: { jury: { hasFinalized: true } },
-        include: { jury: { select: { key: true, name: true } } },
+        where: { member: { hasFinalized: true } },
+        include: {
+          member: {
+            select: {
+              id: true,
+              name: true,
+              location: true,
+              watchParty: { select: { name: true, key: true } },
+            },
+          },
+        },
       },
     },
     orderBy: { performanceOrder: "asc" },
@@ -23,24 +32,27 @@ async function getScoreboardData() {
       flagEmoji: c.flagEmoji,
       youtubeUrl: c.youtubeUrl,
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
-      juryScores: c.scores.map((s) => ({
-        juryName: s.jury.name,
-        juryKey: s.jury.key,
+      memberScores: c.scores.map((s) => ({
+        memberName: s.member.name,
+        memberId: s.member.id,
+        memberLocation: s.member.location,
+        partyName: s.member.watchParty.name,
+        partyKey: s.member.watchParty.key,
         points: s.points,
       })),
     }))
     .sort((a, b) => b.totalPoints - a.totalPoints);
 
-  const juries = await prisma.jury.findMany({
-    where: { hasFinalized: true },
-    select: { key: true, name: true, location: true },
+  const parties = await prisma.watchParty.findMany({
+    where: { members: { some: { hasFinalized: true } } },
+    select: { key: true, name: true },
   });
 
-  return { scoreboard, juries };
+  return { scoreboard, parties };
 }
 
 export default async function ScoreboardPage() {
-  const { scoreboard, juries } = await getScoreboardData();
+  const { scoreboard, parties } = await getScoreboardData();
 
-  return <ScoreboardClient initialScoreboard={scoreboard} initialJuries={juries} />;
+  return <ScoreboardClient initialScoreboard={scoreboard} initialParties={parties} />;
 }

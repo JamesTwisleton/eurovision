@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 
   const body = await request.json();
@@ -31,12 +31,12 @@ export async function POST(request: NextRequest) {
     data: parsed.data,
   });
 
-  // Create score records for all existing juries
-  const juries = await prisma.jury.findMany();
-  if (juries.length > 0) {
+  // Create score records for all existing members
+  const members = await prisma.member.findMany();
+  if (members.length > 0) {
     await prisma.score.createMany({
-      data: juries.map((j) => ({
-        juryId: j.id,
+      data: members.map((m) => ({
+        memberId: m.id,
         contestantId: contestant.id,
         points: 0,
       })),
