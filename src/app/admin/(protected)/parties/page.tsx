@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FloatingBackground } from "@/components/FloatingBackground";
@@ -28,6 +29,7 @@ interface WatchParty {
 export default function AdminPartiesPage() {
   const [parties, setParties] = useState<WatchParty[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const fetchParties = useCallback(async () => {
     const res = await fetch("/api/admin/parties");
@@ -59,6 +61,13 @@ export default function AdminPartiesPage() {
     await fetch(`/api/admin/parties/${partyId}/members/${memberId}`, { method: "DELETE" });
     fetchParties();
   }
+
+  const copyToClipboard = (e: React.MouseEvent, key: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(key);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
 
   return (
     <div className="flex flex-1 flex-col px-4 py-6 relative">
@@ -94,99 +103,137 @@ export default function AdminPartiesPage() {
           </GlassCard>
         ) : (
           <div className="flex flex-col gap-3">
-            {parties.map((p) => (
-              <div key={p.id} className="glass p-4">
-                <div
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
-                >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-lg">{p.name}</span>
-                      <span className="rounded-full bg-muted-5 px-2 py-0.5 text-[10px] font-bold text-muted-50">
-                        {p._count.members} {p._count.members === 1 ? "member" : "members"}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-40">
-                      Code: <span className="font-mono text-muted-50">{p.key}</span> &middot;{" "}
-                      Created {new Date(p.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/party/${p.key}`}
-                      target="_blank"
-                      className="rounded-lg bg-muted-5 px-3 py-1.5 text-sm text-muted-60 hover:bg-muted-10"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      View
-                    </Link>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDeleteParty(p.id); }}
-                      className="rounded-lg bg-red-500/10 px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/20"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
+            {parties.map((p) => {
+              const isExpanded = expandedId === p.id;
+              const finalizedCount = p.members.filter(m => m.hasFinalized).length;
 
-                {expandedId === p.id && p.members.length > 0 && (
-                  <div className="mt-3 border-t border-muted-10 pt-3">
-                    <p className="text-xs font-semibold text-muted-50 uppercase tracking-wider mb-2">
-                      Members
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      {p.members.map((m) => (
-                        <div key={m.id} className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{m.name}</span>
-                            <span className="text-sm text-muted-40">{m.location}</span>
-                            <span
-                              className={cn(
-                                "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-                                m.role === "HOST"
-                                  ? "bg-neon-pink/20 text-neon-pink"
-                                  : "bg-muted-5 text-muted-50"
-                              )}
-                            >
-                              {m.role}
-                            </span>
-                            {m.hasFinalized && (
-                              <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-400">
-                                Finalised
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex gap-1">
-                            {m.role === "GUEST" ? (
-                              <button
-                                onClick={() => handleChangeRole(p.id, m.id, "HOST")}
-                                className="rounded px-2 py-1 text-xs text-muted-60 hover:bg-muted-10"
-                              >
-                                Make Host
-                              </button>
+              return (
+                <div key={p.id} className="glass overflow-hidden">
+                  <div
+                    className="flex items-center justify-between cursor-pointer p-4 hover:bg-muted-5 transition-colors"
+                    onClick={() => setExpandedId(isExpanded ? null : p.id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <motion.span
+                        animate={{ rotate: isExpanded ? 90 : 0 }}
+                        className="text-muted-30 text-[10px] w-3 flex justify-center"
+                      >
+                        ▶
+                      </motion.span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-lg">{p.name}</span>
+                          <span className="rounded-full bg-muted-5 px-2 py-0.5 text-[10px] font-bold text-muted-50">
+                            {p._count.members} {p._count.members === 1 ? "member" : "members"}
+                            {p._count.members > 0 && ` (${finalizedCount} finalised)`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-40">
+                          <span className="font-mono bg-muted-5 px-1.5 py-0.5 rounded text-muted-50">
+                            {p.key}
+                          </span>
+                          <button
+                            onClick={(e) => copyToClipboard(e, p.key)}
+                            className="text-[10px] uppercase font-bold text-neon-cyan hover:text-neon-cyan/80 transition-colors"
+                          >
+                            {copiedKey === p.key ? "Copied!" : "Copy"}
+                          </button>
+                          <span>&middot;</span>
+                          <span>Created {new Date(p.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/party/${p.key}`}
+                        target="_blank"
+                        className="rounded-lg bg-muted-5 px-3 py-1.5 text-sm text-muted-60 hover:bg-muted-10"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        View
+                      </Link>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteParty(p.id); }}
+                        className="rounded-lg bg-red-500/10 px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/20"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <div className="px-4 pb-4 pt-0">
+                          <div className="border-t border-muted-10 pt-4">
+                            <p className="text-xs font-semibold text-muted-50 uppercase tracking-wider mb-3">
+                              Members
+                            </p>
+                            {p.members.length === 0 ? (
+                              <p className="text-sm text-muted-40 italic">No members in this party yet.</p>
                             ) : (
-                              <button
-                                onClick={() => handleChangeRole(p.id, m.id, "GUEST")}
-                                className="rounded px-2 py-1 text-xs text-muted-60 hover:bg-muted-10"
-                              >
-                                Make Guest
-                              </button>
+                              <div className="flex flex-col gap-2">
+                                {p.members.map((m) => (
+                                  <div key={m.id} className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">{m.name}</span>
+                                      <span className="text-sm text-muted-40">{m.location}</span>
+                                      <span
+                                        className={cn(
+                                          "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                                          m.role === "HOST"
+                                            ? "bg-neon-pink/20 text-neon-pink"
+                                            : "bg-muted-5 text-muted-50"
+                                        )}
+                                      >
+                                        {m.role}
+                                      </span>
+                                      {m.hasFinalized && (
+                                        <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-400">
+                                          Finalised
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex gap-1">
+                                      {m.role === "GUEST" ? (
+                                        <button
+                                          onClick={() => handleChangeRole(p.id, m.id, "HOST")}
+                                          className="rounded px-2 py-1 text-xs text-muted-60 hover:bg-muted-10"
+                                        >
+                                          Make Host
+                                        </button>
+                                      ) : (
+                                        <button
+                                          onClick={() => handleChangeRole(p.id, m.id, "GUEST")}
+                                          className="rounded px-2 py-1 text-xs text-muted-60 hover:bg-muted-10"
+                                        >
+                                          Make Guest
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() => handleRemoveMember(p.id, m.id)}
+                                        className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-500/10"
+                                      >
+                                        Remove
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             )}
-                            <button
-                              onClick={() => handleRemoveMember(p.id, m.id)}
-                              className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-500/10"
-                            >
-                              Remove
-                            </button>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
