@@ -195,7 +195,6 @@ export function JuryClient({ initialJury }: JuryClientProps) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             {jury.hasFinalized && (
               <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-400">
                 Finalized
@@ -207,6 +206,7 @@ export function JuryClient({ initialJury }: JuryClientProps) {
             >
               Scoreboard
             </a>
+            <ThemeToggle />
           </div>
         </div>
       </div>
