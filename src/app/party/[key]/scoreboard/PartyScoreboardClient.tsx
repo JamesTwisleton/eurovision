@@ -117,7 +117,15 @@ export function PartyScoreboardClient({
               </p>
             </div>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <Link
+              href="/scoreboard"
+              className="text-sm font-medium text-muted-60 hover:text-primary transition-colors"
+            >
+              Global Scoreboard
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 
