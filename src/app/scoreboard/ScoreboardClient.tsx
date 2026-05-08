@@ -58,11 +58,17 @@ function getYoutubeEmbedUrl(url: string) {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 }
 
+function getJuryKeyFromCookie(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)jury_key=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 export function ScoreboardClient({ initialScoreboard, initialJuries }: ScoreboardClientProps) {
   const socketRef = useSocket();
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [juries, setJuries] = useState(initialJuries);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [juryKey] = useState(() => typeof document !== "undefined" ? getJuryKeyFromCookie() : null);
 
   const fetchScoreboard = useCallback(async () => {
     const res = await fetch("/api/scoreboard");
@@ -269,7 +275,15 @@ export function ScoreboardClient({ initialScoreboard, initialJuries }: Scoreboar
           </div>
         )}
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 flex justify-center gap-6">
+          {juryKey && (
+            <Link
+              href={`/jury/${juryKey}`}
+              className="text-sm text-muted-30 hover:text-muted-50 transition-colors"
+            >
+              &larr; Back to your jury
+            </Link>
+          )}
           <Link
             href="/"
             className="text-sm text-muted-30 hover:text-muted-50 transition-colors"

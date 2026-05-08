@@ -346,23 +346,23 @@ export function JuryClient({ initialJury }: JuryClientProps) {
               className="fixed bottom-0 left-0 right-0 z-50 glass-strong p-4 pb-6"
             >
               <div className="mx-auto max-w-5xl">
-                <div className="mb-1 flex items-center justify-between">
+                <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">
                       {selectedScore.contestant.flagEmoji}
                     </span>
-                    <span className="font-bold">
+                    <span className="font-bold text-lg">
                       {selectedScore.contestant.country}
                     </span>
                   </div>
                   <button
                     onClick={() => setSelectedContestant(null)}
-                    className="text-sm text-muted-40 hover:text-muted-60"
+                    className="rounded-lg border border-muted-20 px-4 py-1.5 text-sm font-medium text-primary hover:bg-muted-10 transition-colors"
                   >
                     Done
                   </button>
                 </div>
-                <p className="mb-3 text-xs text-muted-30">
+                <p className="mb-3 text-sm text-primary/70">
                   Tap a number to assign that score. Tap the same number
                   again to clear it.
                 </p>
@@ -406,14 +406,14 @@ export function JuryClient({ initialJury }: JuryClientProps) {
 
         {/* Finalize section */}
         <div className="mt-6 pb-24">
-          <GlassCard className="mb-4">
-            <h3 className="mb-1 text-sm font-bold text-muted-70">
+          <GlassCard className="mb-4" strong>
+            <h3 className="mb-2 text-base font-bold text-primary">
               Ready to submit?
             </h3>
-            <p className="text-xs text-muted-40 leading-relaxed">
+            <p className="text-sm text-primary/70 leading-relaxed">
               Just like real Eurovision, your final votes must follow the
-              official format: give exactly <strong className="text-muted-60">one country 12 points</strong> (your
-              favourite), <strong className="text-muted-60">one country 10</strong>, then <strong className="text-muted-60">one each of 8, 7, 6, 5, 4, 3,
+              official format: give exactly <strong className="text-primary">one country 12 points</strong> (your
+              favourite), <strong className="text-primary">one country 10</strong>, then <strong className="text-primary">one each of 8, 7, 6, 5, 4, 3,
               2, and 1</strong>. All other countries get zero. You can still
               edit after finalizing.
             </p>
