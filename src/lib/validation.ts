@@ -8,15 +8,15 @@ export const draftScoreSchema = z.object({
 });
 
 export const createWatchPartySchema = z.object({
-  partyName: z.string().min(1).max(100),
-  memberName: z.string().min(1).max(100),
-  memberLocation: z.string().min(1).max(100),
+  partyName: z.string().trim().min(1).max(100),
+  memberName: z.string().trim().toLowerCase().min(1).max(100),
+  memberLocation: z.string().trim().toLowerCase().min(1).max(100),
 });
 
 export const joinWatchPartySchema = z.object({
-  key: z.string().min(1),
-  name: z.string().min(1).max(100),
-  location: z.string().min(1).max(100),
+  key: z.string().trim().toLowerCase().min(1),
+  name: z.string().trim().toLowerCase().min(1).max(100),
+  location: z.string().trim().toLowerCase().min(1).max(100),
 });
 
 export const contestantSchema = z.object({

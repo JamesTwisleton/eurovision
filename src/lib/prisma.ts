@@ -22,6 +22,6 @@ export async function findWatchPartyByIdOrKey(idOrKey: string) {
   }
 
   return prisma.watchParty.findUnique({
-    where: { key: idOrKey }
+    where: { key: idOrKey.toLowerCase().trim() }
   });
 }
