@@ -6,8 +6,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SortControls } from "@/components/SortControls";
 import { FloatingBackground } from "@/components/FloatingBackground";
 import { useSocket } from "@/hooks/useSocket";
+import { useSortPreference, sortEntries } from "@/hooks/useSortPreference";
 import { cn } from "@/lib/cn";
 
 interface MemberScore {
@@ -22,6 +24,7 @@ interface ScoreboardEntry {
   country: string;
   artist: string;
   song: string;
+  performanceOrder: number;
   flagEmoji: string;
   youtubeUrl: string;
   totalPoints: number;
@@ -77,6 +80,7 @@ export function PartyScoreboardClient({
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [members, setMembers] = useState(initialMembers);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { sortBy, sortOrder, setSortBy, toggleSortOrder, isLoaded } = useSortPreference();
 
   const fetchScoreboard = useCallback(async () => {
     const res = await fetch(`/api/watch-party/${partyKey}/scoreboard`);
@@ -84,6 +88,23 @@ export function PartyScoreboardClient({
     setScoreboard(data.scoreboard);
     setMembers(data.members);
   }, [partyKey]);
+
+  const scoreboardWithRank = scoreboard.map((entry, index) => ({
+    ...entry,
+    rank: index + 1,
+  }));
+
+  const sortedScoreboard = isLoaded
+    ? sortEntries(
+      scoreboardWithRank,
+      sortBy,
+      sortOrder,
+      (e) => e.performanceOrder,
+      (e) => e.country,
+      (e) => e.artist,
+      (e) => e.totalPoints
+    )
+    : scoreboardWithRank;
 
   useEffect(() => {
     const socket = socketRef.current;
@@ -136,6 +157,12 @@ export function PartyScoreboardClient({
             >
               Global Scoreboard
             </Link>
+            <SortControls
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortByChange={setSortBy}
+              onToggleOrder={toggleSortOrder}
+            />
             <ThemeToggle />
           </div>
         </div>
@@ -164,7 +191,8 @@ export function PartyScoreboardClient({
               </p>
             )}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {scoreboard.map((entry, rank) => {
+              {sortedScoreboard.map((entry) => {
+                const rank = entry.rank - 1;
                 const isExpanded = selectedId === entry.id;
                 return (
                   <motion.div
