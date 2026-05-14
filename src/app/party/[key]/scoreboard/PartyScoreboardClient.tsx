@@ -12,8 +12,8 @@ import { cn } from "@/lib/cn";
 
 interface MemberScore {
   memberName: string;
-  memberId: string;
-  memberLocation: string;
+  memberId?: string;
+  memberLocation?: string;
   points: number;
 }
 
@@ -29,9 +29,9 @@ interface ScoreboardEntry {
 }
 
 interface MemberInfo {
-  id: string;
+  id?: string;
   name: string;
-  location: string;
+  location?: string;
 }
 
 interface PartyScoreboardClientProps {
@@ -39,6 +39,8 @@ interface PartyScoreboardClientProps {
   partyName: string;
   initialScoreboard: ScoreboardEntry[];
   initialMembers: MemberInfo[];
+  userPartyKey: string | null;
+  isPartyMember: boolean;
 }
 
 function getYoutubeEmbedUrl(url: string) {
@@ -66,6 +68,8 @@ export function PartyScoreboardClient({
   partyName,
   initialScoreboard,
   initialMembers,
+  userPartyKey,
+  isPartyMember,
 }: PartyScoreboardClientProps) {
   const socketRef = useSocket(partyKey);
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
@@ -110,7 +114,13 @@ export function PartyScoreboardClient({
             <div className="border-l border-muted-20 pl-3">
               <h1 className="neon-text text-2xl font-black">SCOREBOARD</h1>
               <p className="text-sm text-muted-60 leading-relaxed">
-                {partyName} &middot;{" "}
+                {partyName}
+                {isPartyMember && (
+                  <span className="ml-1 text-[10px] font-mono text-neon-cyan opacity-70">
+                    ({partyKey})
+                  </span>
+                )}
+                {" "}&middot;{" "}
                 {members.length > 0
                   ? `${members.length} ${members.length === 1 ? "member has" : "members have"} finalised.`
                   : "No members have finalised yet."}
@@ -132,9 +142,9 @@ export function PartyScoreboardClient({
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
         {members.length > 0 && (
           <div className="mb-4 flex flex-wrap justify-center gap-2">
-            {members.map((m) => (
-              <span key={m.id} className="rounded-full bg-muted-5 px-3 py-1 text-sm text-muted-60">
-                {m.name} ({m.location})
+            {members.map((m, idx) => (
+              <span key={m.id || idx} className="rounded-full bg-muted-5 px-3 py-1 text-sm text-muted-60">
+                {m.name}{m.location ? ` (${m.location})` : ""}
               </span>
             ))}
           </div>
@@ -228,10 +238,10 @@ export function PartyScoreboardClient({
                                   {entry.memberScores
                                     .slice()
                                     .sort((a, b) => b.points - a.points)
-                                    .map((ms) => (
-                                      <div key={ms.memberId} className="flex items-center justify-between text-base">
+                                    .map((ms, idx) => (
+                                      <div key={ms.memberId || idx} className="flex items-center justify-between text-base">
                                         <span className="text-muted-60 truncate">
-                                          {ms.memberName} <span className="text-muted-50">({ms.memberLocation})</span>
+                                          {ms.memberName}{ms.memberLocation ? <span className="text-muted-50"> ({ms.memberLocation})</span> : ""}
                                         </span>
                                         <span
                                           className={cn(
@@ -263,12 +273,20 @@ export function PartyScoreboardClient({
           </>
         )}
 
-        <div className="mt-8 mb-12 flex justify-center">
+        <div className="mt-8 mb-12 flex flex-col items-center gap-4">
+          {userPartyKey && (
+            <Link
+              href={`/party/${userPartyKey}`}
+              className="rounded-xl border border-neon-pink/30 px-6 py-3 text-base font-medium text-neon-pink hover:bg-neon-pink/5 transition-colors"
+            >
+              &larr; Back to your scorecard
+            </Link>
+          )}
           <Link
-            href={`/party/${partyKey}`}
-            className="rounded-xl border border-muted-20 px-6 py-3 text-base font-medium text-muted-60 hover:bg-muted-5 transition-colors"
+            href="/"
+            className="text-sm font-medium text-muted-50 hover:text-primary transition-colors"
           >
-            &larr; Back to your scorecard
+            &larr; Back to Home
           </Link>
         </div>
       </div>

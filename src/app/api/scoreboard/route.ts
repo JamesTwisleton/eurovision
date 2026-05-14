@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getMemberFromRequest } from "@/lib/session";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const currentMember = await getMemberFromRequest(request);
+  const currentMemberPartyKey = currentMember?.watchParty.key || null;
+
   const contestants = await prisma.contestant.findMany({
     include: {
       scores: {
@@ -27,10 +31,8 @@ export async function GET() {
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
       memberScores: c.scores.map((s) => ({
         memberName: s.member.name,
-        memberId: s.member.id,
-        memberLocation: s.member.location,
         partyName: s.member.watchParty.name,
-        partyKey: s.member.watchParty.key,
+        partyKey: s.member.watchParty.key === currentMemberPartyKey ? s.member.watchParty.key : null,
         points: s.points,
       })),
     }))
@@ -38,8 +40,17 @@ export async function GET() {
 
   const parties = await prisma.watchParty.findMany({
     where: { members: { some: { hasFinalized: true } } },
-    select: { key: true, name: true },
+    select: {
+      key: true,
+      name: true,
+      id: true
+    },
   });
 
-  return NextResponse.json({ scoreboard, parties });
+  const sanitizedParties = parties.map(p => ({
+    name: p.name,
+    key: p.key === currentMemberPartyKey ? p.key : p.id
+  }));
+
+  return NextResponse.json({ scoreboard, parties: sanitizedParties });
 }

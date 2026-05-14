@@ -22,6 +22,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
   }
 
+  const existingMember = await prisma.member.findUnique({
+    where: {
+      watchPartyId_name_location: {
+        watchPartyId: watchParty.id,
+        name: parsed.data.name,
+        location: parsed.data.location,
+      },
+    },
+  });
+
+  if (existingMember) {
+    if (body.confirm !== true) {
+      return NextResponse.json(
+        {
+          error: "Conflict",
+          message: `There's already a ${existingMember.name} from ${existingMember.location}. Are you signing back in to your ${watchParty.name} scorecard?`,
+          watchPartyName: watchParty.name,
+        },
+        { status: 409 }
+      );
+    }
+
+    const response = NextResponse.json({ watchParty, member: existingMember });
+    setMemberCookie(response, existingMember.id);
+    return response;
+  }
+
   const contestants = await prisma.contestant.findMany();
 
   const member = await prisma.member.create({

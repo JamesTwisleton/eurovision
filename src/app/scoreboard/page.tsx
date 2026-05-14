@@ -2,8 +2,11 @@ export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
 import { ScoreboardClient } from "./ScoreboardClient";
+import { getMemberFromRequest } from "@/lib/session";
+import { NextRequest } from "next/server";
+import { cookies } from "next/headers";
 
-async function getScoreboardData() {
+async function getScoreboardData(currentMemberId: string | null) {
   const contestants = await prisma.contestant.findMany({
     include: {
       scores: {
@@ -34,10 +37,8 @@ async function getScoreboardData() {
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
       memberScores: c.scores.map((s) => ({
         memberName: s.member.name,
-        memberId: s.member.id,
-        memberLocation: s.member.location,
         partyName: s.member.watchParty.name,
-        partyKey: s.member.watchParty.key,
+        partyKey: s.member.watchParty.key === currentMemberId ? s.member.watchParty.key : null,
         points: s.points,
       })),
     }))
@@ -45,14 +46,32 @@ async function getScoreboardData() {
 
   const parties = await prisma.watchParty.findMany({
     where: { members: { some: { hasFinalized: true } } },
-    select: { key: true, name: true },
+    select: { key: true, name: true, id: true },
   });
 
   return { scoreboard, parties };
 }
 
 export default async function ScoreboardPage() {
-  const { scoreboard, parties } = await getScoreboardData();
+  const cookieStore = await cookies();
+  const request = {
+    cookies: {
+      get: (name: string) => cookieStore.get(name),
+    },
+  } as unknown as NextRequest;
 
-  return <ScoreboardClient initialScoreboard={scoreboard} initialParties={parties} />;
+  const member = await getMemberFromRequest(request);
+  const { scoreboard, parties } = await getScoreboardData(member?.watchParty.key || null);
+
+  return (
+    <ScoreboardClient
+      initialScoreboard={scoreboard}
+      initialParties={parties.map(p => ({
+        name: p.name,
+        key: p.key === member?.watchParty.key ? p.key : p.id, // Use ID as placeholder if not authorized
+        isAuthorized: p.key === member?.watchParty.key
+      }))}
+      userPartyKey={member?.watchParty.key || null}
+    />
+  );
 }
