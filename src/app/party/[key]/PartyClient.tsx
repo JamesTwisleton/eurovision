@@ -8,7 +8,9 @@ import { GlassCard } from "@/components/GlassCard";
 import { ScoreInput } from "@/components/ScoreInput";
 import { Toast } from "@/components/Toast";
 import { useSocket } from "@/hooks/useSocket";
+import { useSortPreference, sortEntries } from "@/hooks/useSortPreference";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SortControls } from "@/components/SortControls";
 import { FloatingBackground } from "@/components/FloatingBackground";
 import { cn } from "@/lib/cn";
 import { VALID_FINAL_POINTS } from "@/lib/validation";
@@ -72,6 +74,7 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
   const [joinError, setJoinError] = useState("");
   const [joinLoading, setJoinLoading] = useState(false);
   const [selectedContestant, setSelectedContestant] = useState<string | null>(null);
+  const { sortBy, sortOrder, setSortBy, toggleSortOrder, isLoaded } = useSortPreference();
   const [toast, setToast] = useState<{ message: string; type: "error" | "success" } | null>(null);
   const [showHenry, setShowHenry] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -326,6 +329,18 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
   const missingPoints = VALID_FINAL_POINTS.filter((p) => !usedPoints.has(p));
   const scoredCount = scores.filter((s) => s.points > 0).length;
 
+  const sortedScores = isLoaded
+    ? sortEntries(
+      scores,
+      sortBy,
+      sortOrder,
+      (s) => s.contestant.performanceOrder,
+      (s) => s.contestant.country,
+      (s) => s.contestant.artist,
+      (s) => s.points
+    )
+    : scores;
+
   function getYoutubeEmbedUrl(url: string) {
     if (!url) return null;
     let videoId = "";
@@ -410,13 +425,21 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
         </button>
       </div>
 
-      {/* Instructions */}
-      <div className="mx-auto w-full max-w-5xl px-4 pt-3 relative z-10">
-        <div className="rounded-lg bg-muted-5 px-3 py-2 text-sm text-muted-60 leading-relaxed">
+      {/* Instructions & Sort */}
+      <div className="mx-auto w-full max-w-5xl px-4 pt-3 relative z-10 flex flex-col sm:flex-row sm:items-start gap-3">
+        <div className="flex-1 rounded-lg bg-muted-5 px-3 py-2 text-sm text-muted-60 leading-relaxed">
           <strong className="text-muted-70">Tap a country</strong>{" "}
           to give it a score. During the show, feel free to change scores as much as you
           like &mdash; nothing is locked in until you hit &quot;Finalise&quot; at
           the bottom. This is your personal scorecard.
+        </div>
+        <div className="flex justify-end shrink-0">
+          <SortControls
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSortByChange={setSortBy}
+            onToggleOrder={toggleSortOrder}
+          />
         </div>
       </div>
 
@@ -445,7 +468,7 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
       {/* Contestant List */}
       <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-3">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {scores.map((score) => {
+          {sortedScores.map((score) => {
             const others = otherScores[score.contestantId] || [];
             return (
               <div

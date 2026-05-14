@@ -41,6 +41,7 @@ export async function GET(
       country: c.country,
       artist: c.artist,
       song: c.song,
+      performanceOrder: c.performanceOrder,
       flagEmoji: c.flagEmoji,
       youtubeUrl: c.youtubeUrl,
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
