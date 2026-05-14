@@ -33,11 +33,13 @@ interface ScoreboardEntry {
 interface PartyInfo {
   key: string;
   name: string;
+  isAuthorized?: boolean;
 }
 
 interface ScoreboardClientProps {
   initialScoreboard: ScoreboardEntry[];
   initialParties: PartyInfo[];
+  userPartyKey: string | null;
 }
 
 function getYoutubeEmbedUrl(url: string) {
@@ -60,7 +62,7 @@ function getYoutubeEmbedUrl(url: string) {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 }
 
-export function ScoreboardClient({ initialScoreboard, initialParties }: ScoreboardClientProps) {
+export function ScoreboardClient({ initialScoreboard, initialParties, userPartyKey }: ScoreboardClientProps) {
   const socketRef = useSocket();
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [parties, setParties] = useState(initialParties);
@@ -119,10 +121,19 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
             {parties.map((p) => (
               <Link
                 key={p.key}
-                href={`/party/${p.key}/scoreboard`}
-                className="rounded-full bg-muted-5 px-3 py-1 text-sm text-muted-60 hover:text-primary transition-colors"
+                href={p.isAuthorized ? `/party/${p.key}/scoreboard` : "#"}
+                className={cn(
+                  "rounded-full bg-muted-5 px-3 py-1 text-sm text-muted-60 transition-colors",
+                  p.isAuthorized ? "hover:text-primary" : "cursor-default opacity-80"
+                )}
+                onClick={(e) => !p.isAuthorized && e.preventDefault()}
               >
                 {p.name}
+                {p.isAuthorized && (
+                  <span className="ml-1 text-[10px] font-mono text-neon-cyan opacity-70">
+                    ({p.key})
+                  </span>
+                )}
               </Link>
             ))}
           </div>
@@ -252,8 +263,16 @@ export function ScoreboardClient({ initialScoreboard, initialParties }: Scoreboa
           </>
         )}
 
-        <div className="mt-8 flex justify-center gap-6">
-          <Link href="/" className="text-base font-medium text-muted-50 hover:text-primary transition-colors">
+        <div className="mt-8 flex flex-col items-center gap-4">
+          {userPartyKey && (
+            <Link
+              href={`/party/${userPartyKey}`}
+              className="rounded-xl border border-neon-pink/30 px-6 py-3 text-base font-medium text-neon-pink hover:bg-neon-pink/5 transition-colors"
+            >
+              &larr; Back to your scorecard
+            </Link>
+          )}
+          <Link href="/" className="text-sm font-medium text-muted-50 hover:text-primary transition-colors">
             &larr; Back to Home
           </Link>
         </div>
