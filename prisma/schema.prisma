@@ -32,6 +32,8 @@ model Member {
   scores       Score[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+
+  @@unique([watchPartyId, name, location])
 }
 
 model Contestant {

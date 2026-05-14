@@ -27,8 +27,6 @@ export async function GET() {
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
       memberScores: c.scores.map((s) => ({
         memberName: s.member.name,
-        memberId: s.member.id,
-        memberLocation: s.member.location,
         partyName: s.member.watchParty.name,
         partyKey: s.member.watchParty.key,
         points: s.points,

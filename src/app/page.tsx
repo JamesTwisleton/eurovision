@@ -40,7 +40,7 @@ export default function Home() {
     router.push(`/party/${data.watchParty.key}`);
   }
 
-  async function handleJoin() {
+  async function handleJoin(confirmOverride = false) {
     if (!joinCode || !joinName || !joinLocation) {
       setError("Please fill in all fields");
       return;
@@ -54,10 +54,21 @@ export default function Home() {
         key: joinCode.trim().toLowerCase(),
         name: joinName,
         location: joinLocation,
+        confirm: confirmOverride,
       }),
     });
     const data = await res.json();
     if (!res.ok) {
+      if (res.status === 409) {
+        if (window.confirm(data.message)) {
+          handleJoin(true);
+          return;
+        } else {
+          setError("Pick a different name or location");
+          setLoading(false);
+          return;
+        }
+      }
       setError(data.error || "Couldn't find that watch party. Double-check the code and try again.");
       setLoading(false);
       return;
@@ -282,7 +293,7 @@ export default function Home() {
             </div>
             {error && <p className="text-sm text-red-400">{error}</p>}
             <button
-              onClick={handleJoin}
+              onClick={() => handleJoin()}
               disabled={loading}
               className="rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-3 font-bold text-white transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
             >

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getMemberFromRequest } from "@/lib/session";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ key: string }> }
 ) {
   const { key } = await params;
@@ -15,6 +16,10 @@ export async function GET(
   if (!watchParty) {
     return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
   }
+
+  const currentMember = await getMemberFromRequest(request);
+  const isPartyMember = currentMember?.watchPartyId === watchParty.id;
+  const isHost = currentMember?.role === "HOST" && isPartyMember;
 
   const contestants = await prisma.contestant.findMany({
     include: {
@@ -44,8 +49,8 @@ export async function GET(
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
       memberScores: c.scores.map((s) => ({
         memberName: s.member.name,
-        memberId: s.member.id,
-        memberLocation: s.member.location,
+        memberId: isHost ? s.member.id : undefined,
+        memberLocation: isPartyMember ? s.member.location : undefined,
         points: s.points,
       })),
     }))
@@ -53,7 +58,11 @@ export async function GET(
 
   const finalisedMembers = await prisma.member.findMany({
     where: { watchPartyId: watchParty.id, hasFinalized: true },
-    select: { id: true, name: true, location: true },
+    select: {
+      id: isHost,
+      name: true,
+      location: isPartyMember,
+    },
   });
 
   return NextResponse.json({

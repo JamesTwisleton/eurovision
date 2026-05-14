@@ -196,7 +196,7 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
     setToast({ message: "Scores and finalisation reset.", type: "success" });
   }
 
-  async function handleJoinParty() {
+  async function handleJoinParty(confirmOverride = false) {
     if (!joinName || !joinLocation) {
       setJoinError("Please fill in both fields");
       return;
@@ -210,10 +210,21 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
         key: partyKey,
         name: joinName,
         location: joinLocation,
+        confirm: confirmOverride,
       }),
     });
+    const data = await res.json();
     if (!res.ok) {
-      const data = await res.json();
+      if (res.status === 409) {
+        if (window.confirm(data.message)) {
+          handleJoinParty(true);
+          return;
+        } else {
+          setJoinError("Pick a different name or location");
+          setJoinLoading(false);
+          return;
+        }
+      }
       setJoinError(data.error || "Failed to join watch party");
       setJoinLoading(false);
       return;
@@ -282,7 +293,7 @@ export function PartyClient({ partyKey, partyName }: PartyClientProps) {
             </div>
             {joinError && <p className="text-sm text-red-400">{joinError}</p>}
             <button
-              onClick={handleJoinParty}
+              onClick={() => handleJoinParty()}
               disabled={joinLoading}
               className="rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-3 font-bold text-white transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
             >

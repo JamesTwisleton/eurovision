@@ -16,10 +16,12 @@ export async function GET(
     return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
   }
 
+  const isHost = member.role === "HOST";
+
   const members = await prisma.member.findMany({
     where: { watchPartyId: watchParty.id },
     select: {
-      id: true,
+      id: isHost,
       name: true,
       location: true,
       role: true,
@@ -29,5 +31,5 @@ export async function GET(
     orderBy: { createdAt: "asc" },
   });
 
-  return NextResponse.json({ members, isHost: member.role === "HOST" });
+  return NextResponse.json({ members, isHost });
 }
