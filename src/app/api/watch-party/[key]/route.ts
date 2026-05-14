@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { requireMember } from "@/lib/session";
+import { prisma, findWatchPartyByIdOrKey } from "@/lib/prisma";
+import { getMemberFromRequest } from "@/lib/session";
 
 export async function GET(
   request: NextRequest,
@@ -8,11 +8,25 @@ export async function GET(
 ) {
   const { key } = await params;
 
-  const { member, error } = await requireMember(request);
-  if (error) return error;
+  const currentMember = await getMemberFromRequest(request);
 
-  const watchParty = await prisma.watchParty.findUnique({
-    where: { key },
+  const watchParty = await findWatchPartyByIdOrKey(key);
+
+  if (!watchParty) {
+    return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
+  }
+
+  const isPartyMember = currentMember?.watchPartyId === watchParty.id;
+
+  if (!isPartyMember) {
+    return NextResponse.json({ error: "You are not a member of this watch party" }, { status: 403 });
+  }
+
+  // If we reach here, currentMember is guaranteed to be a member of this party
+  const member = currentMember!;
+
+  const partyWithMembers = await prisma.watchParty.findUnique({
+    where: { id: watchParty.id },
     include: {
       members: {
         select: { id: true, name: true, location: true, role: true, hasFinalized: true },
@@ -20,14 +34,6 @@ export async function GET(
       },
     },
   });
-
-  if (!watchParty) {
-    return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
-  }
-
-  if (member.watchPartyId !== watchParty.id) {
-    return NextResponse.json({ error: "You are not a member of this watch party" }, { status: 403 });
-  }
 
   // Current member's scores
   const scores = await prisma.score.findMany({
@@ -62,7 +68,7 @@ export async function GET(
   }
 
   return NextResponse.json({
-    watchParty,
+    watchParty: partyWithMembers,
     member: {
       id: member.id,
       name: member.name,

@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { prisma } from "@/lib/prisma";
+import { prisma, findWatchPartyByIdOrKey } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { PartyScoreboardClient } from "./PartyScoreboardClient";
 import { getMemberFromRequest } from "@/lib/session";
@@ -12,10 +12,7 @@ interface Props {
 }
 
 async function getScoreboardData(key: string, currentMember: any) {
-  const watchParty = await prisma.watchParty.findUnique({
-    where: { key },
-    select: { id: true, name: true, key: true },
-  });
+  const watchParty = await findWatchPartyByIdOrKey(key);
 
   if (!watchParty) return null;
 
@@ -49,7 +46,7 @@ async function getScoreboardData(key: string, currentMember: any) {
       youtubeUrl: c.youtubeUrl,
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
       memberScores: c.scores.map((s) => ({
-        memberName: s.member.name,
+        memberName: isPartyMember ? s.member.name : "Member",
         memberId: isHost ? s.member.id : undefined,
         memberLocation: isPartyMember ? s.member.location : undefined,
         points: s.points,
@@ -66,6 +63,12 @@ async function getScoreboardData(key: string, currentMember: any) {
     },
   });
 
+  const sanitizedMembers = finalisedMembers.map(m => ({
+    ...m,
+    name: isPartyMember ? m.name : "Member",
+    location: isPartyMember ? m.location : undefined,
+  }));
+
   return {
     watchParty: {
       id: watchParty.id,
@@ -73,7 +76,7 @@ async function getScoreboardData(key: string, currentMember: any) {
       key: isPartyMember ? watchParty.key : watchParty.id,
     },
     scoreboard,
-    members: finalisedMembers,
+    members: sanitizedMembers,
     isPartyMember,
     isHost
   };
@@ -96,6 +99,7 @@ export default async function PartyScoreboardPage({ params }: Props) {
   return (
     <PartyScoreboardClient
       partyKey={data.watchParty.key}
+      partyId={data.watchParty.id}
       partyName={data.watchParty.name}
       initialScoreboard={data.scoreboard}
       initialMembers={data.members}

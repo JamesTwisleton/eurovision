@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
   setMemberCookie(response, member.id);
 
   // Notify party members
-  global.io?.to(`room:party_${watchParty.key}`).emit("member_joined", {
+  global.io?.to(`room:party_${watchParty.id}`).emit("member_joined", {
     memberId: member.id,
     name: member.name,
     location: member.location,

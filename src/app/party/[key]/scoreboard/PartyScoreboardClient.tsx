@@ -36,6 +36,7 @@ interface MemberInfo {
 
 interface PartyScoreboardClientProps {
   partyKey: string;
+  partyId: string;
   partyName: string;
   initialScoreboard: ScoreboardEntry[];
   initialMembers: MemberInfo[];
@@ -65,13 +66,14 @@ function getYoutubeEmbedUrl(url: string) {
 
 export function PartyScoreboardClient({
   partyKey,
+  partyId,
   partyName,
   initialScoreboard,
   initialMembers,
   userPartyKey,
   isPartyMember,
 }: PartyScoreboardClientProps) {
-  const socketRef = useSocket(partyKey);
+  const socketRef = useSocket(partyId);
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [members, setMembers] = useState(initialMembers);
   const [selectedId, setSelectedId] = useState<string | null>(null);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, findWatchPartyByIdOrKey } from "@/lib/prisma";
 import { draftScoreSchema } from "@/lib/validation";
 import { requireMember } from "@/lib/session";
 
@@ -26,7 +26,7 @@ export async function PUT(
   if (error) return error;
 
   // Verify member belongs to this party
-  const watchParty = await prisma.watchParty.findUnique({ where: { key } });
+  const watchParty = await findWatchPartyByIdOrKey(key);
   if (!watchParty || member.watchPartyId !== watchParty.id) {
     return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
   }
@@ -48,7 +48,7 @@ export async function PUT(
   });
 
   // Emit to party room so others can see live updates
-  global.io?.to(`room:party_${key}`).emit("draft_updated", {
+  global.io?.to(`room:party_${watchParty.id}`).emit("draft_updated", {
     memberId: member.id,
     memberName: member.name,
     contestantId: score.contestantId,
@@ -58,7 +58,7 @@ export async function PUT(
 
   // If member already finalised, update scoreboards
   if (member.hasFinalized) {
-    global.io?.to(`room:party_${key}`).emit("scoreboard_updated");
+    global.io?.to(`room:party_${watchParty.id}`).emit("scoreboard_updated");
     global.io?.to("room:global").emit("scoreboard_updated");
   }
 

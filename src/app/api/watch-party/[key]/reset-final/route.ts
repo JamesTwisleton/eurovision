@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, findWatchPartyByIdOrKey } from "@/lib/prisma";
 import { requireMember } from "@/lib/session";
 
 declare global {
@@ -15,7 +15,7 @@ export async function POST(
   const { member, error } = await requireMember(request);
   if (error) return error;
 
-  const watchParty = await prisma.watchParty.findUnique({ where: { key } });
+  const watchParty = await findWatchPartyByIdOrKey(key);
   if (!watchParty || member.watchPartyId !== watchParty.id) {
     return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
   }
@@ -30,7 +30,7 @@ export async function POST(
     data: { hasFinalized: false },
   });
 
-  global.io?.to(`room:party_${key}`).emit("scoreboard_updated");
+  global.io?.to(`room:party_${watchParty.id}`).emit("scoreboard_updated");
   global.io?.to("room:global").emit("scoreboard_updated");
 
   return NextResponse.json({ success: true, message: "Scores and finalisation reset." });

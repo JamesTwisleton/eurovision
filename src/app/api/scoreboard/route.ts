@@ -29,12 +29,15 @@ export async function GET(request: NextRequest) {
       flagEmoji: c.flagEmoji,
       youtubeUrl: c.youtubeUrl,
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
-      memberScores: c.scores.map((s) => ({
-        memberName: s.member.name,
-        partyName: s.member.watchParty.name,
-        partyKey: s.member.watchParty.key === currentMemberPartyKey ? s.member.watchParty.key : null,
-        points: s.points,
-      })),
+      memberScores: c.scores.map((s) => {
+        const isPartyMember = s.member.watchParty.key === currentMemberPartyKey;
+        return {
+          memberName: isPartyMember ? s.member.name : "Member",
+          partyName: s.member.watchParty.name,
+          partyKey: isPartyMember ? s.member.watchParty.key : s.member.watchParty.id,
+          points: s.points,
+        };
+      }),
     }))
     .sort((a, b) => b.totalPoints - a.totalPoints);
 
