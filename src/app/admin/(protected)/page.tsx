@@ -2,9 +2,12 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/cn";
 import { GlassCard } from "@/components/GlassCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FloatingBackground } from "@/components/FloatingBackground";
+import { SortControls } from "@/components/SortControls";
+import { useSortPreference, sortEntries } from "@/hooks/useSortPreference";
 
 interface Contestant {
   id: string;
@@ -32,6 +35,7 @@ export default function AdminPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const { sortBy, sortOrder, setSortBy, toggleSortOrder, isLoaded } = useSortPreference();
 
   // Track pending performance order changes locally
   const [localOrders, setLocalOrders] = useState<Record<string, number>>({});
@@ -86,6 +90,18 @@ export default function AdminPage() {
     .filter((c) => localOrders[c.id] !== c.performanceOrder)
     .map((c) => c.id);
   const hasChanges = changedIds.length > 0;
+
+  const sortedContestants = isLoaded
+    ? sortEntries(
+      contestants,
+      sortBy,
+      sortOrder,
+      (c) => localOrders[c.id] || c.performanceOrder,
+      (c) => c.country,
+      (c) => c.artist,
+      () => 0 // Score not relevant here
+    )
+    : contestants;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -390,11 +406,21 @@ export default function AdminPage() {
         </GlassCard>
 
         {/* Contestant List */}
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold">
-            Contestants ({contestants.length})
-          </h2>
-          <div className="flex items-center gap-3">
+        <div className="mb-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <h2 className="text-lg font-bold shrink-0">
+              Contestants ({contestants.length})
+            </h2>
+            <div className="hidden sm:block">
+              <SortControls
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortByChange={setSortBy}
+                onToggleOrder={toggleSortOrder}
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
             {hasConflicts && (
               <span className="text-xs font-bold text-red-400 uppercase tracking-tight">
                 Duplicate Orders!
@@ -412,63 +438,104 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="glass overflow-hidden">
           {contestants.length === 0 ? (
-            <GlassCard className="text-center">
+            <div className="p-8 text-center">
               <p className="text-muted-50 leading-relaxed">
                 No contestants yet. Use the form above to add the
                 countries competing in this year&apos;s Eurovision. You can
                 add them all now or during the show.
               </p>
-            </GlassCard>
+            </div>
           ) : (
-            contestants.map((c) => (
-              <div
-                key={c.id}
-                className={`glass flex items-center gap-3 p-3 transition-colors ${
-                  localOrders[c.id] !== c.performanceOrder
-                    ? "ring-1 ring-neon-cyan/50"
-                    : ""
-                }`}
-              >
-                <input
-                  type="number"
-                  value={localOrders[c.id] || ""}
-                  onChange={(e) =>
-                    setLocalOrders({
-                      ...localOrders,
-                      [c.id]: parseInt(e.target.value) || 0,
-                    })
-                  }
-                  className={`w-10 rounded-lg bg-muted-10 px-1 py-1 text-center text-xs font-bold focus:outline-none focus:ring-1 focus:ring-neon-pink ${
-                    ordersList.filter((o) => o === localOrders[c.id]).length > 1
-                      ? "text-red-400 ring-1 ring-red-400"
-                      : "text-muted-60"
-                  }`}
-                />
-                <span className="text-2xl">{c.flagEmoji}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">{c.country}</div>
-                  <div className="text-sm text-muted-50 truncate">
-                    {c.artist} &mdash; {c.song}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => startEdit(c)}
-                    className="rounded-lg bg-muted-5 px-3 py-1.5 text-sm text-muted-60 hover:bg-muted-10"
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-muted-10 bg-muted-5/50">
+                  <th
+                    onClick={() => sortBy === "performanceOrder" ? toggleSortOrder() : setSortBy("performanceOrder")}
+                    className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 w-20 text-center cursor-pointer hover:text-primary transition-colors"
                   >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    className="rounded-lg bg-red-500/10 px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/20"
+                    Order {sortBy === "performanceOrder" && (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                  <th
+                    onClick={() => sortBy === "country" ? toggleSortOrder() : setSortBy("country")}
+                    className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 cursor-pointer hover:text-primary transition-colors"
                   >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))
+                    Country {sortBy === "country" && (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                  <th
+                    onClick={() => sortBy === "artist" ? toggleSortOrder() : setSortBy("artist")}
+                    className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 hidden md:table-cell cursor-pointer hover:text-primary transition-colors"
+                  >
+                    Artist & Song {sortBy === "artist" && (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedContestants.map((c) => {
+                  const isChanged = localOrders[c.id] !== c.performanceOrder;
+                  const isConflict = ordersList.filter((o) => o === localOrders[c.id]).length > 1;
+                  return (
+                    <tr
+                      key={c.id}
+                      className={cn(
+                        "border-b border-muted-10 last:border-0 transition-colors",
+                        isChanged ? "bg-neon-cyan/5" : "hover:bg-muted-5/30"
+                      )}
+                    >
+                      <td className="px-4 py-3 text-center">
+                        <input
+                          type="number"
+                          value={localOrders[c.id] || ""}
+                          onChange={(e) =>
+                            setLocalOrders({
+                              ...localOrders,
+                              [c.id]: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className={cn(
+                            "w-12 rounded-lg bg-muted-10 px-1 py-1.5 text-center text-sm font-bold focus:outline-none focus:ring-2 focus:ring-neon-pink/50 transition-all",
+                            isConflict ? "text-red-400 ring-2 ring-red-400/50" : "text-primary"
+                          )}
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{c.flagEmoji}</span>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-primary truncate">{c.country}</span>
+                            <span className="text-xs text-muted-50 truncate md:hidden">{c.artist}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-medium text-muted-70 truncate">{c.artist}</span>
+                          <span className="text-xs text-muted-40 truncate">{c.song}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => startEdit(c)}
+                            className="rounded-lg bg-muted-10 px-3 py-1.5 text-sm font-medium text-muted-60 hover:bg-muted-20 hover:text-primary transition-all"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(c.id)}
+                            className="rounded-lg bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-all"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
