@@ -29,14 +29,14 @@ describe('AdminPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (global.fetch as any).mockImplementation((url: string) => {
+    vi.mocked(global.fetch).mockImplementation((url: string) => {
       if (url === '/api/contestants') {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ contestants: mockContestants }),
-        });
+        } as Response);
       }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as Response);
     });
   });
 

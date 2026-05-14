@@ -369,7 +369,16 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => {
                     setEditingId(null);
-                    setForm({ ...emptyForm, performanceOrder: nextOrder });
+                    const maxServer =
+                      contestants.length > 0
+                        ? Math.max(...contestants.map((c) => c.performanceOrder))
+                        : 0;
+                    const maxLocal =
+                      Object.values(localOrders).length > 0
+                        ? Math.max(...Object.values(localOrders))
+                        : 0;
+                    const next = Math.max(maxServer, maxLocal) + 1;
+                    setForm({ ...emptyForm, performanceOrder: next });
                   }}
                   className="rounded-xl border border-muted-20 px-4 py-3 text-muted-60 hover:bg-muted-5"
                 >
