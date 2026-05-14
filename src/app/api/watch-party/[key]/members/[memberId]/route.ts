@@ -12,7 +12,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ key: string; memberId: string }> }
 ) {
-  const { key, memberId } = await params;
+  const { key: rawKey, memberId } = await params;
+  const key = rawKey.toLowerCase().trim();
 
   const { member: actor, error } = await requireMember(request);
   if (error) return error;
@@ -54,7 +55,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ key: string; memberId: string }> }
 ) {
-  const { key, memberId } = await params;
+  const { key: rawKey, memberId } = await params;
+  const key = rawKey.toLowerCase().trim();
 
   const { member: actor, error } = await requireMember(request);
   if (error) return error;

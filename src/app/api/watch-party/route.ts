@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     dictionaries: [adjectives, colors, animals],
     separator: "-",
     length: 3,
-  });
+  }).toLowerCase();
 
   const contestants = await prisma.contestant.findMany();
 

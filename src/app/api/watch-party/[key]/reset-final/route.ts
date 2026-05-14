@@ -10,7 +10,8 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ key: string }> }
 ) {
-  const { key } = await params;
+  const { key: rawKey } = await params;
+  const key = rawKey.toLowerCase().trim();
 
   const { member, error } = await requireMember(request);
   if (error) return error;
