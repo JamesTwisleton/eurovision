@@ -31,6 +31,8 @@ export async function GET(request: NextRequest) {
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
       memberScores: c.scores.map((s) => ({
         memberName: s.member.name,
+        memberId: undefined, // Always hidden on global scoreboard for privacy
+        memberLocation: s.member.watchParty.key === currentMemberPartyKey ? s.member.location : undefined,
         partyName: s.member.watchParty.name,
         partyKey: s.member.watchParty.key === currentMemberPartyKey ? s.member.watchParty.key : null,
         points: s.points,

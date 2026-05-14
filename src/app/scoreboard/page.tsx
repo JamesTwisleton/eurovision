@@ -6,7 +6,7 @@ import { getMemberFromRequest } from "@/lib/session";
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
-async function getScoreboardData(currentMemberId: string | null) {
+async function getScoreboardData(userPartyKey: string | null) {
   const contestants = await prisma.contestant.findMany({
     include: {
       scores: {
@@ -37,8 +37,10 @@ async function getScoreboardData(currentMemberId: string | null) {
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
       memberScores: c.scores.map((s) => ({
         memberName: s.member.name,
+        memberId: undefined, // Always hidden on global scoreboard for privacy
+        memberLocation: s.member.watchParty.key === userPartyKey ? s.member.location : undefined,
         partyName: s.member.watchParty.name,
-        partyKey: s.member.watchParty.key === currentMemberId ? s.member.watchParty.key : null,
+        partyKey: s.member.watchParty.key === userPartyKey ? s.member.watchParty.key : null,
         points: s.points,
       })),
     }))

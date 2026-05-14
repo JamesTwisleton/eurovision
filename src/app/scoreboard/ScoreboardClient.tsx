@@ -12,10 +12,10 @@ import { cn } from "@/lib/cn";
 
 interface MemberScore {
   memberName: string;
-  memberId: string;
-  memberLocation: string;
+  memberId?: string;
+  memberLocation?: string;
   partyName: string;
-  partyKey: string;
+  partyKey: string | null;
   points: number;
 }
 
@@ -227,10 +227,10 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
                                   {entry.memberScores
                                     .slice()
                                     .sort((a, b) => b.points - a.points)
-                                    .map((ms) => (
-                                      <div key={ms.memberId} className="flex items-center justify-between text-base">
+                                    .map((ms, idx) => (
+                                      <div key={ms.memberId || idx} className="flex items-center justify-between text-base">
                                         <span className="text-muted-60 truncate">
-                                          {ms.memberName}{" "}
+                                          {ms.memberName}{ms.memberLocation ? ` (${ms.memberLocation})` : ""}{" "}
                                           <span className="text-muted-50">({ms.partyName})</span>
                                         </span>
                                         <span

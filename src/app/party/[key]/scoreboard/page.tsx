@@ -6,12 +6,13 @@ import { PartyScoreboardClient } from "./PartyScoreboardClient";
 import { getMemberFromRequest } from "@/lib/session";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
+import { Member } from "@prisma/client";
 
 interface Props {
   params: Promise<{ key: string }>;
 }
 
-async function getScoreboardData(key: string, currentMember: any) {
+async function getScoreboardData(key: string, currentMember: Member | null) {
   const watchParty = await prisma.watchParty.findUnique({
     where: { key },
     select: { id: true, name: true, key: true },
