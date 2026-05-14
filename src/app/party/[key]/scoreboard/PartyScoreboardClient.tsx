@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
@@ -184,123 +184,152 @@ export function PartyScoreboardClient({
             <p className="text-muted-50 leading-relaxed">No contestants have been added yet.</p>
           </GlassCard>
         ) : (
-          <>
+          <div className="flex flex-col gap-4">
             {members.length === 0 && (
-              <p className="mb-3 text-center text-sm font-medium text-muted-50">
+              <p className="text-center text-sm font-medium text-muted-50">
                 Waiting for members to finalise their votes...
               </p>
             )}
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {sortedScoreboard.map((entry) => {
-                const rank = entry.rank - 1;
-                const isExpanded = selectedId === entry.id;
-                return (
-                  <motion.div
-                    key={entry.id}
-                    layout
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className={cn(
-                      "glass cursor-pointer p-4 transition-all",
-                      rank === 0 && entry.totalPoints > 0 && "neon-glow",
-                      isExpanded && "ring-2 ring-neon-pink/50"
-                    )}
-                    onClick={() => setSelectedId(isExpanded ? null : entry.id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={cn(
-                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-                          rank === 0 && members.length > 0
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : rank === 1 && members.length > 0
-                              ? "bg-gray-400/20 text-gray-300"
-                              : rank === 2 && members.length > 0
-                                ? "bg-amber-700/20 text-amber-600"
-                                : "bg-muted-5 text-muted-50"
-                        )}
-                      >
-                        {rank + 1}
-                      </span>
-                      <span className="text-2xl">{entry.flagEmoji}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold truncate">{entry.country}</div>
-                        <div className="text-sm text-muted-60 truncate">
-                          {entry.artist} &mdash; {entry.song}
-                        </div>
-                      </div>
-                      {members.length > 0 ? (
-                        <AnimatedNumber value={entry.totalPoints} className="text-2xl font-black neon-text" />
-                      ) : (
-                        <span className="text-lg font-bold text-muted-30">&mdash;</span>
-                      )}
-                    </div>
-
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="overflow-hidden"
+            <div className="glass overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-muted-10 bg-muted-5/50">
+                    <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 w-16 text-center">Rank</th>
+                    <th
+                      onClick={() => sortBy === "country" ? toggleSortOrder() : setSortBy("country")}
+                      className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 cursor-pointer hover:text-primary transition-colors"
+                    >
+                      Country {sortBy === "country" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th
+                      onClick={() => sortBy === "artist" ? toggleSortOrder() : setSortBy("artist")}
+                      className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 hidden md:table-cell cursor-pointer hover:text-primary transition-colors"
+                    >
+                      Artist {sortBy === "artist" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th
+                      onClick={() => sortBy === "score" ? toggleSortOrder() : setSortBy("score")}
+                      className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors"
+                    >
+                      Points {sortBy === "score" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedScoreboard.map((entry) => {
+                    const rank = entry.rank - 1;
+                    const isExpanded = selectedId === entry.id;
+                    return (
+                      <React.Fragment key={entry.id}>
+                        <tr
+                          onClick={() => setSelectedId(isExpanded ? null : entry.id)}
+                          className={cn(
+                            "cursor-pointer transition-colors hover:bg-muted-5/30 border-b border-muted-10 last:border-0",
+                            isExpanded && "bg-muted-5/40",
+                            rank === 0 && entry.totalPoints > 0 && "bg-neon-pink/5"
+                          )}
                         >
-                          <div className="mt-3 border-t border-muted-10 pt-3">
-                            {entry.youtubeUrl && (() => {
-                              const embedUrl = getYoutubeEmbedUrl(entry.youtubeUrl);
-                              return embedUrl ? (
-                                <div className="mb-3 aspect-video overflow-hidden rounded-xl bg-black shadow-lg">
-                                  <iframe
-                                    src={embedUrl}
-                                    title={`${entry.country} performance`}
-                                    className="h-full w-full border-0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen
-                                  />
-                                </div>
-                              ) : null;
-                            })()}
-                            {entry.memberScores.length > 0 && (
-                              <>
-                                <p className="text-sm font-semibold text-muted-60 uppercase tracking-wider mb-2">
-                                  Member Breakdown
-                                </p>
-                                <div className="flex flex-col gap-1.5">
-                                  {entry.memberScores
-                                    .slice()
-                                    .sort((a, b) => b.points - a.points)
-                                    .map((ms, idx) => (
-                                      <div key={ms.memberId || idx} className="flex items-center justify-between text-base">
-                                        <span className="text-muted-60 truncate">
-                                          {ms.memberName}{ms.memberLocation ? <span className="text-muted-50"> ({ms.memberLocation})</span> : ""}
-                                        </span>
-                                        <span
-                                          className={cn(
-                                            "rounded px-2 py-0.5 text-sm font-bold",
-                                            ms.points === 12
-                                              ? "bg-yellow-500/20 text-yellow-400"
-                                              : ms.points === 10
-                                                ? "bg-gray-400/20 text-gray-300"
-                                                : ms.points > 0
-                                                  ? "bg-muted-5 text-muted-60"
-                                                  : "text-muted-30"
-                                          )}
-                                        >
-                                          {ms.points} pts
-                                        </span>
-                                      </div>
-                                    ))}
-                                </div>
-                              </>
+                          <td className="px-4 py-4 text-center">
+                            <span
+                              className={cn(
+                                "inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold",
+                                rank === 0 && members.length > 0
+                                  ? "bg-yellow-500/20 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.2)]"
+                                  : rank === 1 && members.length > 0
+                                    ? "bg-gray-400/20 text-gray-300"
+                                    : rank === 2 && members.length > 0
+                                      ? "bg-amber-700/20 text-amber-600"
+                                      : "bg-muted-5 text-muted-50"
+                              )}
+                            >
+                              {rank + 1}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{entry.flagEmoji}</span>
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-bold text-primary truncate">{entry.country}</span>
+                                <span className="text-xs text-muted-50 truncate md:hidden">{entry.artist}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 hidden md:table-cell">
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-medium text-muted-70 truncate">{entry.artist}</span>
+                              <span className="text-xs text-muted-40 truncate">{entry.song}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-right">
+                            {members.length > 0 ? (
+                              <AnimatedNumber value={entry.totalPoints} className="text-xl font-black neon-text" />
+                            ) : (
+                              <span className="text-lg font-bold text-muted-30">&mdash;</span>
                             )}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr className="bg-muted-5/20 border-b border-muted-10 last:border-0">
+                            <td colSpan={4} className="px-4 py-6">
+                              <div className="max-w-3xl mx-auto">
+                                {entry.youtubeUrl && (() => {
+                                  const embedUrl = getYoutubeEmbedUrl(entry.youtubeUrl);
+                                  return embedUrl ? (
+                                    <div className="mb-6 aspect-video overflow-hidden rounded-xl bg-black shadow-2xl">
+                                      <iframe
+                                        src={embedUrl}
+                                        title={`${entry.country} performance`}
+                                        className="h-full w-full border-0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowFullScreen
+                                      />
+                                    </div>
+                                  ) : null;
+                                })()}
+                                {entry.memberScores.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-bold text-muted-40 uppercase tracking-widest mb-4">
+                                      Member Breakdown
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+                                      {entry.memberScores
+                                        .slice()
+                                        .sort((a, b) => b.points - a.points)
+                                        .map((ms, idx) => (
+                                          <div key={ms.memberId || idx} className="flex items-center justify-between py-1 border-b border-muted-5 last:border-0 sm:[&:nth-last-child(-n+2)]:border-0">
+                                            <span className="text-sm text-muted-70 truncate mr-4">
+                                              {ms.memberName}{ms.memberLocation ? <span className="text-xs text-muted-40"> ({ms.memberLocation})</span> : ""}
+                                            </span>
+                                            <span
+                                              className={cn(
+                                                "text-sm font-black",
+                                                ms.points === 12
+                                                  ? "text-yellow-400"
+                                                  : ms.points === 10
+                                                    ? "text-gray-300"
+                                                    : ms.points > 0
+                                                      ? "text-primary"
+                                                      : "text-muted-20"
+                                              )}
+                                            >
+                                              {ms.points} <span className="text-[10px] font-bold text-muted-40">PTS</span>
+                                            </span>
+                                          </div>
+                                        ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          </>
+          </div>
         )}
 
         <div className="mt-8 mb-12 flex flex-col items-center gap-4">

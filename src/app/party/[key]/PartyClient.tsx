@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -467,76 +467,125 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
 
       {/* Contestant List */}
       <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-3">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {sortedScores.map((score) => {
-            const others = otherScores[score.contestantId] || [];
-            return (
-              <div
-                key={score.contestantId}
-                className={cn(
-                  "glass text-left transition-all",
-                  selectedContestant === score.contestantId && "ring-2 ring-neon-pink/50"
-                )}
-              >
-                <button
-                  onClick={() =>
-                    setSelectedContestant(
-                      selectedContestant === score.contestantId ? null : score.contestantId
-                    )
-                  }
-                  className="flex w-full items-center gap-3 p-3 active:scale-[0.98] transition-all"
+        <div className="glass overflow-hidden">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-muted-10 bg-muted-5/50">
+                <th
+                  onClick={() => sortBy === "performanceOrder" ? toggleSortOrder() : setSortBy("performanceOrder")}
+                  className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 w-12 text-center cursor-pointer hover:text-primary transition-colors"
                 >
-                  <span className="text-sm text-muted-50 w-5 text-center font-medium">
-                    {score.contestant.performanceOrder}
-                  </span>
-                  <span className="text-2xl">{score.contestant.flagEmoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold truncate">{score.contestant.country}</div>
-                    <div className="text-sm text-muted-60 truncate">
-                      {score.contestant.artist} &mdash; {score.contestant.song}
-                    </div>
-                  </div>
-                  <div
-                    className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold",
-                      score.points === 12
-                        ? "score-badge-12"
-                        : score.points === 10
-                          ? "score-badge-10"
-                          : score.points > 0
-                            ? "score-badge text-white"
-                            : "bg-muted-5 text-muted-20"
+                  # {sortBy === "performanceOrder" && (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  onClick={() => sortBy === "country" ? toggleSortOrder() : setSortBy("country")}
+                  className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 cursor-pointer hover:text-primary transition-colors"
+                >
+                  Country {sortBy === "country" && (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  onClick={() => sortBy === "artist" ? toggleSortOrder() : setSortBy("artist")}
+                  className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 hidden md:table-cell cursor-pointer hover:text-primary transition-colors"
+                >
+                  Artist & Song {sortBy === "artist" && (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  onClick={() => sortBy === "score" ? toggleSortOrder() : setSortBy("score")}
+                  className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors"
+                >
+                  Your Score {sortBy === "score" && (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedScores.map((score) => {
+                const others = otherScores[score.contestantId] || [];
+                const isSelected = selectedContestant === score.contestantId;
+                return (
+                  <React.Fragment key={score.contestantId}>
+                    <tr
+                      onClick={() =>
+                        setSelectedContestant(
+                          isSelected ? null : score.contestantId
+                        )
+                      }
+                      className={cn(
+                        "cursor-pointer transition-colors hover:bg-muted-5/30 border-b border-muted-10 last:border-0",
+                        isSelected && "bg-muted-5/50 ring-inset ring-2 ring-neon-pink/30"
+                      )}
+                    >
+                      <td className="px-4 py-4 text-center text-sm font-medium text-muted-40">
+                        {score.contestant.performanceOrder}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{score.contestant.flagEmoji}</span>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-primary truncate">{score.contestant.country}</span>
+                            <span className="text-xs text-muted-50 truncate md:hidden">
+                              {score.contestant.artist}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 hidden md:table-cell">
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-medium text-muted-70 truncate">{score.contestant.artist}</span>
+                          <span className="text-xs text-muted-40 truncate">{score.contestant.song}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <div className="flex justify-end">
+                          <div
+                            className={cn(
+                              "flex h-9 w-12 items-center justify-center rounded-lg text-lg font-bold transition-all",
+                              score.points === 12
+                                ? "score-badge-12"
+                                : score.points === 10
+                                  ? "score-badge-10"
+                                  : score.points > 0
+                                    ? "score-badge text-white"
+                                    : "bg-muted-5 text-muted-20"
+                            )}
+                          >
+                            {score.points}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    {others.length > 0 && (
+                      <tr className="bg-muted-5/10 border-b border-muted-10 last:border-0">
+                        <td colSpan={4} className="px-4 py-2">
+                          <div className="flex flex-wrap gap-x-4 gap-y-1">
+                            <span className="text-[10px] font-bold text-muted-40 uppercase tracking-widest self-center mr-1">Other Juries:</span>
+                            {others.map((os) => (
+                              <span key={os.memberId} className="text-xs text-muted-60">
+                                {os.memberName}{" "}
+                                <span
+                                  className={cn(
+                                    "font-black ml-0.5",
+                                    os.points === 12
+                                      ? "text-yellow-400"
+                                      : os.points === 10
+                                        ? "text-gray-300"
+                                        : os.points > 0
+                                          ? "text-primary"
+                                          : "text-muted-20"
+                                  )}
+                                >
+                                  {os.points}
+                                </span>
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
                     )}
-                  >
-                    {score.points}
-                  </div>
-                </button>
-                {others.length > 0 && (
-                  <div className="border-t border-muted-10 px-3 py-2 flex flex-wrap gap-x-3 gap-y-1">
-                    {others.map((os) => (
-                      <span key={os.memberId} className="text-sm text-muted-50">
-                        {os.memberName}{" "}
-                        <span
-                          className={cn(
-                            "font-bold",
-                            os.points === 12
-                              ? "text-yellow-400"
-                              : os.points === 10
-                                ? "text-gray-300"
-                                : os.points > 0
-                                  ? "text-muted-70"
-                                  : "text-muted-30"
-                          )}
-                        >
-                          {os.points}
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
         {/* Expanded Score Input */}
@@ -544,31 +593,52 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
           {selectedContestant && selectedScore && (
             <motion.div
               key="score-input"
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
-              className="fixed bottom-0 left-0 right-0 z-50 glass-strong p-4 pb-6"
+              exit={{ opacity: 0, y: 100 }}
+              className="fixed bottom-0 left-0 right-0 z-50 glass-strong p-6 border-t border-muted-20 shadow-[0_-10px_40px_rgba(0,0,0,0.3)]"
             >
-              <div className="mx-auto max-w-5xl">
-                <div className="mb-2 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{selectedScore.contestant.flagEmoji}</span>
-                    <span className="font-bold text-lg">{selectedScore.contestant.country}</span>
+              <div className="mx-auto max-w-2xl">
+                <div className="mb-6 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl">{selectedScore.contestant.flagEmoji}</span>
+                    <div className="flex flex-col">
+                      <span className="text-2xl font-black text-primary leading-tight">{selectedScore.contestant.country}</span>
+                      <span className="text-sm text-muted-50">{selectedScore.contestant.artist}</span>
+                    </div>
                   </div>
                   <button
                     onClick={() => setSelectedContestant(null)}
-                    className="rounded-lg border border-muted-20 px-4 py-1.5 text-sm font-medium text-primary hover:bg-muted-10 transition-colors"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-muted-10 text-primary hover:bg-muted-20 transition-colors"
                   >
-                    Done
+                    ✕
                   </button>
                 </div>
-                <p className="mb-3 text-base text-primary/80">
-                  Tap a number to assign that score. Tap the same number again to clear it.
-                </p>
+
+                <div className="mb-6">
+                  <p className="mb-4 text-center text-sm font-medium text-muted-60">
+                    Assign your score for this performance:
+                  </p>
+                  <ScoreInput
+                    value={selectedScore.points}
+                    onChange={(points) => {
+                      const newPoints = points === selectedScore.points ? 0 : points;
+                      updateScore(selectedScore.contestantId, newPoints);
+                      setScores((prev) =>
+                        prev.map((s) =>
+                          s.contestantId === selectedScore.contestantId
+                            ? { ...s, points: newPoints }
+                            : s
+                        )
+                      );
+                    }}
+                  />
+                </div>
+
                 {selectedScore.contestant.youtubeUrl && (() => {
                   const embedUrl = getYoutubeEmbedUrl(selectedScore.contestant.youtubeUrl);
                   return embedUrl ? (
-                    <div className="mb-4 aspect-video overflow-hidden rounded-xl bg-black shadow-lg">
+                    <div className="mb-2 aspect-video overflow-hidden rounded-xl bg-black shadow-lg">
                       <iframe
                         src={embedUrl}
                         title={`${selectedScore.contestant.country} performance`}
@@ -579,20 +649,6 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
                     </div>
                   ) : null;
                 })()}
-                <ScoreInput
-                  value={selectedScore.points}
-                  onChange={(points) => {
-                    const newPoints = points === selectedScore.points ? 0 : points;
-                    updateScore(selectedScore.contestantId, newPoints);
-                    setScores((prev) =>
-                      prev.map((s) =>
-                        s.contestantId === selectedScore.contestantId
-                          ? { ...s, points: newPoints }
-                          : s
-                      )
-                    );
-                  }}
-                />
               </div>
             </motion.div>
           )}

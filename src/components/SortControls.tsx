@@ -17,29 +17,34 @@ export function SortControls({
   onToggleOrder,
 }: SortControlsProps) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="relative">
-        <select
-          value={sortBy}
-          onChange={(e) => onSortByChange(e.target.value as SortField)}
-          className="appearance-none rounded-lg bg-muted-5 py-1.5 pl-3 pr-8 text-sm font-medium text-muted-60 outline-none transition-colors hover:text-primary focus:ring-1 focus:ring-neon-cyan/50"
+    <div className="flex items-center gap-1.5 rounded-lg bg-muted-5 p-1">
+      {(["performanceOrder", "country", "artist", "score"] as SortField[]).map((field) => (
+        <button
+          key={field}
+          onClick={() => {
+            if (sortBy === field) {
+              onToggleOrder();
+            } else {
+              onSortByChange(field);
+            }
+          }}
+          className={cn(
+            "rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wider transition-all active:scale-95",
+            sortBy === field
+              ? "bg-neon-pink text-white shadow-[0_0_10px_rgba(255,45,120,0.3)]"
+              : "text-muted-40 hover:text-muted-60"
+          )}
         >
-          <option value="performanceOrder">Performance Order</option>
-          <option value="country">Country Name</option>
-          <option value="artist">Artist Name</option>
-          <option value="score">Score</option>
-        </select>
-        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-40">
-          ▼
-        </div>
-      </div>
-      <button
-        onClick={onToggleOrder}
-        className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted-5 text-sm text-muted-60 transition-colors hover:text-primary active:scale-95"
-        title={sortOrder === "asc" ? "Sort Ascending" : "Sort Descending"}
-      >
-        {sortOrder === "asc" ? "↑" : "↓"}
-      </button>
+          <span className="flex items-center gap-1">
+            {field === "performanceOrder" ? "#" : field}
+            {sortBy === field && (
+              <span className="text-[10px] opacity-80">
+                {sortOrder === "asc" ? "↑" : "↓"}
+              </span>
+            )}
+          </span>
+        </button>
+      ))}
     </div>
   );
 }
