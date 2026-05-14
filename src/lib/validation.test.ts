@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateFinalScores, VALID_FINAL_POINTS, createWatchPartySchema, joinWatchPartySchema, contestantSchema, draftScoreSchema } from './validation';
+import { validateFinalScores, VALID_FINAL_POINTS, createWatchPartySchema, joinWatchPartySchema, contestantSchema, draftScoreSchema, reorderSchema } from './validation';
 
 describe('validateFinalScores', () => {
   it('should return valid for a correct set of scores', () => {
@@ -117,6 +117,26 @@ describe('Zod schemas', () => {
       const base = { song: 'Song', performanceOrder: 1, flagEmoji: '\u{1F1EB}\u{1F1F7}' };
       expect(contestantSchema.safeParse({ ...base, country: '', artist: 'A' }).success).toBe(false);
       expect(contestantSchema.safeParse({ ...base, country: 'FR', artist: '' }).success).toBe(false);
+    });
+  });
+
+  describe('reorderSchema', () => {
+    it('should validate a list of reorders', () => {
+      const data = [
+        { id: '550e8400-e29b-41d4-a716-446655440000', performanceOrder: 2 },
+        { id: '550e8400-e29b-41d4-a716-446655440001', performanceOrder: 1 },
+      ];
+      expect(reorderSchema.safeParse(data).success).toBe(true);
+    });
+
+    it('should reject invalid ids', () => {
+      const data = [{ id: 'not-a-uuid', performanceOrder: 1 }];
+      expect(reorderSchema.safeParse(data).success).toBe(false);
+    });
+
+    it('should reject non-positive performanceOrder', () => {
+      const data = [{ id: '550e8400-e29b-41d4-a716-446655440000', performanceOrder: 0 }];
+      expect(reorderSchema.safeParse(data).success).toBe(false);
     });
   });
 
