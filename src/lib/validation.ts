@@ -29,6 +29,13 @@ export const contestantSchema = z.object({
   flagEmoji: z.string().min(1).max(10),
 });
 
+export const reorderSchema = z.array(
+  z.object({
+    id: z.string().uuid(),
+    performanceOrder: z.number().int().min(1),
+  })
+);
+
 export function validateFinalScores(
   scores: { points: number }[]
 ): { valid: boolean; errors: string[] } {

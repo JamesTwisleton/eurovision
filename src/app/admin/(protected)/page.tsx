@@ -32,23 +32,85 @@ export default function AdminPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+
+  // Track pending performance order changes locally
+  const [localOrders, setLocalOrders] = useState<Record<string, number>>({});
+
   const fetchContestants = useCallback(async () => {
     const res = await fetch("/api/contestants");
     const data = await res.json();
-    setContestants(data.contestants);
+    const serverContestants = data.contestants as Contestant[];
+    setContestants(serverContestants);
+
+    // Update local orders: preserve pending changes, but add new ones and remove deleted ones
+    setLocalOrders((prev) => {
+      const next = { ...prev };
+      serverContestants.forEach((c) => {
+        if (next[c.id] === undefined) {
+          next[c.id] = c.performanceOrder;
+        }
+      });
+      // Remove IDs that no longer exist on server
+      const serverIds = new Set(serverContestants.map((c) => c.id));
+      Object.keys(next).forEach((id) => {
+        if (!serverIds.has(id)) delete next[id];
+      });
+      return next;
+    });
   }, []);
 
   useEffect(() => {
     fetchContestants();
   }, [fetchContestants]);
 
+  // Set default next order in form when contestants change or editing ends
+  useEffect(() => {
+    if (!editingId) {
+      const maxServer =
+        contestants.length > 0
+          ? Math.max(...contestants.map((c) => c.performanceOrder))
+          : 0;
+      const maxLocal =
+        Object.values(localOrders).length > 0
+          ? Math.max(...Object.values(localOrders))
+          : 0;
+      const next = Math.max(maxServer, maxLocal) + 1;
+      setForm((f) => ({ ...f, performanceOrder: next }));
+    }
+  }, [contestants, localOrders, editingId]);
+
+  // Conflict detection
+  const ordersList = Object.values(localOrders);
+  const hasConflicts = new Set(ordersList).size !== ordersList.length;
+  const changedIds = contestants
+    .filter((c) => localOrders[c.id] !== c.performanceOrder)
+    .map((c) => c.id);
+  const hasChanges = changedIds.length > 0;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
+    const performanceOrder = Number(form.performanceOrder);
+
+    // Check for conflicts in the form submission against local pending state
+    const conflictId = Object.entries(localOrders).find(
+      ([id, order]) => order === performanceOrder && id !== editingId
+    )?.[0];
+
+    if (conflictId) {
+      const conflictCountry =
+        contestants.find((c) => c.id === conflictId)?.country ||
+        "another contestant";
+      setError(
+        `Order ${performanceOrder} is already assigned to ${conflictCountry}. Please resolve conflicts using the running order list below or choose a different number.`
+      );
+      return;
+    }
+
     const payload = {
       ...form,
-      performanceOrder: Number(form.performanceOrder),
+      performanceOrder,
     };
 
     const url = editingId
@@ -68,6 +130,14 @@ export default function AdminPage() {
       return;
     }
 
+    const saved = await res.json();
+    // Force sync localOrders for the saved contestant
+    setLocalOrders((prev) => ({
+      ...prev,
+      [saved.id || saved.contestant.id]:
+        saved.performanceOrder || saved.contestant.performanceOrder,
+    }));
+
     setForm(emptyForm);
     setEditingId(null);
     fetchContestants();
@@ -75,6 +145,39 @@ export default function AdminPage() {
 
   async function handleDelete(id: string) {
     await fetch(`/api/contestants/${id}`, { method: "DELETE" });
+    fetchContestants();
+  }
+
+  async function handleSaveOrders() {
+    if (hasConflicts) return;
+    setError("");
+
+    const payload = changedIds.map((id) => ({
+      id,
+      performanceOrder: localOrders[id],
+    }));
+
+    const res = await fetch("/api/contestants/reorder", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error || "Failed to update orders");
+      return;
+    }
+
+    // After bulk save, we want to fully sync localOrders with what's now on the server
+    const data = await res.json();
+    const updatedContestants = data.contestants as Contestant[];
+    const syncedOrders: Record<string, number> = {};
+    updatedContestants.forEach((c) => {
+      syncedOrders[c.id] = c.performanceOrder;
+    });
+    setLocalOrders(syncedOrders);
+
     fetchContestants();
   }
 
@@ -266,7 +369,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => {
                     setEditingId(null);
-                    setForm(emptyForm);
+                    setForm({ ...emptyForm, performanceOrder: nextOrder });
                   }}
                   className="rounded-xl border border-muted-20 px-4 py-3 text-muted-60 hover:bg-muted-5"
                 >
@@ -278,9 +381,28 @@ export default function AdminPage() {
         </GlassCard>
 
         {/* Contestant List */}
-        <h2 className="mb-3 text-lg font-bold">
-          Contestants ({contestants.length})
-        </h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-bold">
+            Contestants ({contestants.length})
+          </h2>
+          <div className="flex items-center gap-3">
+            {hasConflicts && (
+              <span className="text-xs font-bold text-red-400 uppercase tracking-tight">
+                Duplicate Orders!
+              </span>
+            )}
+            {hasChanges && (
+              <button
+                onClick={handleSaveOrders}
+                disabled={hasConflicts}
+                className="rounded-lg bg-neon-cyan/20 px-3 py-1.5 text-sm font-bold text-neon-cyan hover:bg-neon-cyan/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Save Running Order
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {contestants.length === 0 ? (
             <GlassCard className="text-center">
@@ -294,11 +416,27 @@ export default function AdminPage() {
             contestants.map((c) => (
               <div
                 key={c.id}
-                className="glass flex items-center gap-3 p-3"
+                className={`glass flex items-center gap-3 p-3 transition-colors ${
+                  localOrders[c.id] !== c.performanceOrder
+                    ? "ring-1 ring-neon-cyan/50"
+                    : ""
+                }`}
               >
-                <span className="text-xs text-muted-30 w-5 text-center">
-                  {c.performanceOrder}
-                </span>
+                <input
+                  type="number"
+                  value={localOrders[c.id] || ""}
+                  onChange={(e) =>
+                    setLocalOrders({
+                      ...localOrders,
+                      [c.id]: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className={`w-10 rounded-lg bg-muted-10 px-1 py-1 text-center text-xs font-bold focus:outline-none focus:ring-1 focus:ring-neon-pink ${
+                    ordersList.filter((o) => o === localOrders[c.id]).length > 1
+                      ? "text-red-400 ring-1 ring-red-400"
+                      : "text-muted-60"
+                  }`}
+                />
                 <span className="text-2xl">{c.flagEmoji}</span>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{c.country}</div>
