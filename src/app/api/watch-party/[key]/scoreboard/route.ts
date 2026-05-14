@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, findWatchPartyByIdOrKey } from "@/lib/prisma";
 import { getMemberFromRequest } from "@/lib/session";
 
 export async function GET(
@@ -8,10 +8,7 @@ export async function GET(
 ) {
   const { key } = await params;
 
-  const watchParty = await prisma.watchParty.findUnique({
-    where: { key },
-    select: { id: true, name: true, key: true },
-  });
+  const watchParty = await findWatchPartyByIdOrKey(key);
 
   if (!watchParty) {
     return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
@@ -48,7 +45,7 @@ export async function GET(
       youtubeUrl: c.youtubeUrl,
       totalPoints: c.scores.reduce((sum, s) => sum + s.points, 0),
       memberScores: c.scores.map((s) => ({
-        memberName: s.member.name,
+        memberName: isPartyMember ? s.member.name : "Member",
         memberId: isHost ? s.member.id : undefined,
         memberLocation: isPartyMember ? s.member.location : undefined,
         points: s.points,
@@ -65,9 +62,19 @@ export async function GET(
     },
   });
 
+  const sanitizedMembers = finalisedMembers.map(m => ({
+    ...m,
+    name: isPartyMember ? m.name : "Member",
+    location: isPartyMember ? m.location : undefined,
+  }));
+
   return NextResponse.json({
-    watchParty,
+    watchParty: {
+      id: watchParty.id,
+      name: watchParty.name,
+      key: isPartyMember ? watchParty.key : watchParty.id, // Hide secret key from non-members
+    },
     scoreboard,
-    members: finalisedMembers,
+    members: sanitizedMembers,
   });
 }

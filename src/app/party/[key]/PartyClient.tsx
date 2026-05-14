@@ -54,12 +54,13 @@ interface WatchPartyInfo {
 
 interface PartyClientProps {
   partyKey: string;
+  partyId: string;
   partyName: string;
 }
 
-export function PartyClient({ partyKey, partyName }: PartyClientProps) {
+export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) {
   const router = useRouter();
-  const socketRef = useSocket(partyKey);
+  const socketRef = useSocket(partyId);
   const [watchParty, setWatchParty] = useState<WatchPartyInfo | null>(null);
   const [member, setMember] = useState<MemberInfo | null>(null);
   const [scores, setScores] = useState<Score[]>([]);

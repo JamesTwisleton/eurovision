@@ -1,17 +1,17 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { notFound, redirect } from "next/navigation";
+import { findWatchPartyByIdOrKey } from "@/lib/prisma";
+import { getMemberFromRequest } from "@/lib/session";
 import { PartyClient } from "./PartyClient";
+import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
 interface Props {
   params: Promise<{ key: string }>;
 }
 
 async function getParty(key: string) {
-  return await prisma.watchParty.findUnique({
-    where: { key },
-    select: { name: true, key: true },
-  });
+  return await findWatchPartyByIdOrKey(key);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -40,5 +40,31 @@ export default async function PartyPage({ params }: Props) {
     notFound();
   }
 
-  return <PartyClient partyKey={key} partyName={party.name} />;
+  const cookieStore = await cookies();
+  const request = {
+    cookies: {
+      get: (name: string) => cookieStore.get(name),
+    },
+  } as unknown as NextRequest;
+
+  const currentMember = await getMemberFromRequest(request);
+  const isPartyMember = currentMember?.watchPartyId === party.id;
+
+  // If user is a member but used the ID (UUID) in URL, redirect to the secret key URL
+  if (isPartyMember && key === party.id) {
+    redirect(`/party/${party.key}`);
+  }
+
+  // If user is NOT a member and used the secret key in URL, we still let them in to JOIN,
+  // but PartyClient will handle the state.
+  // Actually, if they are not a member, we should probably not reveal the secret key in the URL
+  // if they somehow got it but aren't logged in? No, they need the key to join.
+
+  return (
+    <PartyClient
+      partyKey={isPartyMember ? party.key : key}
+      partyId={party.id}
+      partyName={party.name}
+    />
+  );
 }

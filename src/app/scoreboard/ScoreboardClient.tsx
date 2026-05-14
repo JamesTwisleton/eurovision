@@ -12,8 +12,8 @@ import { cn } from "@/lib/cn";
 
 interface MemberScore {
   memberName: string;
-  memberId: string;
-  memberLocation: string;
+  memberId?: string;
+  memberLocation?: string;
   partyName: string;
   partyKey: string;
   points: number;
@@ -121,12 +121,10 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
             {parties.map((p) => (
               <Link
                 key={p.key}
-                href={p.isAuthorized ? `/party/${p.key}/scoreboard` : "#"}
+                href={`/party/${p.key}/scoreboard`}
                 className={cn(
-                  "rounded-full bg-muted-5 px-3 py-1 text-sm text-muted-60 transition-colors",
-                  p.isAuthorized ? "hover:text-primary" : "cursor-default opacity-80"
+                  "rounded-full bg-muted-5 px-3 py-1 text-sm text-muted-60 transition-colors hover:text-primary"
                 )}
-                onClick={(e) => !p.isAuthorized && e.preventDefault()}
               >
                 {p.name}
                 {p.isAuthorized && (

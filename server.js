@@ -30,9 +30,9 @@ app.prepare().then(() => {
     socket.join("room:global");
 
     // Join a specific watch party room
-    socket.on("join_party", (partyKey) => {
-      socket.join(`room:party_${partyKey}`);
-      console.log(`${socket.id} joined room:party_${partyKey}`);
+    socket.on("join_party", (partyId) => {
+      socket.join(`room:party_${partyId}`);
+      console.log(`${socket.id} joined room:party_${partyId}`);
     });
 
     socket.on("disconnect", () => {
