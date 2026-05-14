@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { prisma, findWatchPartyByIdOrKey } from "@/lib/prisma";
+import { findWatchPartyByIdOrKey } from "@/lib/prisma";
 import { getMemberFromRequest } from "@/lib/session";
 import { PartyClient } from "./PartyClient";
 import { cookies } from "next/headers";

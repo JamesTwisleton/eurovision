@@ -12,8 +12,8 @@ import { cn } from "@/lib/cn";
 
 interface MemberScore {
   memberName: string;
-  memberId: string;
-  memberLocation: string;
+  memberId?: string;
+  memberLocation?: string;
   partyName: string;
   partyKey: string;
   points: number;

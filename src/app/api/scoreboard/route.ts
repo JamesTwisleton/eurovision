@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
         where: { member: { hasFinalized: true } },
         include: {
           member: {
-            select: { id: true, name: true, location: true, watchParty: { select: { name: true, key: true } } },
+            select: { id: true, name: true, location: true, watchParty: { select: { id: true, name: true, key: true } } },
           },
         },
       },

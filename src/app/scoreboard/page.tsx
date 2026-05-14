@@ -17,7 +17,7 @@ async function getScoreboardData(currentMemberId: string | null) {
               id: true,
               name: true,
               location: true,
-              watchParty: { select: { name: true, key: true } },
+              watchParty: { select: { id: true, name: true, key: true } },
             },
           },
         },

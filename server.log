@@ -1,0 +1,42 @@
+
+> eurovision-jury@0.1.0 start
+> node server.js
+
+> Ready on http://0.0.0.0:3000
+ GET / 200 in 3.5s (next.js: 3.2s, application-code: 341ms)
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][warn][NO_SECRET]
+https://next-auth.js.org/warnings#no_secret
+ GET /api/auth/session 200 in 2.1s (next.js: 1974ms, application-code: 87ms)
+⨯ Error [PrismaClientInitializationError]:
+Invalid `{imported module ./src/lib/prisma.ts}["prisma"].contestant.findMany()` invocation in
+/app/.next/dev/server/chunks/[root-of-the-server]__0u30j0b._.js:269:171
+
+  266     separator: "-",
+  267     length: 3
+  268 });
+→ 269 const contestants = await {imported module ./src/lib/prisma.ts}["prisma"].contestant.findMany(
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   |
+ 6 |   provider = "postgresql"
+ 7 |   url      = env("DATABASE_URL")
+   |
+
+Validation Error Count: 1
+    at <unknown> (file:/app/src/app/api/watch-party/route.ts:29:47)
+    at <unknown> (-->  schema.prisma:7)
+    at async POST (file:/app/src/app/api/watch-party/route.ts:29:23)
+  27 |   });
+  28 |
+> 29 |   const contestants = await prisma.contestant.findMany();
+     |                                               ^
+  30 |
+  31 |   const watchParty = await prisma.watchParty.create({
+  32 |     data: { {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+ POST /api/watch-party 500 in 1063ms (next.js: 918ms, application-code: 145ms)

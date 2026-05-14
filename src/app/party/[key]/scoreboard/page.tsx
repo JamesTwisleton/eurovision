@@ -11,12 +11,14 @@ interface Props {
   params: Promise<{ key: string }>;
 }
 
-async function getScoreboardData(key: string, currentMember: any) {
+import { Member } from "@prisma/client";
+
+async function getScoreboardData(key: string, currentMember: Member | null) {
   const watchParty = await findWatchPartyByIdOrKey(key);
 
   if (!watchParty) return null;
 
-  const isPartyMember = currentMember?.watchPartyId === watchParty.id;
+  const isPartyMember = !!currentMember && currentMember.watchPartyId === watchParty.id;
   const isHost = currentMember?.role === "HOST" && isPartyMember;
 
   const contestants = await prisma.contestant.findMany({
