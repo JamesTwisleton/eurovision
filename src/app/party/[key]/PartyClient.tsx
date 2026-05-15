@@ -450,9 +450,9 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
               <tr className="border-b border-muted-10 bg-muted-5/50">
                 <th
                   onClick={() => sortBy === "performanceOrder" ? toggleSortOrder() : setSortBy("performanceOrder")}
-                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-10 sm:w-16 text-center cursor-pointer hover:text-primary transition-colors"
+                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-14 sm:w-16 text-center cursor-pointer hover:text-primary transition-colors"
                 >
-                  # {sortBy === "performanceOrder" && (sortOrder === "asc" ? "↑" : "↓")}
+                  Order {sortBy === "performanceOrder" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
                 <th
                   onClick={() => sortBy === "country" ? toggleSortOrder() : setSortBy("country")}
@@ -468,7 +468,7 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
                 </th>
                 <th
                   onClick={() => sortBy === "score" ? toggleSortOrder() : setSortBy("score")}
-                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-24 sm:w-40"
+                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-20 sm:w-40"
                 >
                   Score {sortBy === "score" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>

@@ -25,6 +25,8 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [isHost, setIsHost] = useState(false);
   const [partyName, setPartyName] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newName, setNewName] = useState("");
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -39,6 +41,7 @@ export default function MembersPage() {
     setMembers(data.members);
     setIsHost(data.isHost);
     setPartyName(data.partyName);
+    setNewName(data.partyName);
     setCurrentMember(data.currentMember);
     setLoading(false);
   }, [key, router]);
@@ -64,6 +67,24 @@ export default function MembersPage() {
     await navigator.clipboard.writeText(key);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleUpdatePartyName() {
+    if (!newName.trim() || newName === partyName) {
+      setIsEditingName(false);
+      return;
+    }
+
+    const res = await fetch(`/api/watch-party/${key}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newName }),
+    });
+
+    if (res.ok) {
+      setPartyName(newName);
+      setIsEditingName(false);
+    }
   }
 
   async function handleChangeRole(memberId: string, newRole: "HOST" | "GUEST") {
@@ -110,79 +131,135 @@ export default function MembersPage() {
       <Header user={headerUser} />
 
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
-        {/* Share code */}
-        <GlassCard className="mb-4" strong>
-          <p className="text-base text-primary/80 mb-2">
-            Share this code with friends so they can join your Watch Party:
-          </p>
-          <div className="flex items-center gap-3">
-            <span className="flex-1 rounded-lg bg-muted-5 px-4 py-2 font-mono text-lg font-bold text-neon-cyan">
-              {key}
-            </span>
-            <button
-              onClick={handleCopyCode}
-              className="rounded-lg bg-gradient-to-r from-neon-pink to-neon-purple px-4 py-2 text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
-            >
-              {copied ? "Copied!" : "Copy"}
-            </button>
-          </div>
-        </GlassCard>
+        {/* Party Settings */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-black neon-text mb-4 uppercase tracking-tight">Party Settings</h1>
 
-        {/* Member list */}
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {members.map((m) => (
-            <div key={m.id} className="glass p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-lg">{m.name}</span>
-                    <span
-                      className={cn(
-                        "rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider",
-                        m.role === "HOST"
-                          ? "bg-neon-pink/20 text-neon-pink"
-                          : "bg-muted-5 text-muted-60"
-                      )}
-                    >
-                      {m.role}
-                    </span>
-                    {m.hasFinalized && (
-                      <span className="rounded-full bg-green-500/20 px-2.5 py-0.5 text-xs font-bold text-green-400 uppercase tracking-wider">
-                        Finalised
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-base text-muted-60">{m.location}</p>
-                </div>
-                {isHost && (
-                  <div className="flex gap-1">
-                    {m.role === "GUEST" && (
-                      <button
-                        onClick={() => handleChangeRole(m.id, "HOST")}
-                        className="rounded-lg bg-muted-5 px-3 py-1.5 text-sm text-muted-70 hover:bg-muted-10"
-                      >
-                        Make Host
-                      </button>
-                    )}
-                    {m.role === "HOST" && (
-                      <button
-                        onClick={() => handleChangeRole(m.id, "GUEST")}
-                        className="rounded-lg bg-muted-5 px-3 py-1.5 text-sm text-muted-70 hover:bg-muted-10"
-                      >
-                        Make Guest
-                      </button>
-                    )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <GlassCard strong>
+              <p className="text-xs font-bold text-muted-50 uppercase tracking-widest mb-3">Watch Party Name</p>
+              {isHost ? (
+                isEditingName ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="flex-1 rounded-lg bg-muted-5 px-3 py-2 text-primary focus:outline-none focus:ring-2 focus:ring-neon-pink/50"
+                      autoFocus
+                    />
                     <button
-                      onClick={() => handleRemove(m.id)}
-                      className="rounded-lg bg-red-500/10 px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/20"
+                      onClick={handleUpdatePartyName}
+                      className="rounded-lg bg-green-500/20 px-4 py-2 text-sm font-bold text-green-400 hover:bg-green-500/30 transition-colors"
                     >
-                      Remove
+                      Save
+                    </button>
+                    <button
+                      onClick={() => { setIsEditingName(false); setNewName(partyName); }}
+                      className="rounded-lg bg-muted-10 px-4 py-2 text-sm font-bold text-muted-50 hover:bg-muted-20 transition-colors"
+                    >
+                      Cancel
                     </button>
                   </div>
-                )}
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold">{partyName}</span>
+                    <button
+                      onClick={() => setIsEditingName(true)}
+                      className="text-xs font-bold text-neon-cyan uppercase tracking-wider hover:opacity-80"
+                    >
+                      Change Name
+                    </button>
+                  </div>
+                )
+              ) : (
+                <span className="text-lg font-bold">{partyName}</span>
+              )}
+            </GlassCard>
+
+            <GlassCard strong>
+              <p className="text-xs font-bold text-muted-50 uppercase tracking-widest mb-3">Join Code</p>
+              <div className="flex items-center gap-3">
+                <span className="flex-1 rounded-lg bg-muted-5 px-4 py-2 font-mono text-lg font-bold text-neon-cyan">
+                  {key}
+                </span>
+                <button
+                  onClick={handleCopyCode}
+                  className="rounded-lg bg-gradient-to-r from-neon-pink to-neon-purple px-4 py-2 text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
+                >
+                  {copied ? "Copied!" : "Copy"}
+                </button>
               </div>
+            </GlassCard>
+          </div>
+        </div>
+
+        {/* Member list */}
+        <div className="mb-8">
+          <h2 className="text-xl font-black neon-text mb-4 uppercase tracking-tight">Members</h2>
+          <div className="glass overflow-hidden">
+            <div className="flex flex-col">
+              {members.map((m, idx) => (
+                <div
+                  key={m.id || idx}
+                  className="flex items-center justify-between p-4 border-b border-muted-10 last:border-0 hover:bg-muted-5/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-primary">{m.name}</span>
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                            m.role === "HOST"
+                              ? "bg-neon-pink/20 text-neon-pink"
+                              : "bg-muted-5 text-muted-50"
+                          )}
+                        >
+                          {m.role}
+                        </span>
+                        {m.hasFinalized && (
+                          <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-400">
+                            Finalised
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm text-muted-40">{m.location}</span>
+                    </div>
+                  </div>
+                  {isHost && (
+                    <div className="flex gap-2">
+                      {m.role === "GUEST" ? (
+                        <button
+                          onClick={() => handleChangeRole(m.id, "HOST")}
+                          className="rounded px-2.5 py-1.5 text-xs font-bold text-muted-50 hover:bg-muted-10 transition-colors uppercase tracking-wider"
+                        >
+                          Make Host
+                        </button>
+                      ) : (
+                        m.id !== currentMember?.id && (
+                          <button
+                            onClick={() => handleChangeRole(m.id, "GUEST")}
+                            className="rounded px-2.5 py-1.5 text-xs font-bold text-muted-50 hover:bg-muted-10 transition-colors uppercase tracking-wider"
+                          >
+                            Make Guest
+                          </button>
+                        )
+                      )}
+                      {m.id !== currentMember?.id && (
+                        <button
+                          onClick={() => handleRemove(m.id)}
+                          className="rounded px-2.5 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors uppercase tracking-wider"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
 
         {!isHost && (
@@ -196,7 +273,7 @@ export default function MembersPage() {
           </div>
         )}
 
-        <div className="mt-8 flex justify-center gap-6">
+        <div className="mt-8 flex justify-center gap-6 pb-12">
           <Link href={`/party/${key}`} className="text-base font-medium text-muted-50 hover:text-primary transition-colors">
             &larr; Back to your scorecard
           </Link>

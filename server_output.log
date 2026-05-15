@@ -1,0 +1,54 @@
+
+> eurovision-jury@0.1.0 dev
+> node server.js
+
+> Ready on http://0.0.0.0:3000
+ GET / 200 in 406ms (next.js: 172ms, application-code: 234ms)
+ GET / 200 in 174ms (next.js: 15ms, application-code: 160ms)
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][warn][NO_SECRET]
+https://next-auth.js.org/warnings#no_secret
+ GET /api/auth/session 200 in 825ms (next.js: 784ms, application-code: 41ms)
+ GET /scoreboard 200 in 337ms (next.js: 31ms, application-code: 306ms)
+ GET /api/auth/session 200 in 34ms (next.js: 19ms, application-code: 15ms)
+Client connected: 7KIHdPZKqYnyhZzFAAAB
+ GET / 200 in 54ms (next.js: 3ms, application-code: 51ms)
+Client disconnected: 7KIHdPZKqYnyhZzFAAAB
+ GET /api/auth/session 200 in 33ms (next.js: 21ms, application-code: 13ms)
+ POST /api/watch-party 201 in 885ms (next.js: 856ms, application-code: 29ms)
+ GET /party/adverse-orange-macaw 200 in 4.0s (next.js: 3.8s, application-code: 135ms)
+Client connected: xdHqkRK5b1czpP7dAAAD
+xdHqkRK5b1czpP7dAAAD joined room:party_03523996-052d-47a8-97e6-145018bae707
+xdHqkRK5b1czpP7dAAAD joined room:party_03523996-052d-47a8-97e6-145018bae707
+ GET /api/watch-party/adverse-orange-macaw 200 in 1167ms (next.js: 1136ms, application-code: 30ms)
+ GET /api/watch-party/adverse-orange-macaw 200 in 60ms (next.js: 40ms, application-code: 19ms)
+ GET /party/adverse-orange-macaw/scoreboard 200 in 1927ms (next.js: 1864ms, application-code: 63ms)
+xdHqkRK5b1czpP7dAAAD joined room:party_03523996-052d-47a8-97e6-145018bae707
+xdHqkRK5b1czpP7dAAAD joined room:party_03523996-052d-47a8-97e6-145018bae707
+Client disconnected: xdHqkRK5b1czpP7dAAAD
+ GET / 200 in 64ms (next.js: 4ms, application-code: 60ms)
+ GET /api/auth/session 200 in 46ms (next.js: 29ms, application-code: 17ms)
+ GET /scoreboard 200 in 213ms (next.js: 4ms, application-code: 209ms)
+ GET /api/auth/session 200 in 54ms (next.js: 28ms, application-code: 26ms)
+Client connected: sSX7v61iIV6L1fc3AAAF
+Client disconnected: sSX7v61iIV6L1fc3AAAF
+ GET / 200 in 84ms (next.js: 3ms, application-code: 81ms)
+ GET /api/auth/session 200 in 108ms (next.js: 65ms, application-code: 43ms)
+ POST /api/watch-party 201 in 60ms (next.js: 5ms, application-code: 54ms)
+ GET /party/remaining-amethyst-hornet 200 in 175ms (next.js: 45ms, application-code: 129ms)
+Client connected: k1iAhumMGbSiV0JMAAAH
+k1iAhumMGbSiV0JMAAAH joined room:party_b133d7f9-a7e7-4207-a610-bd6a4b69b8fd
+k1iAhumMGbSiV0JMAAAH joined room:party_b133d7f9-a7e7-4207-a610-bd6a4b69b8fd
+ GET /api/watch-party/remaining-amethyst-hornet 200 in 106ms (next.js: 52ms, application-code: 54ms)
+ GET /api/watch-party/remaining-amethyst-hornet 200 in 68ms (next.js: 11ms, application-code: 57ms)
+ GET /party/remaining-amethyst-hornet/scoreboard 200 in 196ms (next.js: 59ms, application-code: 137ms)
+k1iAhumMGbSiV0JMAAAH joined room:party_b133d7f9-a7e7-4207-a610-bd6a4b69b8fd
+k1iAhumMGbSiV0JMAAAH joined room:party_b133d7f9-a7e7-4207-a610-bd6a4b69b8fd
+Client disconnected: k1iAhumMGbSiV0JMAAAH
+ GET /party/remaining-amethyst-hornet/members 200 in 1893ms (next.js: 1792ms, application-code: 101ms)
+Client connected: uEirK5DPi9ocD_HUAAAJ
+uEirK5DPi9ocD_HUAAAJ joined room:party_remaining-amethyst-hornet
+ GET /api/auth/session 200 in 41ms (next.js: 28ms, application-code: 13ms)
+ GET /api/watch-party/remaining-amethyst-hornet/members 200 in 788ms (next.js: 768ms, application-code: 20ms)
+Client disconnected: uEirK5DPi9ocD_HUAAAJ

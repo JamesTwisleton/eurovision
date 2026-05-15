@@ -128,11 +128,10 @@ export function ScoreboardClient({ initialScoreboard, initialParties, initialSta
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
         <div className="mb-6 flex flex-col items-center justify-center">
           <div className="rounded-xl bg-muted-5/30 border border-muted-10 px-6 py-3 text-center">
-            <span className="text-lg sm:text-xl font-bold text-primary">
-              {stats.finalizedUsers}/{stats.totalUsers}
-            </span>
-            <span className="text-sm sm:text-base text-muted-50 ml-2">
-              from {stats.totalParties} watch parties
+            <span className="text-sm sm:text-base text-muted-50">
+              <span className="font-bold text-primary">{stats.totalUsers - stats.finalizedUsers}</span> users left to finalise out of{" "}
+              <span className="font-bold text-primary">{stats.totalUsers}</span> users in{" "}
+              <span className="font-bold text-primary">{stats.totalParties}</span> watch parties.
             </span>
           </div>
         </div>
@@ -160,7 +159,7 @@ export function ScoreboardClient({ initialScoreboard, initialParties, initialSta
               <table className="w-full text-left border-collapse table-fixed">
                 <thead>
                   <tr className="border-b border-muted-10 bg-muted-5/50">
-                    <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-12 sm:w-16 text-center">Rank</th>
+                    <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-12 sm:w-16 text-center">Pos</th>
                     <th
                       onClick={() => sortBy === "country" ? toggleSortOrder() : setSortBy("country")}
                       className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 cursor-pointer hover:text-primary transition-colors"
