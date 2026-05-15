@@ -152,6 +152,7 @@ export function Header({ user, children }: HeaderProps) {
             >
               {user.partyName}
             </Link>
+            <span className="text-primary font-bold">!</span>
             <span className="text-muted-50"> | </span>
             <span className="uppercase tracking-wider text-neon-cyan font-bold">
               {user.role}
