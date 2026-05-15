@@ -159,7 +159,7 @@ export function ScoreboardClient({ initialScoreboard, initialParties, initialSta
               <table className="w-full text-left border-collapse table-fixed">
                 <thead>
                   <tr className="border-b border-muted-10 bg-muted-5/50">
-                    <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-12 sm:w-16 text-center">Pos</th>
+                    <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-14 sm:w-16 text-center">Order</th>
                     <th
                       onClick={() => sortBy === "country" ? toggleSortOrder() : setSortBy("country")}
                       className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 cursor-pointer hover:text-primary transition-colors"

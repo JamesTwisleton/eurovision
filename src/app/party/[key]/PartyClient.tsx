@@ -450,7 +450,7 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
               <tr className="border-b border-muted-10 bg-muted-5/50">
                 <th
                   onClick={() => sortBy === "performanceOrder" ? toggleSortOrder() : setSortBy("performanceOrder")}
-                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-12 sm:w-16 text-center cursor-pointer hover:text-primary transition-colors"
+                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-14 sm:w-16 text-center cursor-pointer hover:text-primary transition-colors"
                 >
                   Order {sortBy === "performanceOrder" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
