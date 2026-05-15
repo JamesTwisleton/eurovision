@@ -35,6 +35,7 @@ interface MemberInfo {
   id?: string;
   name: string;
   location?: string;
+  hasFinalized?: boolean;
 }
 
 interface PartyScoreboardClientProps {
@@ -143,21 +144,24 @@ export function PartyScoreboardClient({
               {copied ? "Link copied!" : "Invite friends to this Watch Party"}
             </button>
           </div>
-          <div className="w-full md:w-3/4 flex flex-wrap content-start gap-2 rounded-xl bg-muted-5/30 border border-muted-10 p-3">
-            {members.length > 0 ? (
-              members.map((m, idx) => (
-                <span
-                  key={m.id || idx}
-                  className="inline-flex items-center rounded-full bg-muted-10 border border-muted-20 px-3 py-1 text-xs font-medium text-muted-70"
-                >
-                  {m.name} | {m.location || "Unknown"}
+          <div className="w-full md:w-3/4 flex flex-col gap-2 rounded-xl bg-muted-5/30 border border-muted-10 p-3">
+            <span className="text-[10px] font-bold text-muted-40 uppercase tracking-widest px-1">In this Watch Party:</span>
+            <div className="flex flex-wrap content-start gap-2">
+              {members.length > 0 ? (
+                members.map((m, idx) => (
+                  <span
+                    key={m.id || idx}
+                    className="inline-flex items-center rounded-full bg-muted-10 border border-muted-20 px-3 py-1 text-xs font-medium text-muted-70"
+                  >
+                    {m.name}@{m.location || "Unknown"}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-muted-40 italic self-center px-1">
+                  Waiting for members to join...
                 </span>
-              ))
-            ) : (
-              <span className="text-xs text-muted-40 italic self-center">
-                Waiting for members to finalise...
-              </span>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
@@ -199,7 +203,7 @@ export function PartyScoreboardClient({
                     </th>
                     <th
                       onClick={() => sortBy === "score" ? toggleSortOrder() : setSortBy("score")}
-                      className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-20 sm:w-32"
+                      className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-24 sm:w-40"
                     >
                       Points {sortBy === "score" && (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
@@ -236,11 +240,11 @@ export function PartyScoreboardClient({
                             </span>
                           </td>
                           <td className="px-2 sm:px-4 py-4">
-                            <div className="flex items-center gap-2 sm:gap-3">
-                              <span className="text-xl sm:text-2xl shrink-0">{entry.flagEmoji}</span>
+                            <div className="flex items-center gap-2 sm:gap-4">
+                              <span className="text-2xl sm:text-4xl shrink-0">{entry.flagEmoji}</span>
                               <div className="flex flex-col min-w-0">
-                                <span className="font-bold text-primary truncate text-sm sm:text-base">{entry.country}</span>
-                                <span className="text-[10px] sm:text-xs text-muted-50 truncate md:hidden">{entry.artist}</span>
+                                <span className="font-bold text-primary truncate text-base sm:text-xl">{entry.country}</span>
+                                <span className="text-xs sm:text-sm text-muted-50 truncate md:hidden">{entry.artist}</span>
                               </div>
                             </div>
                           </td>
@@ -251,10 +255,10 @@ export function PartyScoreboardClient({
                             </div>
                           </td>
                           <td className="px-2 sm:px-4 py-4 text-right">
-                            {members.length > 0 ? (
-                              <AnimatedNumber value={entry.totalPoints} className="text-lg sm:text-xl font-black neon-text" />
+                            {members.some(m => m.hasFinalized) ? (
+                              <AnimatedNumber value={entry.totalPoints} className="text-xl sm:text-3xl font-black neon-text" />
                             ) : (
-                              <span className="text-base sm:text-lg font-bold text-muted-30">&mdash;</span>
+                              <span className="text-lg sm:text-2xl font-bold text-muted-30">&mdash;</span>
                             )}
                           </td>
                         </tr>

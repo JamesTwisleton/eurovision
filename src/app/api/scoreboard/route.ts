@@ -56,5 +56,17 @@ export async function GET(request: NextRequest) {
     key: p.key === currentMemberPartyKey ? p.key : p.id
   }));
 
-  return NextResponse.json({ scoreboard, parties: sanitizedParties });
+  const totalUsers = await prisma.member.count();
+  const finalizedUsers = await prisma.member.count({ where: { hasFinalized: true } });
+  const totalParties = await prisma.watchParty.count();
+
+  return NextResponse.json({
+    scoreboard,
+    parties: sanitizedParties,
+    stats: {
+      totalUsers,
+      finalizedUsers,
+      totalParties
+    }
+  });
 }
