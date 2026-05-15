@@ -1,36 +1,36 @@
 # Eurovision 2026 Jury
 
-A real-time web app for groups of friends to act as their own "National Juries" during Eurovision 2026. Create a jury for your watch party, score each act as you watch, then submit your final votes to see how your picks compare across all juries on a live scoreboard.
+A real-time web app for groups of friends to act as their own "National Juries" during Eurovision 2026. Create a name for your watch party, score each act as you watch, then submit your final votes to see how your picks compare across all juries on a live scoreboard.  You can also see how all other watch parties using the App are voting.
 
 ## Features
 
-### Jury Creation & Joining
-- Create a new jury with a name and location -- you get a unique shareable code (e.g. `neon-disco-glitter`)
-- Join an existing jury by entering the code someone shared with you
-- Everyone on the same code shares one scoresheet and can score collaboratively
+### Watch Party Creation & Joining
+- Create a new Watch Party - you get a unique shareable code (e.g. `neon-disco-glitter`)
+- Join an existing Watch Party by entering the code someone shared with you
+- Everyone on the same code can see the scoreboard for their Watch Party
 
 ### Live Scoring
-- Score each contestant 0--12 as you watch the show
-- Scores sync in real time via WebSockets -- if someone updates a score on their phone, it instantly appears on every other device viewing the same jury
+- Score each contestant 0-12 as you watch the show
+- Scores sync in real time via WebSockets -if someone updates a score on their phone, it instantly appears on every other device viewing the same jury
 - Progress bar tracks how many countries you've scored and which point values you still need to assign
 
-### Finalization & Eurovision Rules
-- When you're ready, hit "Finalize Jury Votes"
+### finalisation & Eurovision Rules
+- When you're ready, hit "Finalise Votes"
 - The app enforces official Eurovision voting rules: exactly one 12, one 10, one 8, 7, 6, 5, 4, 3, 2, and 1 -- all other countries get 0
 - If your scores don't match the rules, you get a toast notification explaining what's wrong
-- You can still edit scores after finalizing (re-triggers validation on save)
-- Successfully finalizing triggers a Henry the cockapoo easter egg
+- You can still edit scores after finalising (re-triggers validation on save)
+- Successfully finalising triggers a Henry the Cockapoo easter egg
 
 ### Global Scoreboard
-- Aggregates finalized scores from all juries
+- Aggregates finalised scores from all users
 - Animated rank changes (Framer Motion layout animations) and rolling number transitions
-- Shows per-jury score breakdowns with colour-coded badges (gold for 12, silver for 10)
+- Shows score breakdowns with colour-coded badges (gold for 12, silver for 10)
 
 ### Admin Panel (`/admin`)
-- Protected by Google OAuth -- only whitelisted Gmail accounts can access
+- Protected by Google OAuth - only whitelisted Gmail accounts can access
 - No links to admin appear anywhere on the public site; you must navigate to `/admin` directly
 - **Acts tab**: Add, edit, and delete contestants (country, artist, song, performance order, flag emoji, image)
-- **Juries tab**: View all registered juries, edit names/locations, toggle finalized status, delete juries
+- **Watch Parties tab**: View all registered juries, edit names/locations, toggle finalised status, delete juries
 
 ## Tech Stack
 
