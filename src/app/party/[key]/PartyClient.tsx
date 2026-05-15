@@ -9,9 +9,9 @@ import { ScoreInput } from "@/components/ScoreInput";
 import { Toast } from "@/components/Toast";
 import { useSocket } from "@/hooks/useSocket";
 import { useSortPreference, sortEntries } from "@/hooks/useSortPreference";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { SortControls } from "@/components/SortControls";
 import { FloatingBackground } from "@/components/FloatingBackground";
+import { Header, HeaderUser } from "@/components/Header";
 import { cn } from "@/lib/cn";
 import { VALID_FINAL_POINTS } from "@/lib/validation";
 
@@ -58,13 +58,14 @@ interface PartyClientProps {
   partyKey: string;
   partyId: string;
   partyName: string;
+  initialMember: MemberInfo | null;
 }
 
-export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) {
+export function PartyClient({ partyKey, partyId, partyName, initialMember }: PartyClientProps) {
   const router = useRouter();
   const socketRef = useSocket(partyId);
   const [watchParty, setWatchParty] = useState<WatchPartyInfo | null>(null);
-  const [member, setMember] = useState<MemberInfo | null>(null);
+  const [member, setMember] = useState<MemberInfo | null>(initialMember);
   const [scores, setScores] = useState<Score[]>([]);
   const [otherScores, setOtherScores] = useState<Record<string, OtherMemberScore[]>>({});
   const [loading, setLoading] = useState(true);
@@ -261,7 +262,7 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
             EUROVISION
           </h1>
           <h2 className="mt-1 text-xl font-semibold text-neon-cyan">
-            2026 JURY
+            2026 WATCH PARTY
           </h2>
         </div>
         <GlassCard className="relative z-10 w-full max-w-sm" strong>
@@ -361,30 +362,22 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
     return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
   }
 
+  const headerUser: HeaderUser | null = member ? {
+    id: member.id,
+    name: member.name,
+    location: member.location,
+    role: member.role,
+    partyName: partyName,
+    partyKey: partyKey,
+  } : null;
+
   return (
     <div className="flex flex-1 flex-col relative">
       <FloatingBackground />
       {/* Header */}
-      <div className="sticky top-0 z-40 glass-strong px-4 py-3">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex flex-col items-start leading-none hover:opacity-80 transition-opacity">
-              <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
-                EUROVISION
-              </span>
-              <span className="text-sm font-semibold text-neon-cyan">
-                2026 JURY
-              </span>
-            </Link>
-            <div className="border-l border-muted-20 pl-3">
-              <h1 className="neon-text text-2xl font-black">{partyName}</h1>
-              <p className="text-sm text-muted-60">
-                {member.name} &middot; {member.location} &middot;{" "}
-                <span className="text-sm uppercase tracking-wider text-neon-cyan">{member.role}</span>
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
+      <Header user={headerUser}>
+        {member && (
+          <>
             {member.hasFinalized && (
               <span className="rounded-full bg-green-500/20 px-3 py-1 text-sm font-semibold text-green-400">
                 Finalised
@@ -402,10 +395,9 @@ export function PartyClient({ partyKey, partyId, partyName }: PartyClientProps) 
             >
               Members
             </Link>
-            <ThemeToggle />
-          </div>
-        </div>
-      </div>
+          </>
+        )}
+      </Header>
 
       {/* Share button */}
       <div className="mx-auto w-full max-w-5xl px-4 pt-3">

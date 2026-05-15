@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Header, HeaderUser } from "@/components/Header";
 import { SortControls } from "@/components/SortControls";
 import { FloatingBackground } from "@/components/FloatingBackground";
 import { useSocket } from "@/hooks/useSocket";
@@ -45,6 +45,7 @@ interface PartyScoreboardClientProps {
   initialMembers: MemberInfo[];
   userPartyKey: string | null;
   isPartyMember: boolean;
+  currentUser: HeaderUser | null;
 }
 
 function getYoutubeEmbedUrl(url: string) {
@@ -75,11 +76,13 @@ export function PartyScoreboardClient({
   initialMembers,
   userPartyKey,
   isPartyMember,
+  currentUser,
 }: PartyScoreboardClientProps) {
   const socketRef = useSocket(partyId);
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [members, setMembers] = useState(initialMembers);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const { sortBy, sortOrder, setSortBy, toggleSortOrder, isLoaded } = useSortPreference();
 
   const fetchScoreboard = useCallback(async () => {
@@ -123,61 +126,68 @@ export function PartyScoreboardClient({
     <div className="flex flex-1 flex-col relative">
       <FloatingBackground />
 
-      <div className="sticky top-0 z-40 glass-strong px-4 py-3">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex flex-col items-start leading-none hover:opacity-80 transition-opacity">
-              <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
-                EUROVISION
-              </span>
-              <span className="text-sm font-semibold text-neon-cyan">
-                2026 JURY
-              </span>
-            </Link>
-            <div className="border-l border-muted-20 pl-3">
-              <h1 className="neon-text text-2xl font-black">SCOREBOARD</h1>
-              <p className="text-sm text-muted-60 leading-relaxed">
-                {partyName}
-                {isPartyMember && (
-                  <span className="ml-1 text-[10px] font-mono text-neon-cyan opacity-70">
-                    ({partyKey})
-                  </span>
-                )}
-                {" "}&middot;{" "}
-                {members.length > 0
-                  ? `${members.length} ${members.length === 1 ? "member has" : "members have"} finalised.`
-                  : "No members have finalised yet."}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/scoreboard"
-              className="text-sm font-medium text-muted-60 hover:text-primary transition-colors"
-            >
-              Global Scoreboard
-            </Link>
-            <SortControls
-              sortBy={sortBy}
-              sortOrder={sortOrder}
-              onSortByChange={setSortBy}
-              onToggleOrder={toggleSortOrder}
-            />
-            <ThemeToggle />
-          </div>
-        </div>
-      </div>
+      <Header user={currentUser}>
+        <Link
+          href="/scoreboard"
+          title="Global Scoreboard"
+          className="text-muted-60 hover:text-primary transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+          </svg>
+        </Link>
+        <SortControls
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSortByChange={setSortBy}
+          onToggleOrder={toggleSortOrder}
+        />
+      </Header>
 
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
-        {members.length > 0 && (
-          <div className="mb-4 flex flex-wrap justify-center gap-2">
-            {members.map((m, idx) => (
-              <span key={m.id || idx} className="rounded-full bg-muted-5 px-3 py-1 text-sm text-muted-60">
-                {m.name}{m.location ? ` (${m.location})` : ""}
-              </span>
-            ))}
+        <div className="mb-6 flex flex-col md:flex-row gap-4 items-stretch">
+          <div className="w-full md:w-1/4">
+            <button
+              onClick={async () => {
+                const url = `${window.location.origin}/party/${partyKey}`;
+                await navigator.clipboard.writeText(url);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="w-full h-full rounded-xl bg-neon-blue/10 border border-neon-blue/20 px-4 py-3 text-sm font-bold text-neon-blue transition-all hover:bg-neon-blue/20 active:scale-[0.98] flex items-center justify-center text-center"
+            >
+              {copied ? "Link copied!" : "Invite friends to this Watch Party"}
+            </button>
           </div>
-        )}
+          <div className="w-full md:w-3/4 flex flex-wrap content-start gap-2 rounded-xl bg-muted-5/30 border border-muted-10 p-3">
+            {members.length > 0 ? (
+              members.map((m, idx) => (
+                <span
+                  key={m.id || idx}
+                  className="inline-flex items-center rounded-full bg-muted-10 border border-muted-20 px-3 py-1 text-xs font-medium text-muted-70"
+                >
+                  {m.name} | {m.location || "Unknown"}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-muted-40 italic self-center">
+                Waiting for members to finalise...
+              </span>
+            )}
+          </div>
+        </div>
 
         {scoreboard.length === 0 ? (
           <GlassCard className="text-center" strong>

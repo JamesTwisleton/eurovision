@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Header, HeaderUser } from "@/components/Header";
 import { SortControls } from "@/components/SortControls";
 import { FloatingBackground } from "@/components/FloatingBackground";
 import { useSocket } from "@/hooks/useSocket";
@@ -43,6 +43,7 @@ interface ScoreboardClientProps {
   initialScoreboard: ScoreboardEntry[];
   initialParties: PartyInfo[];
   userPartyKey: string | null;
+  currentUser: HeaderUser | null;
 }
 
 function getYoutubeEmbedUrl(url: string) {
@@ -65,7 +66,7 @@ function getYoutubeEmbedUrl(url: string) {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 }
 
-export function ScoreboardClient({ initialScoreboard, initialParties, userPartyKey }: ScoreboardClientProps) {
+export function ScoreboardClient({ initialScoreboard, initialParties, userPartyKey, currentUser }: ScoreboardClientProps) {
   const socketRef = useSocket();
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [parties, setParties] = useState(initialParties);
@@ -111,38 +112,14 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
     <div className="flex flex-1 flex-col relative">
       <FloatingBackground />
 
-      <div className="sticky top-0 z-40 glass-strong px-4 py-3">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex flex-col items-start leading-none hover:opacity-80 transition-opacity">
-              <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
-                EUROVISION
-              </span>
-              <span className="text-sm font-semibold text-neon-cyan">
-                2026 JURY
-              </span>
-            </Link>
-            <div className="border-l border-muted-20 pl-3">
-              <h1 className="neon-text text-2xl font-black">GLOBAL SCOREBOARD</h1>
-              <p className="text-sm text-muted-60 leading-relaxed">
-                Combined results from all Watch Parties.
-                {parties.length > 0
-                  ? ` ${parties.length} ${parties.length === 1 ? "party" : "parties"} with finalised votes.`
-                  : " No members have finalised yet."}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <SortControls
-              sortBy={sortBy}
-              sortOrder={sortOrder}
-              onSortByChange={setSortBy}
-              onToggleOrder={toggleSortOrder}
-            />
-            <ThemeToggle />
-          </div>
-        </div>
-      </div>
+      <Header user={currentUser}>
+        <SortControls
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSortByChange={setSortBy}
+          onToggleOrder={toggleSortOrder}
+        />
+      </Header>
 
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
         {parties.length > 0 && (

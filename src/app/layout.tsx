@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eurovision 2026 Jury",
+  title: "Eurovision 2026 Watch Party",
   description: "Real-time scoring for Eurovision 2026",
 };
 

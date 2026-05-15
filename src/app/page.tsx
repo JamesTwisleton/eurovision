@@ -90,7 +90,7 @@ export default function Home() {
           EUROVISION
         </h1>
         <h2 className="mt-2 text-2xl font-semibold text-neon-cyan sm:text-3xl">
-          2026 JURY
+          2026 WATCH PARTY
         </h2>
         <p className="mx-auto mt-4 max-w-xs text-sm leading-relaxed text-muted-50">
           Be your own National Jury! Create or join a Watch Party,

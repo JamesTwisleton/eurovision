@@ -76,6 +76,14 @@ export default async function ScoreboardPage() {
         isAuthorized: p.key === member?.watchParty.key
       }))}
       userPartyKey={member?.watchParty.key || null}
+      currentUser={member ? {
+        id: member.id,
+        name: member.name,
+        location: member.location,
+        role: member.role,
+        partyName: member.watchParty.name,
+        partyKey: member.watchParty.key,
+      } : null}
     />
   );
 }
