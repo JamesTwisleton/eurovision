@@ -36,7 +36,7 @@ export function SortControls({
           )}
         >
           <span className="flex items-center gap-1">
-            {field === "performanceOrder" ? "#" : field}
+            {field === "performanceOrder" ? "Order" : field}
             {sortBy === field && (
               <span className="text-[10px] opacity-80">
                 {sortOrder === "asc" ? "↑" : "↓"}
