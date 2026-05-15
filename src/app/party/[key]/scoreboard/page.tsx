@@ -57,16 +57,17 @@ async function getScoreboardData(key: string, currentMember: Member | null) {
     }))
     .sort((a, b) => b.totalPoints - a.totalPoints);
 
-  const finalisedMembers = await prisma.member.findMany({
-    where: { watchPartyId: watchParty.id, hasFinalized: true },
+  const allMembers = await prisma.member.findMany({
+    where: { watchPartyId: watchParty.id },
     select: {
       id: isHost,
       name: true,
       location: isPartyMember,
+      hasFinalized: true,
     },
   });
 
-  const sanitizedMembers = finalisedMembers.map(m => ({
+  const sanitizedMembers = allMembers.map(m => ({
     ...m,
     name: isPartyMember ? m.name : "Member",
     location: isPartyMember ? m.location : undefined,

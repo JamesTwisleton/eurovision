@@ -468,7 +468,7 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
                 </th>
                 <th
                   onClick={() => sortBy === "score" ? toggleSortOrder() : setSortBy("score")}
-                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-20 sm:w-32"
+                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-24 sm:w-40"
                 >
                   Score {sortBy === "score" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
@@ -495,11 +495,11 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
                         {score.contestant.performanceOrder}
                       </td>
                       <td className="px-2 sm:px-4 py-4">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <span className="text-xl sm:text-2xl shrink-0">{score.contestant.flagEmoji}</span>
+                        <div className="flex items-center gap-2 sm:gap-4">
+                          <span className="text-2xl sm:text-4xl shrink-0">{score.contestant.flagEmoji}</span>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-bold text-primary truncate text-sm sm:text-base">{score.contestant.country}</span>
-                            <span className="text-[10px] sm:text-xs text-muted-50 truncate md:hidden">
+                            <span className="font-bold text-primary truncate text-base sm:text-xl">{score.contestant.country}</span>
+                            <span className="text-xs sm:text-sm text-muted-50 truncate md:hidden">
                               {score.contestant.artist}
                             </span>
                           </div>
@@ -515,7 +515,7 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
                         <div className="flex justify-end">
                           <div
                             className={cn(
-                              "flex h-8 w-10 sm:h-9 sm:w-12 items-center justify-center rounded-lg text-base sm:text-lg font-bold transition-all",
+                              "flex h-9 w-12 sm:h-12 sm:w-16 items-center justify-center rounded-lg text-lg sm:text-2xl font-bold transition-all",
                               score.points === 12
                                 ? "score-badge-12"
                                 : score.points === 10
@@ -534,7 +534,7 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
                       <tr className="bg-muted-5/10 border-b border-muted-10 last:border-0">
                         <td colSpan={4} className="px-2 sm:px-4 py-2">
                           <div className="flex flex-wrap gap-x-4 gap-y-1">
-                            <span className="text-[10px] font-bold text-muted-40 uppercase tracking-widest self-center mr-1">Other Juries:</span>
+                            <span className="text-[10px] font-bold text-muted-40 uppercase tracking-widest self-center mr-1">Friends:</span>
                             {others.map((os) => (
                               <span key={os.memberId} className="text-xs text-muted-60">
                                 {os.memberName}{" "}

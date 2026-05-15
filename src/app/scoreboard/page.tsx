@@ -53,7 +53,19 @@ async function getScoreboardData(currentMemberId: string | null) {
     select: { key: true, name: true, id: true },
   });
 
-  return { scoreboard, parties };
+  const totalUsers = await prisma.member.count();
+  const finalizedUsers = await prisma.member.count({ where: { hasFinalized: true } });
+  const totalParties = await prisma.watchParty.count();
+
+  return {
+    scoreboard,
+    parties,
+    stats: {
+      totalUsers,
+      finalizedUsers,
+      totalParties
+    }
+  };
 }
 
 export default async function ScoreboardPage() {
@@ -65,7 +77,7 @@ export default async function ScoreboardPage() {
   } as unknown as NextRequest;
 
   const member = await getMemberFromRequest(request);
-  const { scoreboard, parties } = await getScoreboardData(member?.watchParty.key || null);
+  const { scoreboard, parties, stats } = await getScoreboardData(member?.watchParty.key || null);
 
   return (
     <ScoreboardClient
@@ -75,6 +87,7 @@ export default async function ScoreboardPage() {
         key: p.key === member?.watchParty.key ? p.key : p.id, // Use ID as placeholder if not authorized
         isAuthorized: p.key === member?.watchParty.key
       }))}
+      initialStats={stats}
       userPartyKey={member?.watchParty.key || null}
       currentUser={member ? {
         id: member.id,

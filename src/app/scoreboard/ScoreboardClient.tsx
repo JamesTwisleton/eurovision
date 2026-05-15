@@ -39,9 +39,16 @@ interface PartyInfo {
   isAuthorized?: boolean;
 }
 
+interface GlobalStats {
+  totalUsers: number;
+  finalizedUsers: number;
+  totalParties: number;
+}
+
 interface ScoreboardClientProps {
   initialScoreboard: ScoreboardEntry[];
   initialParties: PartyInfo[];
+  initialStats: GlobalStats;
   userPartyKey: string | null;
   currentUser: HeaderUser | null;
 }
@@ -66,10 +73,11 @@ function getYoutubeEmbedUrl(url: string) {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 }
 
-export function ScoreboardClient({ initialScoreboard, initialParties, userPartyKey, currentUser }: ScoreboardClientProps) {
+export function ScoreboardClient({ initialScoreboard, initialParties, initialStats, userPartyKey, currentUser }: ScoreboardClientProps) {
   const socketRef = useSocket();
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [parties, setParties] = useState(initialParties);
+  const [stats, setStats] = useState(initialStats);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { sortBy, sortOrder, setSortBy, toggleSortOrder, isLoaded } = useSortPreference();
 
@@ -78,6 +86,9 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
     const data = await res.json();
     setScoreboard(data.scoreboard);
     setParties(data.parties);
+    if (data.stats) {
+      setStats(data.stats);
+    }
   }, []);
 
   const scoreboardWithRank = scoreboard.map((entry, index) => ({
@@ -115,26 +126,16 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
       <Header user={currentUser} />
 
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
-        {parties.length > 0 && (
-          <div className="mb-4 flex flex-wrap justify-center gap-2">
-            {parties.map((p) => (
-              <Link
-                key={p.key}
-                href={`/party/${p.key}/scoreboard`}
-                className={cn(
-                  "rounded-full bg-muted-5 px-3 py-1 text-sm text-muted-60 transition-colors hover:text-primary"
-                )}
-              >
-                {p.name}
-                {p.isAuthorized && (
-                  <span className="ml-1 text-[10px] font-mono text-neon-cyan opacity-70">
-                    ({p.key})
-                  </span>
-                )}
-              </Link>
-            ))}
+        <div className="mb-6 flex flex-col items-center justify-center">
+          <div className="rounded-xl bg-muted-5/30 border border-muted-10 px-6 py-3 text-center">
+            <span className="text-lg sm:text-xl font-bold text-primary">
+              {stats.finalizedUsers}/{stats.totalUsers}
+            </span>
+            <span className="text-sm sm:text-base text-muted-50 ml-2">
+              from {stats.totalParties} watch parties
+            </span>
           </div>
-        )}
+        </div>
 
         {scoreboard.length === 0 ? (
           <GlassCard className="text-center" strong>
@@ -174,7 +175,7 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
                     </th>
                     <th
                       onClick={() => sortBy === "score" ? toggleSortOrder() : setSortBy("score")}
-                      className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-20 sm:w-32"
+                      className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-24 sm:w-40"
                     >
                       Points {sortBy === "score" && (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
@@ -211,11 +212,11 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
                             </span>
                           </td>
                           <td className="px-2 sm:px-4 py-4">
-                            <div className="flex items-center gap-2 sm:gap-3">
-                              <span className="text-xl sm:text-2xl shrink-0">{entry.flagEmoji}</span>
+                            <div className="flex items-center gap-2 sm:gap-4">
+                              <span className="text-2xl sm:text-4xl shrink-0">{entry.flagEmoji}</span>
                               <div className="flex flex-col min-w-0">
-                                <span className="font-bold text-primary truncate text-sm sm:text-base">{entry.country}</span>
-                                <span className="text-[10px] sm:text-xs text-muted-50 truncate md:hidden">{entry.artist}</span>
+                                <span className="font-bold text-primary truncate text-base sm:text-xl">{entry.country}</span>
+                                <span className="text-xs sm:text-sm text-muted-50 truncate md:hidden">{entry.artist}</span>
                               </div>
                             </div>
                           </td>
@@ -227,9 +228,9 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
                           </td>
                           <td className="px-2 sm:px-4 py-4 text-right">
                             {parties.length > 0 ? (
-                              <AnimatedNumber value={entry.totalPoints} className="text-lg sm:text-xl font-black neon-text" />
+                              <AnimatedNumber value={entry.totalPoints} className="text-xl sm:text-3xl font-black neon-text" />
                             ) : (
-                              <span className="text-base sm:text-lg font-bold text-muted-30">&mdash;</span>
+                              <span className="text-lg sm:text-2xl font-bold text-muted-30">&mdash;</span>
                             )}
                           </td>
                         </tr>
