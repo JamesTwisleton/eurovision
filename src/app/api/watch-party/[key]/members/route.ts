@@ -32,5 +32,15 @@ export async function GET(
     orderBy: { createdAt: "asc" },
   });
 
-  return NextResponse.json({ members, isHost });
+  return NextResponse.json({
+    members,
+    isHost,
+    partyName: watchParty.name,
+    currentMember: {
+      id: member.id,
+      name: member.name,
+      location: member.location,
+      role: member.role,
+    },
+  });
 }

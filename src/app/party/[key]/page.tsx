@@ -65,6 +65,13 @@ export default async function PartyPage({ params }: Props) {
       partyKey={isPartyMember ? party.key : key}
       partyId={party.id}
       partyName={party.name}
+      initialMember={isPartyMember ? {
+        id: currentMember.id,
+        name: currentMember.name,
+        location: currentMember.location,
+        role: currentMember.role,
+        hasFinalized: currentMember.hasFinalized,
+      } : null}
     />
   );
 }

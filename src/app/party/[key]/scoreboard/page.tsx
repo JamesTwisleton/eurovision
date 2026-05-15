@@ -108,6 +108,14 @@ export default async function PartyScoreboardPage({ params }: Props) {
       initialMembers={data.members}
       userPartyKey={member?.watchParty.key || null}
       isPartyMember={data.isPartyMember}
+      currentUser={member ? {
+        id: member.id,
+        name: member.name,
+        location: member.location,
+        role: member.role,
+        partyName: member.watchParty.name,
+        partyKey: member.watchParty.key,
+      } : null}
     />
   );
 }

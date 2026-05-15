@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { GlassCard } from "@/components/GlassCard";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Header, HeaderUser } from "@/components/Header";
 import { FloatingBackground } from "@/components/FloatingBackground";
 import { useSocket } from "@/hooks/useSocket";
 import { cn } from "@/lib/cn";
@@ -24,6 +24,8 @@ export default function MembersPage() {
   const socketRef = useSocket(key);
   const [members, setMembers] = useState<Member[]>([]);
   const [isHost, setIsHost] = useState(false);
+  const [partyName, setPartyName] = useState("");
+  const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -36,6 +38,8 @@ export default function MembersPage() {
     const data = await res.json();
     setMembers(data.members);
     setIsHost(data.isHost);
+    setPartyName(data.partyName);
+    setCurrentMember(data.currentMember);
     setLoading(false);
   }, [key, router]);
 
@@ -90,31 +94,20 @@ export default function MembersPage() {
     );
   }
 
+  const headerUser: HeaderUser | null = currentMember ? {
+    id: currentMember.id,
+    name: currentMember.name,
+    location: currentMember.location,
+    role: currentMember.role,
+    partyName: partyName,
+    partyKey: key,
+  } : null;
+
   return (
     <div className="flex flex-1 flex-col relative">
       <FloatingBackground />
 
-      <div className="sticky top-0 z-40 glass-strong px-4 py-3">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex flex-col items-start leading-none hover:opacity-80 transition-opacity">
-              <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-lg font-black tracking-tight text-transparent">
-                EUROVISION
-              </span>
-              <span className="text-sm font-semibold text-neon-cyan">
-                2026 JURY
-              </span>
-            </Link>
-            <div className="border-l border-muted-20 pl-3">
-              <h1 className="neon-text text-2xl font-black">MEMBERS</h1>
-              <p className="text-sm text-muted-60">
-                {members.length} {members.length === 1 ? "member" : "members"} in this Watch Party
-              </p>
-            </div>
-          </div>
-          <ThemeToggle />
-        </div>
-      </div>
+      <Header user={headerUser} />
 
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
         {/* Share code */}
