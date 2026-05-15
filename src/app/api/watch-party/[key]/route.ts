@@ -80,3 +80,32 @@ export async function GET(
     otherScores,
   });
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ key: string }> }
+) {
+  const { key } = await params;
+  const currentMember = await getMemberFromRequest(request);
+
+  const watchParty = await findWatchPartyByIdOrKey(key);
+  if (!watchParty) {
+    return NextResponse.json({ error: "Watch party not found" }, { status: 404 });
+  }
+
+  if (currentMember?.watchPartyId !== watchParty.id || currentMember?.role !== "HOST") {
+    return NextResponse.json({ error: "Only the host can rename the watch party" }, { status: 403 });
+  }
+
+  const { name } = await request.json();
+  if (!name || typeof name !== "string" || name.trim().length === 0) {
+    return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+  }
+
+  const updated = await prisma.watchParty.update({
+    where: { id: watchParty.id },
+    data: { name: name.trim() },
+  });
+
+  return NextResponse.json({ watchParty: updated });
+}

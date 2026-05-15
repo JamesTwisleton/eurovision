@@ -1,0 +1,47 @@
+
+> eurovision-jury@0.1.0 dev
+> node server.js
+
+> Ready on http://0.0.0.0:3000
+ GET /party/comparative-orange-asp 200 in 1338ms (next.js: 739ms, application-code: 599ms)
+Client connected: jFapQPBWdww0KSL9AAAB
+jFapQPBWdww0KSL9AAAB joined room:party_e6b62124-062d-4936-97ee-53c2174555a9
+ GET /api/watch-party/comparative-orange-asp 403 in 808ms (next.js: 738ms, application-code: 70ms)
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][warn][NO_SECRET]
+https://next-auth.js.org/warnings#no_secret
+ GET /api/auth/session 200 in 883ms (next.js: 859ms, application-code: 23ms)
+ POST /api/watch-party/join 409 in 152ms (next.js: 124ms, application-code: 28ms)
+Client disconnected: jFapQPBWdww0KSL9AAAB
+ GET /party/comparative-orange-asp 200 in 153ms (next.js: 36ms, application-code: 117ms)
+ GET /party/comparative-orange-asp 200 in 164ms (next.js: 29ms, application-code: 135ms)
+ GET /api/watch-party/comparative-orange-asp 403 in 74ms (next.js: 27ms, application-code: 47ms)
+Client connected: siC8pohkZJt42vEAAAAD
+ GET /api/auth/session 200 in 86ms (next.js: 59ms, application-code: 26ms)
+siC8pohkZJt42vEAAAAD joined room:party_e6b62124-062d-4936-97ee-53c2174555a9
+ POST /api/watch-party/join 409 in 19ms (next.js: 5ms, application-code: 14ms)
+Client disconnected: siC8pohkZJt42vEAAAAD
+ GET /party/comparative-orange-asp 200 in 137ms (next.js: 27ms, application-code: 110ms)
+ GET /api/watch-party/comparative-orange-asp 403 in 38ms (next.js: 30ms, application-code: 8ms)
+Client connected: 9Iu8NNvW2GEPONAzAAAF
+9Iu8NNvW2GEPONAzAAAF joined room:party_e6b62124-062d-4936-97ee-53c2174555a9
+ GET /api/auth/session 200 in 37ms (next.js: 26ms, application-code: 11ms)
+ POST /api/watch-party/join 409 in 18ms (next.js: 3ms, application-code: 15ms)
+ POST /api/watch-party/join 200 in 15ms (next.js: 3ms, application-code: 12ms)
+ GET /api/watch-party/comparative-orange-asp 200 in 46ms (next.js: 24ms, application-code: 22ms)
+ GET /party/comparative-orange-asp/members 200 in 552ms (next.js: 438ms, application-code: 115ms)
+9Iu8NNvW2GEPONAzAAAF joined room:party_comparative-orange-asp
+9Iu8NNvW2GEPONAzAAAF joined room:party_comparative-orange-asp
+ GET /api/watch-party/comparative-orange-asp/members 200 in 687ms (next.js: 665ms, application-code: 23ms)
+ GET /api/watch-party/comparative-orange-asp/members 200 in 37ms (next.js: 24ms, application-code: 12ms)
+Client disconnected: 9Iu8NNvW2GEPONAzAAAF
+ GET /party/comparative-orange-asp/scoreboard 200 in 980ms (next.js: 726ms, application-code: 255ms)
+ GET /api/auth/session 200 in 43ms (next.js: 26ms, application-code: 17ms)
+Client connected: PhG1O33dEKmLBVW0AAAH
+PhG1O33dEKmLBVW0AAAH joined room:party_e6b62124-062d-4936-97ee-53c2174555a9
+Client disconnected: PhG1O33dEKmLBVW0AAAH
+ GET /scoreboard 200 in 254ms (next.js: 42ms, application-code: 212ms)
+Client connected: Lc7N7Ei1mRrU-Z-gAAAJ
+ GET /api/auth/session 200 in 103ms (next.js: 53ms, application-code: 49ms)
+Client disconnected: Lc7N7Ei1mRrU-Z-gAAAJ
