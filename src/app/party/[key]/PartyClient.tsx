@@ -376,26 +376,10 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
       <FloatingBackground />
       {/* Header */}
       <Header user={headerUser}>
-        {member && (
-          <>
-            {member.hasFinalized && (
-              <span className="rounded-full bg-green-500/20 px-3 py-1 text-sm font-semibold text-green-400">
-                Finalised
-              </span>
-            )}
-            <Link
-              href={`/party/${partyKey}/scoreboard`}
-              className="text-sm font-medium text-muted-60 hover:text-primary transition-colors"
-            >
-              Scoreboard
-            </Link>
-            <Link
-              href={`/party/${partyKey}/members`}
-              className="text-sm font-medium text-muted-60 hover:text-primary transition-colors"
-            >
-              Members
-            </Link>
-          </>
+        {member && member.hasFinalized && (
+          <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs sm:text-sm font-semibold text-green-400">
+            Finalised
+          </span>
         )}
       </Header>
 
@@ -417,15 +401,42 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
         </button>
       </div>
 
-      {/* Instructions & Sort */}
-      <div className="mx-auto w-full max-w-5xl px-4 pt-3 relative z-10 flex flex-col sm:flex-row sm:items-start gap-3">
-        <div className="flex-1 rounded-lg bg-muted-5 px-3 py-2 text-sm text-muted-60 leading-relaxed">
+      {/* Instructions */}
+      <div className="mx-auto w-full max-w-5xl px-4 pt-3 relative z-10">
+        <div className="rounded-lg bg-muted-5 px-3 py-2 text-sm text-muted-60 leading-relaxed">
           <strong className="text-muted-70">Tap a country</strong>{" "}
           to give it a score. During the show, feel free to change scores as much as you
           like &mdash; nothing is locked in until you hit &quot;Finalise&quot; at
           the bottom. This is your personal scorecard.
         </div>
-        <div className="flex justify-end shrink-0">
+      </div>
+
+      {/* Progress summary */}
+      <div className="mx-auto w-full max-w-5xl px-4 pt-3">
+        <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2.5 text-sm gap-4">
+          <span className="text-muted-60 font-medium shrink-0">
+            {scoredCount}/{scores.length} scored
+          </span>
+          <div className="flex-1 text-right min-w-0">
+            {missingPoints.length > 0 && missingPoints.length <= 5 ? (
+              <span className="text-muted-50 truncate block">
+                Need:{" "}
+                <span className="font-mono font-bold text-neon-pink">
+                  {missingPoints.join(", ")}
+                </span>
+              </span>
+            ) : missingPoints.length === 0 ? (
+              <span className="text-green-400 font-bold">
+                Ready to finalise!
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      {/* Contestant List */}
+      <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-3">
+        <div className="flex justify-end mb-3">
           <SortControls
             sortBy={sortBy}
             sortOrder={sortOrder}
@@ -433,59 +444,33 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
             onToggleOrder={toggleSortOrder}
           />
         </div>
-      </div>
-
-      {/* Progress summary */}
-      <div className="mx-auto w-full max-w-5xl px-4 pt-3">
-        <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2.5 text-sm">
-          <span className="text-muted-60 font-medium">
-            {scoredCount} of {scores.length} countries scored
-          </span>
-          {missingPoints.length > 0 && missingPoints.length <= 5 && (
-            <span className="text-muted-50">
-              Still need to give out:{" "}
-              <span className="font-mono font-bold text-neon-pink">
-                {missingPoints.join(", ")}
-              </span>
-            </span>
-          )}
-          {missingPoints.length === 0 && (
-            <span className="text-green-400 font-bold">
-              Ready to finalise!
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Contestant List */}
-      <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-3">
         <div className="glass overflow-hidden">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse table-fixed">
             <thead>
               <tr className="border-b border-muted-10 bg-muted-5/50">
                 <th
                   onClick={() => sortBy === "performanceOrder" ? toggleSortOrder() : setSortBy("performanceOrder")}
-                  className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 w-12 text-center cursor-pointer hover:text-primary transition-colors"
+                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-10 sm:w-16 text-center cursor-pointer hover:text-primary transition-colors"
                 >
                   # {sortBy === "performanceOrder" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
                 <th
                   onClick={() => sortBy === "country" ? toggleSortOrder() : setSortBy("country")}
-                  className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 cursor-pointer hover:text-primary transition-colors"
+                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 cursor-pointer hover:text-primary transition-colors"
                 >
                   Country {sortBy === "country" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
                 <th
                   onClick={() => sortBy === "artist" ? toggleSortOrder() : setSortBy("artist")}
-                  className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 hidden md:table-cell cursor-pointer hover:text-primary transition-colors"
+                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 hidden md:table-cell cursor-pointer hover:text-primary transition-colors"
                 >
                   Artist & Song {sortBy === "artist" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
                 <th
                   onClick={() => sortBy === "score" ? toggleSortOrder() : setSortBy("score")}
-                  className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors"
+                  className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-20 sm:w-32"
                 >
-                  Your Score {sortBy === "score" && (sortOrder === "asc" ? "↑" : "↓")}
+                  Score {sortBy === "score" && (sortOrder === "asc" ? "↑" : "↓")}
                 </th>
               </tr>
             </thead>
@@ -506,31 +491,31 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
                         isSelected && "bg-muted-5/50 ring-inset ring-2 ring-neon-pink/30"
                       )}
                     >
-                      <td className="px-4 py-4 text-center text-sm font-medium text-muted-40">
+                      <td className="px-2 sm:px-4 py-4 text-center text-sm font-medium text-muted-40">
                         {score.contestant.performanceOrder}
                       </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{score.contestant.flagEmoji}</span>
+                      <td className="px-2 sm:px-4 py-4">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <span className="text-xl sm:text-2xl shrink-0">{score.contestant.flagEmoji}</span>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-bold text-primary truncate">{score.contestant.country}</span>
-                            <span className="text-xs text-muted-50 truncate md:hidden">
+                            <span className="font-bold text-primary truncate text-sm sm:text-base">{score.contestant.country}</span>
+                            <span className="text-[10px] sm:text-xs text-muted-50 truncate md:hidden">
                               {score.contestant.artist}
                             </span>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-4 hidden md:table-cell">
+                      <td className="px-2 sm:px-4 py-4 hidden md:table-cell">
                         <div className="flex flex-col min-w-0">
                           <span className="font-medium text-muted-70 truncate">{score.contestant.artist}</span>
                           <span className="text-xs text-muted-40 truncate">{score.contestant.song}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-right">
+                      <td className="px-2 sm:px-4 py-4 text-right">
                         <div className="flex justify-end">
                           <div
                             className={cn(
-                              "flex h-9 w-12 items-center justify-center rounded-lg text-lg font-bold transition-all",
+                              "flex h-8 w-10 sm:h-9 sm:w-12 items-center justify-center rounded-lg text-base sm:text-lg font-bold transition-all",
                               score.points === 12
                                 ? "score-badge-12"
                                 : score.points === 10
@@ -547,7 +532,7 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
                     </tr>
                     {others.length > 0 && (
                       <tr className="bg-muted-5/10 border-b border-muted-10 last:border-0">
-                        <td colSpan={4} className="px-4 py-2">
+                        <td colSpan={4} className="px-2 sm:px-4 py-2">
                           <div className="flex flex-wrap gap-x-4 gap-y-1">
                             <span className="text-[10px] font-bold text-muted-40 uppercase tracking-widest self-center mr-1">Other Juries:</span>
                             {others.map((os) => (
@@ -713,7 +698,7 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/henry.gif"
-                alt="Henry the cockapoo looking relieved"
+                alt="Relieved dog"
                 className="mx-auto mb-4 h-48 w-48 rounded-2xl object-cover"
               />
               <p className="text-xl font-bold neon-text">

@@ -41,12 +41,6 @@ const contestants = [
 ]
 
 async function main() {
-  console.log('Cleaning up existing data...')
-  // Delete all members, scores and watch parties to avoid conflicts and satisfy user request
-  await prisma.score.deleteMany({})
-  await prisma.member.deleteMany({})
-  await prisma.watchParty.deleteMany({})
-
   console.log('Seeding contestants...')
   for (const contestant of contestants) {
     await prisma.contestant.upsert({

@@ -112,14 +112,7 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
     <div className="flex flex-1 flex-col relative">
       <FloatingBackground />
 
-      <Header user={currentUser}>
-        <SortControls
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          onSortByChange={setSortBy}
-          onToggleOrder={toggleSortOrder}
-        />
-      </Header>
+      <Header user={currentUser} />
 
       <div className="mx-auto w-full max-w-5xl px-4 pt-4">
         {parties.length > 0 && (
@@ -149,31 +142,39 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
           </GlassCard>
         ) : (
           <div className="flex flex-col gap-4">
+            <div className="flex justify-end">
+              <SortControls
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortByChange={setSortBy}
+                onToggleOrder={toggleSortOrder}
+              />
+            </div>
             {parties.length === 0 && (
               <p className="text-center text-sm font-medium text-muted-50">
                 Waiting for members to finalise their votes...
               </p>
             )}
             <div className="glass overflow-hidden">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse table-fixed">
                 <thead>
                   <tr className="border-b border-muted-10 bg-muted-5/50">
-                    <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 w-16 text-center">Rank</th>
+                    <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 w-12 sm:w-16 text-center">Rank</th>
                     <th
                       onClick={() => sortBy === "country" ? toggleSortOrder() : setSortBy("country")}
-                      className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 cursor-pointer hover:text-primary transition-colors"
+                      className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 cursor-pointer hover:text-primary transition-colors"
                     >
                       Country {sortBy === "country" && (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
                     <th
                       onClick={() => sortBy === "artist" ? toggleSortOrder() : setSortBy("artist")}
-                      className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 hidden md:table-cell cursor-pointer hover:text-primary transition-colors"
+                      className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 hidden md:table-cell cursor-pointer hover:text-primary transition-colors"
                     >
                       Artist {sortBy === "artist" && (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
                     <th
                       onClick={() => sortBy === "score" ? toggleSortOrder() : setSortBy("score")}
-                      className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors"
+                      className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-50 text-right cursor-pointer hover:text-primary transition-colors w-20 sm:w-32"
                     >
                       Points {sortBy === "score" && (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
@@ -193,10 +194,10 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
                             rank === 0 && entry.totalPoints > 0 && "bg-neon-pink/5"
                           )}
                         >
-                          <td className="px-4 py-4 text-center">
+                          <td className="px-2 sm:px-4 py-4 text-center">
                             <span
                               className={cn(
-                                "inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold",
+                                "inline-flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-xs sm:text-sm font-bold",
                                 rank === 0 && parties.length > 0
                                   ? "bg-yellow-500/20 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.2)]"
                                   : rank === 1 && parties.length > 0
@@ -209,26 +210,26 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
                               {rank + 1}
                             </span>
                           </td>
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl">{entry.flagEmoji}</span>
+                          <td className="px-2 sm:px-4 py-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <span className="text-xl sm:text-2xl shrink-0">{entry.flagEmoji}</span>
                               <div className="flex flex-col min-w-0">
-                                <span className="font-bold text-primary truncate">{entry.country}</span>
-                                <span className="text-xs text-muted-50 truncate md:hidden">{entry.artist}</span>
+                                <span className="font-bold text-primary truncate text-sm sm:text-base">{entry.country}</span>
+                                <span className="text-[10px] sm:text-xs text-muted-50 truncate md:hidden">{entry.artist}</span>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-4 hidden md:table-cell">
+                          <td className="px-2 sm:px-4 py-4 hidden md:table-cell">
                             <div className="flex flex-col min-w-0">
                               <span className="font-medium text-muted-70 truncate">{entry.artist}</span>
                               <span className="text-xs text-muted-40 truncate">{entry.song}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-4 text-right">
+                          <td className="px-2 sm:px-4 py-4 text-right">
                             {parties.length > 0 ? (
-                              <AnimatedNumber value={entry.totalPoints} className="text-xl font-black neon-text" />
+                              <AnimatedNumber value={entry.totalPoints} className="text-lg sm:text-xl font-black neon-text" />
                             ) : (
-                              <span className="text-lg font-bold text-muted-30">&mdash;</span>
+                              <span className="text-base sm:text-lg font-bold text-muted-30">&mdash;</span>
                             )}
                           </td>
                         </tr>
@@ -297,18 +298,7 @@ export function ScoreboardClient({ initialScoreboard, initialParties, userPartyK
           </div>
         )}
 
-        <div className="mt-8 flex flex-col items-center gap-4">
-          {userPartyKey && (
-            <Link
-              href={`/party/${userPartyKey}`}
-              className="rounded-xl border border-neon-pink/30 px-6 py-3 text-base font-medium text-neon-pink hover:bg-neon-pink/5 transition-colors"
-            >
-              &larr; Back to your scorecard
-            </Link>
-          )}
-          <Link href="/" className="text-sm font-medium text-muted-50 hover:text-primary transition-colors">
-            &larr; Back to Home
-          </Link>
+        <div className="mt-8 mb-24 flex flex-col items-center gap-4">
         </div>
       </div>
     </div>
