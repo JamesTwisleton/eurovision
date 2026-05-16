@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Header, HeaderUser } from "@/components/Header";
@@ -72,11 +70,8 @@ function getYoutubeEmbedUrl(url: string) {
 export function PartyScoreboardClient({
   partyKey,
   partyId,
-  partyName,
   initialScoreboard,
   initialMembers,
-  userPartyKey,
-  isPartyMember,
   currentUser,
 }: PartyScoreboardClientProps) {
   const socketRef = useSocket(partyId);

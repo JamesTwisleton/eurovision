@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Header, HeaderUser } from "@/components/Header";
@@ -73,7 +71,7 @@ function getYoutubeEmbedUrl(url: string) {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 }
 
-export function ScoreboardClient({ initialScoreboard, initialParties, initialStats, userPartyKey, currentUser }: ScoreboardClientProps) {
+export function ScoreboardClient({ initialScoreboard, initialParties, initialStats, currentUser }: ScoreboardClientProps) {
   const socketRef = useSocket();
   const [scoreboard, setScoreboard] = useState(initialScoreboard);
   const [parties, setParties] = useState(initialParties);

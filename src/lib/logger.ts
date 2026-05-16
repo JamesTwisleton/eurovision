@@ -28,7 +28,7 @@ export function logActivity(message: string, request?: NextRequest) {
   }
 }
 
-export function logError(message: string, error?: any, request?: NextRequest) {
+export function logError(message: string, error?: unknown, request?: NextRequest) {
   const errorMessage = error instanceof Error ? error.message : String(error);
   logActivity(`ERROR: ${message}${error ? ` | ${errorMessage}` : ""}`, request);
 }
