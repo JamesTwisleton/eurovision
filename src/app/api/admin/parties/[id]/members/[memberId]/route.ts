@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { z } from "zod";
+import { logActivity } from "@/lib/logger";
 
 const updateMemberSchema = z.object({
   role: z.enum(["HOST", "GUEST"]).optional(),
@@ -61,6 +62,11 @@ export async function PATCH(
     where: { id: memberId },
     include: { watchParty: true },
   });
+
+  if (parsed.data.role && updated) {
+    const action = parsed.data.role === "HOST" ? "elevated" : "demoted";
+    logActivity(`Admin elevated/demoted: ${action} member "${updated.name}" from ${updated.location} in Watch Party "${updated.watchParty.name}"`, request);
+  }
 
   return NextResponse.json({ member: updated });
 }

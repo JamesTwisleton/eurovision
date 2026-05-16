@@ -128,7 +128,7 @@ export function Header({ user, children }: HeaderProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-center">
             {children}
             <ThemeToggle />
           </div>

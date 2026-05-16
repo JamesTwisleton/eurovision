@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireMember } from "@/lib/session";
 import { canElevateGuest, canDemoteHost, canRemoveMember } from "@/lib/permissions";
 import { z } from "zod";
+import { logActivity } from "@/lib/logger";
 
 const updateMemberSchema = z.object({
   role: z.enum(["HOST", "GUEST"]).optional(),
@@ -48,6 +49,11 @@ export async function PATCH(
     data: parsed.data,
   });
 
+  if (parsed.data.role) {
+    const action = parsed.data.role === "HOST" ? "elevated" : "demoted";
+    logActivity(`Host "${actor.name}" ${action} member "${target.name}" from ${target.location} in Watch Party "${watchParty.name}"`, request);
+  }
+
   return NextResponse.json({ member: updated });
 }
 
@@ -76,6 +82,8 @@ export async function DELETE(
   }
 
   await prisma.member.delete({ where: { id: memberId } });
+
+  logActivity(`Host "${actor.name}" removed member "${target.name}" from ${target.location} from Watch Party "${watchParty.name}"`, request);
 
   global.io?.to(`room:party_${key}`).emit("member_left", { memberId });
 

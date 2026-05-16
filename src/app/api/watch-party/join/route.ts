@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { joinWatchPartySchema } from "@/lib/validation";
 import { setMemberCookie } from "@/lib/session";
+import { logActivity } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -34,6 +35,7 @@ export async function POST(request: NextRequest) {
 
   if (existingMember) {
     if (body.confirm !== true) {
+      logActivity(`Conflict: User tried to join Watch Party "${watchParty.name}" (key: ${watchParty.key}) as "${parsed.data.name}" from ${parsed.data.location} but name/location already exists`, request);
       return NextResponse.json(
         {
           error: "Conflict",
@@ -44,6 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    logActivity(`Existing user "${existingMember.name}" from ${existingMember.location} reconnected to Watch Party "${watchParty.name}" (key: ${watchParty.key})`, request);
     const response = NextResponse.json({ watchParty, member: existingMember });
     setMemberCookie(response, existingMember.id);
     return response;
@@ -66,6 +69,9 @@ export async function POST(request: NextRequest) {
     },
     include: { watchParty: true },
   });
+
+  const joinMethod = parsed.data.key === watchParty.id ? "direct link" : "code";
+  logActivity(`Guest user "${member.name}" from ${member.location} joined Watch Party "${watchParty.name}" (key: ${watchParty.key}) using ${joinMethod}`, request);
 
   const response = NextResponse.json({ watchParty, member });
   setMemberCookie(response, member.id);

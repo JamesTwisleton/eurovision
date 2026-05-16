@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { z } from "zod";
+import { logActivity } from "@/lib/logger";
 
 const updatePartySchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -38,7 +39,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
@@ -47,7 +48,12 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  await prisma.watchParty.delete({ where: { id } });
+  const party = await prisma.watchParty.findUnique({ where: { id } });
+
+  if (party) {
+    logActivity(`Admin deleted Watch Party "${party.name}" (key: ${party.key})`, request);
+    await prisma.watchParty.delete({ where: { id } });
+  }
 
   return NextResponse.json({ success: true });
 }

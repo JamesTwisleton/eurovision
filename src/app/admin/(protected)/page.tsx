@@ -35,6 +35,7 @@ export default function AdminPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [logSize, setLogSize] = useState<number | null>(null);
   const { sortBy, sortOrder, setSortBy, toggleSortOrder, isLoaded } = useSortPreference();
 
   // Track pending performance order changes locally
@@ -63,9 +64,22 @@ export default function AdminPage() {
     });
   }, []);
 
+  const fetchLogSize = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/logs");
+      if (res.ok) {
+        const data = await res.json();
+        setLogSize(data.size);
+      }
+    } catch (err) {
+      console.error("Failed to fetch log size", err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchContestants();
-  }, [fetchContestants]);
+    fetchLogSize();
+  }, [fetchContestants, fetchLogSize]);
 
   // Set default next order in form when contestants change or editing ends
   useEffect(() => {
@@ -235,24 +249,46 @@ export default function AdminPage() {
             </Link>
           </div>
         </div>
-        <p className="mb-6 text-sm text-muted-40 leading-relaxed">
-          This is where you set up the contestants for the show. Add each
-          country, their artist, and song title. The{" "}
-          <strong className="text-muted-60">performance order</strong> is the
-          running order on the night &mdash; contestants will appear in this
-          order on everyone&apos;s scoresheet. The{" "}
-          <strong className="text-muted-60">flag emoji</strong> is shown next to
-          each country (e.g. copy-paste from{" "}
-          <a
-            href="https://emojipedia.org/flags"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-neon-cyan hover:underline"
-          >
-            Emojipedia
-          </a>
-          ).
-        </p>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <p className="text-sm text-muted-40 leading-relaxed max-w-2xl">
+            This is where you set up the contestants for the show. Add each
+            country, their artist, and song title. The{" "}
+            <strong className="text-muted-60">performance order</strong> is the
+            running order on the night &mdash; contestants will appear in this
+            order on everyone&apos;s scoresheet. The{" "}
+            <strong className="text-muted-60">flag emoji</strong> is shown next to
+            each country (e.g. copy-paste from{" "}
+            <a
+              href="https://emojipedia.org/flags"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-neon-cyan hover:underline"
+            >
+              Emojipedia
+            </a>
+            ).
+          </p>
+
+          <div className="shrink-0 flex flex-col items-end gap-1">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-30">
+              System Logs
+            </div>
+            <div className="flex items-center gap-3">
+              {logSize !== null && (
+                <span className="text-xs font-medium text-muted-50">
+                  {(logSize / 1024).toFixed(1)} KB
+                </span>
+              )}
+              <a
+                href="/api/admin/logs?download=true"
+                download
+                className="rounded-lg bg-muted-10 px-3 py-1.5 text-xs font-bold text-primary hover:bg-muted-20 transition-all"
+              >
+                Download Logs
+              </a>
+            </div>
+          </div>
+        </div>
 
         {/* Add/Edit Form */}
         <GlassCard className="mb-6" strong>
