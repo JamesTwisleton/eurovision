@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma, findWatchPartyByIdOrKey } from "@/lib/prisma";
 import { validateFinalScores } from "@/lib/validation";
 import { requireMember } from "@/lib/session";
+import { logActivity } from "@/lib/logger";
 
 declare global {
   var io: import("socket.io").Server | undefined;
@@ -37,6 +38,8 @@ export async function POST(
     where: { id: member.id },
     data: { hasFinalized: true },
   });
+
+  logActivity(`User "${member.name}" from ${member.location} finalised their votes in Watch Party "${watchParty.name}"`, request);
 
   global.io?.to(`room:party_${watchParty.id}`).emit("member_finalised", {
     memberId: member.id,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, findWatchPartyByIdOrKey } from "@/lib/prisma";
 import { getMemberFromRequest } from "@/lib/session";
+import { logActivity } from "@/lib/logger";
 
 export async function GET(
   request: NextRequest,
@@ -19,6 +20,12 @@ export async function GET(
   const isPartyMember = currentMember?.watchPartyId === watchParty.id;
 
   if (!isPartyMember) {
+    // If user is not a member but the link is a UUID, they might be joining via direct link
+    if (key === watchParty.id) {
+      // We don't create the user here, the frontend will handle it by showing the join form.
+      // But we can log that someone accessed a direct join link.
+      // Actually, PartyClient shows the join form if 401 or 403 is returned.
+    }
     return NextResponse.json({ error: "You are not a member of this watch party" }, { status: 403 });
   }
 
@@ -102,10 +109,13 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid name" }, { status: 400 });
   }
 
+  const oldName = watchParty.name;
   const updated = await prisma.watchParty.update({
     where: { id: watchParty.id },
     data: { name: name.trim() },
   });
+
+  logActivity(`Host "${currentMember.name}" renamed Watch Party from "${oldName}" to "${updated.name}" (key: ${watchParty.key})`, request);
 
   return NextResponse.json({ watchParty: updated });
 }

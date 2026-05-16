@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createWatchPartySchema } from "@/lib/validation";
 import { setMemberCookie } from "@/lib/session";
+import { logActivity } from "@/lib/logger";
 import {
   uniqueNamesGenerator,
   adjectives,
@@ -59,6 +60,8 @@ export async function POST(request: NextRequest) {
   });
 
   const member = watchParty.members[0];
+
+  logActivity(`Created Watch Party "${watchParty.name}" (key: ${watchParty.key}) and Host user "${member.name}" from ${member.location}`, request);
 
   const response = NextResponse.json({ watchParty, member }, { status: 201 });
   setMemberCookie(response, member.id);
