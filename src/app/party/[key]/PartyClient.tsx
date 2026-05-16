@@ -320,14 +320,12 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
 
   const selectedScore = scores.find((s) => s.contestantId === selectedContestant);
 
-  const usedPoints = new Map<number, string>();
-  for (const s of scores) {
-    if (s.points > 0) {
-      usedPoints.set(s.points, s.contestant.country);
-    }
-  }
+  const pointCounts = VALID_FINAL_POINTS.reduce((acc, p) => {
+    acc[p] = scores.filter((s) => s.points === p).length;
+    return acc;
+  }, {} as Record<number, number>);
 
-  const missingPoints = VALID_FINAL_POINTS.filter((p) => !usedPoints.has(p));
+  const isReadyToFinalise = VALID_FINAL_POINTS.every((p) => pointCounts[p] === 1);
   const scoredCount = scores.filter((s) => s.points > 0).length;
 
   const sortedScores = isLoaded
@@ -375,13 +373,7 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
     <div className="flex flex-1 flex-col relative">
       <FloatingBackground />
       {/* Header */}
-      <Header user={headerUser}>
-        {member && member.hasFinalized && (
-          <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs sm:text-sm font-semibold text-green-400">
-            Finalised
-          </span>
-        )}
-      </Header>
+      <Header user={headerUser} />
 
       {/* Share button */}
       <div className="mx-auto w-full max-w-5xl px-4 pt-3">
@@ -413,24 +405,51 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
 
       {/* Progress summary */}
       <div className="mx-auto w-full max-w-5xl px-4 pt-3">
-        <div className="flex items-center justify-between rounded-lg bg-muted-5 px-3 py-2.5 text-sm gap-4">
-          <span className="text-muted-60 font-medium shrink-0">
-            {scoredCount}/{scores.length} scored
-          </span>
-          <div className="flex-1 text-right min-w-0">
-            {missingPoints.length > 0 && missingPoints.length <= 5 ? (
-              <span className="text-muted-50 truncate block">
-                Need:{" "}
-                <span className="font-mono font-bold text-neon-pink">
-                  {missingPoints.join(", ")}
-                </span>
-              </span>
-            ) : missingPoints.length === 0 ? (
-              <span className="text-green-400 font-bold">
+        <div className="rounded-lg bg-muted-5 px-3 py-3">
+          <div className="mb-3 flex items-center justify-between px-1">
+            <span className="text-sm font-medium text-muted-60">
+              Your Scoring Progress: <span className="text-primary font-bold">{scoredCount}/{scores.length}</span>
+            </span>
+            {isReadyToFinalise && (
+              <span className="text-xs font-bold text-green-400 uppercase tracking-wider">
                 Ready to finalise!
               </span>
-            ) : null}
+            )}
           </div>
+          <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+            {VALID_FINAL_POINTS.map((points) => {
+              const count = pointCounts[points];
+              return (
+                <div
+                  key={points}
+                  className={cn(
+                    "flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg text-sm sm:text-base font-bold transition-all border",
+                    count === 0
+                      ? "bg-muted-5 text-muted-20 border-transparent"
+                      : count === 1
+                        ? "bg-green-500/20 text-green-400 border-green-500/30"
+                        : "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse"
+                  )}
+                  title={
+                    count === 0
+                      ? `${points} points not assigned`
+                      : count === 1
+                        ? `${points} points assigned`
+                        : `${points} points assigned ${count} times!`
+                  }
+                >
+                  {points}
+                </div>
+              );
+            })}
+          </div>
+          <button
+            onClick={handleFinalise}
+            disabled={!isReadyToFinalise}
+            className="mt-4 w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 disabled:grayscale"
+          >
+            {member.hasFinalized ? "Update Finalised Scores" : "Finalise My Votes"}
+          </button>
         </div>
       </div>
 
@@ -646,12 +665,6 @@ export function PartyClient({ partyKey, partyId, partyName, initialMember }: Par
             </p>
           </GlassCard>
 
-          <button
-            onClick={handleFinalise}
-            className="w-full rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-6 py-4 text-lg font-bold text-white transition-all hover:scale-[1.02] active:scale-95 neon-glow"
-          >
-            {member.hasFinalized ? "Update Finalised Scores" : "Finalise My Votes"}
-          </button>
 
           {/* Reset and log off options */}
           <div className="mt-4 flex flex-wrap gap-2 justify-center">

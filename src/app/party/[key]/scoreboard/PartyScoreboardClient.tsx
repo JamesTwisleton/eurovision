@@ -146,7 +146,12 @@ export function PartyScoreboardClient({
                 members.map((m, idx) => (
                   <span
                     key={m.id || idx}
-                    className="inline-flex items-center rounded-full bg-muted-10 border border-muted-20 px-3 py-1 text-xs font-medium text-muted-70"
+                    className={cn(
+                      "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                      m.hasFinalized
+                        ? "bg-green-500/20 border-green-500/30 text-green-400"
+                        : "bg-muted-10 border-muted-20 text-muted-70"
+                    )}
                   >
                     {m.name}@{m.location || "Unknown"}
                   </span>
